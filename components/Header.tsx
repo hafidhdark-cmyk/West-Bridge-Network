@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, ShieldAlert, UserCheck, MessageSquare, ChevronDown, Menu, X } from 'lucide-react';
+import { Search, UserCheck, MessageSquare, Menu, X, Clock, Globe } from 'lucide-react';
 
 interface HeaderProps {
   activeCategory?: string;
@@ -11,36 +11,52 @@ interface HeaderProps {
 }
 
 export const CATEGORIES = [
-  'All',
-  'Breaking',
+  'Home',
+  'World',
   'Politics',
   'Business',
-  'Security',
-  'Education',
   'Tech',
+  'Security',
   'Sports',
   'Entertainment',
 ];
 
-export default function Header({ activeCategory = 'All', onSelectCategory }: HeaderProps) {
+export default function Header({ activeCategory = 'Home', onSelectCategory }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      );
+    };
+    updateClock();
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-      {/* Top Utility Bar */}
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      {/* BBC-Style Top Utility Bar */}
       <div className="bg-wbn-navy text-white text-xs py-1.5 px-4 sm:px-8 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="bg-wbn-red px-2 py-0.5 rounded font-bold uppercase tracking-wider text-[10px] animate-pulse">
-            LIVE WBN NETWORK
+        <div className="flex items-center gap-4">
+          <span className="bg-wbn-red px-2 py-0.5 rounded font-extrabold uppercase tracking-wider text-[10px] animate-pulse">
+            LIVE WBN BROADCAST
           </span>
-          <span className="hidden md:inline text-slate-300">
-            West Africa's Premier Ecosystem of Information
+          <span className="hidden md:flex items-center gap-1 text-slate-300 text-[11px]">
+            <Clock className="w-3 h-3 text-wbn-slate" /> {currentTime || 'Thu, Aug 20, 2026'}
           </span>
         </div>
+
         <div className="flex items-center gap-4 text-slate-300">
-          <Link href="/admin" className="hover:text-white flex items-center gap-1 transition-colors">
+          <Link href="/admin" className="hover:text-white flex items-center gap-1 transition-colors text-[11px]">
             <UserCheck className="w-3.5 h-3.5 text-wbn-cobalt" />
             <span>Admin Portal</span>
           </Link>
@@ -48,7 +64,7 @@ export default function Header({ activeCategory = 'All', onSelectCategory }: Hea
             href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 font-medium transition-colors text-[11px]"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 font-bold transition-colors text-[11px] shadow-sm"
           >
             <MessageSquare className="w-3 h-3 fill-current" />
             <span>Join WhatsApp Channel</span>
@@ -56,9 +72,9 @@ export default function Header({ activeCategory = 'All', onSelectCategory }: Hea
         </div>
       </div>
 
-      {/* Main Navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        {/* Brand Logo */}
+      {/* Main Brand Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        {/* WBN Emblem Logo & Nameplate */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 transition-transform group-hover:scale-105">
             <Image
@@ -70,40 +86,23 @@ export default function Header({ activeCategory = 'All', onSelectCategory }: Hea
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-wbn-navy leading-none">
+            <span className="text-xl sm:text-2xl font-black tracking-tight text-wbn-navy leading-none">
               west bridge network
             </span>
-            <span className="text-[10px] font-semibold tracking-widest text-wbn-slate uppercase mt-1">
+            <span className="text-[10px] font-bold tracking-widest text-wbn-slate uppercase mt-1">
               Truth • Speed • Reach
             </span>
           </div>
         </Link>
 
-        {/* Desktop Category Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
-          {CATEGORIES.slice(0, 7).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => onSelectCategory && onSelectCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                activeCategory === cat
-                  ? 'bg-wbn-blue text-white shadow-sm'
-                  : 'text-slate-700 hover:text-wbn-blue hover:bg-slate-200/60'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </nav>
-
-        {/* Search & Actions */}
+        {/* Quick Search & Actions */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowSearchModal(true)}
-            className="p-2 rounded-full text-slate-600 hover:text-wbn-navy hover:bg-slate-100 transition-colors"
-            title="Search News"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
           >
-            <Search className="w-5 h-5" />
+            <Search className="w-4 h-4 text-wbn-navy" />
+            <span className="hidden sm:inline">Search News</span>
           </button>
 
           {/* Mobile Menu Toggle */}
@@ -116,10 +115,29 @@ export default function Header({ activeCategory = 'All', onSelectCategory }: Hea
         </div>
       </div>
 
+      {/* BBC Sub-Navigation Bar */}
+      <div className="bg-wbn-navy text-white border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center overflow-x-auto">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => onSelectCategory && onSelectCategory(cat)}
+              className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors border-b-2 ${
+                activeCategory === cat
+                  ? 'border-wbn-red text-white bg-slate-800/60'
+                  : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-800/30'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Mobile Drawer Menu */}
       {isMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2">
-          <div className="font-bold text-xs uppercase tracking-wider text-wbn-slate mb-2">Categories</div>
+          <div className="font-bold text-xs uppercase tracking-wider text-wbn-slate mb-2">Sections</div>
           <div className="grid grid-cols-2 gap-2">
             {CATEGORIES.map((cat) => (
               <button
@@ -128,8 +146,8 @@ export default function Header({ activeCategory = 'All', onSelectCategory }: Hea
                   onSelectCategory && onSelectCategory(cat);
                   setIsMenuOpen(false);
                 }}
-                className={`text-left px-3 py-2 rounded-lg text-xs font-medium ${
-                  activeCategory === cat ? 'bg-wbn-blue text-white' : 'bg-slate-50 text-slate-700'
+                className={`text-left px-3 py-2 rounded-lg text-xs font-bold ${
+                  activeCategory === cat ? 'bg-wbn-blue text-white' : 'bg-slate-100 text-slate-700'
                 }`}
               >
                 {cat}

@@ -7,131 +7,147 @@ import Header, { CATEGORIES } from '@/components/Header';
 import BreakingTicker from '@/components/BreakingTicker';
 import AdBanner from '@/components/AdBanner';
 import { getStoredArticles, Article } from '@/lib/newsData';
-import { Clock, Eye, Heart, MessageSquare, TrendingUp, Share2, Shield, Flame } from 'lucide-react';
+import { Clock, Eye, Heart, MessageSquare, TrendingUp, Flame, ChevronRight, Zap } from 'lucide-react';
 
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('Home');
 
   useEffect(() => {
     setArticles(getStoredArticles());
   }, []);
 
-  const filteredArticles = activeCategory === 'All'
+  const filteredArticles = activeCategory === 'Home' || activeCategory === 'All'
     ? articles
     : articles.filter((a) => a.category.toLowerCase() === activeCategory.toLowerCase());
 
-  const featuredArticle = articles.find((a) => a.isBreaking) || articles[0];
-  const regularArticles = filteredArticles.filter((a) => a.id !== featuredArticle?.id);
-  const trendingArticles = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
+  const mainLeadStory = articles.find((a) => a.isBreaking) || articles[0];
+  const sideLeadStories = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
+  const regularNewsList = filteredArticles.filter((a) => a.id !== mainLeadStory?.id);
+  const trendingList = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
 
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
       <Header activeCategory={activeCategory} onSelectCategory={setActiveCategory} />
       <BreakingTicker articles={articles} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Category Pill Filter Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
-          <span className="text-xs font-bold text-wbn-slate uppercase tracking-wider mr-2 flex items-center gap-1">
-            <Flame className="w-4 h-4 text-wbn-red" /> Topics:
-          </span>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                activeCategory === cat
-                  ? 'bg-wbn-blue text-white shadow'
-                  : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Hero Featured Story Card */}
-        {featuredArticle && activeCategory === 'All' && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-200 grid grid-cols-1 lg:grid-cols-12 group transition-all hover:shadow-xl">
-            <div className="lg:col-span-7 relative min-h-[320px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
-              <Image
-                src={featuredArticle.imageUrl}
-                alt={featuredArticle.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-              <div className="absolute top-4 left-4 bg-wbn-red text-white text-xs font-extrabold uppercase px-3 py-1 rounded-full shadow flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 fill-current" /> FEATURED STORY
-              </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        
+        {/* BBC Hero Grid: Main Lead + Stacked Side Stories + Top Reads */}
+        {activeCategory === 'Home' && mainLeadStory && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-wbn-navy pb-2">
+              <h2 className="text-xl font-black text-wbn-navy tracking-tight uppercase flex items-center gap-2">
+                <span className="w-3 h-3 bg-wbn-red rounded-full animate-ping"></span>
+                BBC Lead Coverage
+              </h2>
+              <span className="text-xs font-semibold text-wbn-slate">Updated 5 mins ago</span>
             </div>
 
-            <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-wbn-cobalt uppercase">
-                  <span>{featuredArticle.category}</span>
-                  <span>•</span>
-                  <span className="text-slate-500">{featuredArticle.publishedAt}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Main Lead Story Card (7 Columns) */}
+              <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-md group hover:shadow-lg transition-all flex flex-col justify-between">
+                <div className="relative h-64 sm:h-96 bg-slate-900 overflow-hidden">
+                  <Image
+                    src={mainLeadStory.imageUrl}
+                    alt={mainLeadStory.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  <span className="absolute top-4 left-4 bg-wbn-red text-white text-xs font-extrabold px-3 py-1 rounded-md uppercase tracking-wider shadow">
+                    TOP STORY
+                  </span>
                 </div>
-                <Link href={`/news/${featuredArticle.slug}`}>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-wbn-navy hover:text-wbn-cobalt transition-colors leading-tight">
-                    {featuredArticle.title}
-                  </h1>
-                </Link>
-                <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
-                  {featuredArticle.summary}
-                </p>
+
+                <div className="p-6 sm:p-8 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-wbn-cobalt uppercase">
+                      <span>{mainLeadStory.category}</span>
+                      <span>•</span>
+                      <span className="text-slate-500 font-medium">{mainLeadStory.publishedAt}</span>
+                    </div>
+                    <Link href={`/news/${mainLeadStory.slug}`}>
+                      <h1 className="text-2xl sm:text-3xl font-black text-wbn-navy hover:text-wbn-cobalt transition-colors leading-tight">
+                        {mainLeadStory.title}
+                      </h1>
+                    </Link>
+                    <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
+                      {mainLeadStory.summary}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-9 h-9 rounded-full overflow-hidden border border-wbn-blue">
+                        <Image src={mainLeadStory.authorAvatar} alt={mainLeadStory.author} fill className="object-cover" />
+                      </div>
+                      <span className="text-xs font-bold text-wbn-navy">{mainLeadStory.author}</span>
+                    </div>
+
+                    <Link
+                      href={`/news/${mainLeadStory.slug}`}
+                      className="bg-wbn-navy hover:bg-wbn-blue text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow"
+                    >
+                      Read Story →
+                    </Link>
+                  </div>
+                </div>
               </div>
 
-              {/* Author & Actions Bar */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-wbn-blue">
-                    <Image
-                      src={featuredArticle.authorAvatar}
-                      alt={featuredArticle.author}
-                      fill
-                      className="object-cover"
-                    />
+              {/* Side Lead Stories (5 Columns) */}
+              <div className="lg:col-span-5 space-y-4 flex flex-col justify-between">
+                {sideLeadStories.map((story) => (
+                  <div
+                    key={story.id}
+                    className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all grid grid-cols-12 gap-4 items-center group"
+                  >
+                    <div className="col-span-8 space-y-1.5">
+                      <span className="text-[10px] font-extrabold text-wbn-cobalt uppercase tracking-wider">
+                        {story.category}
+                      </span>
+                      <Link href={`/news/${story.slug}`}>
+                        <h3 className="font-extrabold text-sm text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                          {story.title}
+                        </h3>
+                      </Link>
+                      <span className="text-[10px] text-slate-400 block">{story.publishedAt}</span>
+                    </div>
+                    <div className="col-span-4 relative h-20 rounded-xl overflow-hidden bg-slate-100">
+                      <Image
+                        src={story.imageUrl}
+                        alt={story.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-wbn-navy">{featuredArticle.author}</h4>
-                    <p className="text-[11px] text-slate-500">{featuredArticle.authorRole}</p>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/news/${featuredArticle.slug}`}
-                  className="bg-wbn-blue hover:bg-wbn-cobalt text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow"
-                >
-                  Read Full News →
-                </Link>
+                ))}
               </div>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Main Content Grid: Latest News Feed + Right Sidebar */}
+        {/* Main News Feed Column + Right Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main News Feed Column */}
+          {/* Main Feed (8 Columns) */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <h2 className="text-lg font-extrabold text-wbn-navy tracking-tight flex items-center gap-2">
-                <span className="w-2.5 h-6 bg-wbn-blue rounded-full"></span>
-                {activeCategory === 'All' ? 'Latest Headlines' : `${activeCategory} News`}
+            <div className="flex justify-between items-center border-b-2 border-wbn-navy pb-2">
+              <h2 className="text-lg font-black text-wbn-navy tracking-tight uppercase flex items-center gap-2">
+                <span className="w-2.5 h-5 bg-wbn-blue rounded-full"></span>
+                {activeCategory === 'Home' ? 'Latest Global & Regional Reports' : `${activeCategory} Coverage`}
               </h2>
-              <span className="text-xs font-medium text-slate-500">
-                {regularArticles.length} Stories Available
+              <span className="text-xs font-semibold text-slate-500">
+                {regularNewsList.length} Articles
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {regularArticles.map((article) => (
+              {regularNewsList.map((article) => (
                 <div
                   key={article.id}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group"
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group bbc-card-hover"
                 >
                   <div className="relative h-48 bg-slate-100 overflow-hidden">
                     <Image
@@ -152,7 +168,7 @@ export default function HomePage() {
                         <span>{article.publishedAt}</span>
                       </div>
                       <Link href={`/news/${article.slug}`}>
-                        <h3 className="font-bold text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                        <h3 className="font-extrabold text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
                           {article.title}
                         </h3>
                       </Link>
@@ -170,10 +186,7 @@ export default function HomePage() {
                           <Heart className="w-3.5 h-3.5 text-rose-500" /> {article.likes}
                         </span>
                       </div>
-                      <Link
-                        href={`/news/${article.slug}`}
-                        className="font-bold text-wbn-blue hover:underline"
-                      >
+                      <Link href={`/news/${article.slug}`} className="font-bold text-wbn-blue hover:underline">
                         Read →
                       </Link>
                     </div>
@@ -183,21 +196,21 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Sidebar Column */}
+          {/* Right Sidebar (4 Columns) */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* Join WhatsApp Channel Widget */}
-            <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-2xl p-6 shadow-md space-y-4 relative overflow-hidden">
+            {/* WhatsApp Subscription Box */}
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-2xl p-6 shadow-md space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <MessageSquare className="w-5 h-5 fill-current" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base">WBN WhatsApp Channel</h3>
-                  <p className="text-xs text-emerald-100">Instant breaking news & videos on your phone</p>
+                  <p className="text-xs text-emerald-100">Verified breaking updates on your phone</p>
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-emerald-50">
-                Join over 50,000+ subscribers receiving instant verified news reports directly in their WhatsApp app.
+                Join over 50,000+ subscribers receiving instant news reports directly in their WhatsApp app.
               </p>
               <a
                 href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
@@ -212,20 +225,20 @@ export default function HomePage() {
             {/* Ad Banner Widget */}
             <AdBanner slotType="sidebar" />
 
-            {/* Trending Stories Widget */}
+            {/* BBC Style Top Reads Widget */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
-              <h3 className="font-extrabold text-base text-wbn-navy border-b border-slate-100 pb-3 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-wbn-red" /> Trending Stories
+              <h3 className="font-extrabold text-base text-wbn-navy border-b-2 border-wbn-navy pb-3 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-wbn-red" /> Top Read Stories
               </h3>
               <div className="space-y-4">
-                {trendingArticles.map((story, idx) => (
+                {trendingList.map((story, idx) => (
                   <div key={story.id} className="flex items-start gap-3 group">
-                    <span className="text-xl font-extrabold text-slate-300 group-hover:text-wbn-blue transition-colors">
+                    <span className="text-2xl font-black text-slate-300 group-hover:text-wbn-blue transition-colors">
                       0{idx + 1}
                     </span>
                     <div className="space-y-1">
                       <Link href={`/news/${story.slug}`}>
-                        <h4 className="text-xs font-bold text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                        <h4 className="text-xs font-extrabold text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
                           {story.title}
                         </h4>
                       </Link>
@@ -251,7 +264,7 @@ export default function HomePage() {
               <div className="relative w-8 h-8">
                 <Image src="/logo.png" alt="WBN" fill className="object-contain" />
               </div>
-              <span className="font-extrabold text-white text-lg">west bridge network</span>
+              <span className="font-black text-white text-lg">west bridge network</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed">
               West Bridge Network (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.
@@ -259,7 +272,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-3 uppercase tracking-wider">News Hubs</h4>
+            <h4 className="font-bold text-white mb-3 uppercase tracking-wider">News Sections</h4>
             <ul className="space-y-2">
               {CATEGORIES.slice(1, 6).map((c) => (
                 <li key={c}>

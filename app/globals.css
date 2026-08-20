@@ -27,7 +27,7 @@ body {
   border-radius: 4px;
 }
 
-/* Ticker Marquee Animation */
+/* BBC Ticker Marquee Animation */
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
@@ -41,4 +41,17 @@ body {
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+/* BBC News Section Cards & Dividers */
+.bbc-divider {
+  border-bottom: 2px solid #0F172A;
+}
+
+.bbc-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bbc-card-hover:hover {
+  transform: translateY(-2px);
 }
