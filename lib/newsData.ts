@@ -8,159 +8,161 @@ export interface CommentItem {
 
 export interface Article {
   id: string;
-  slug: string;
   title: string;
+  slug: string;
+  category: string;
   summary: string;
   content: string;
-  category: 'Breaking' | 'Politics' | 'Business' | 'Security' | 'Education' | 'Tech' | 'Sports' | 'Entertainment';
-  author: string;
-  authorRole: string;
-  authorAvatar: string;
+  imageUrl: string;
   publishedAt: string;
   readTime: string;
-  imageUrl: string;
+  author: string;
+  authorAvatar: string;
+  isBreaking?: boolean;
   views: number;
   likes: number;
-  commentsList: CommentItem[];
-  isBreaking?: boolean;
+  commentsCount: number;
   whatsappChannelLink?: string;
+  commentsList?: CommentItem[];
 }
 
 export const INITIAL_ARTICLES: Article[] = [
   {
-    id: 'wbn-101',
+    id: 'wbn-001',
+    title: 'Tinubu Administration Releases Comprehensive Blueprint on Fuel Subsidy Savings Allocation',
     slug: 'tinubu-government-gives-breakdown-of-fuel-subsidy-removal-savings',
-    title: "BREAKING: Tinubu's government gives full breakdown of fuel subsidy removal savings",
-    summary: "President Tinubu's government has unveiled a comprehensive breakdown of the N15.8 trillion saved from fuel subsidy removal and its reallocation to state infrastructure.",
-    content: `The Federal Government led by President Bola Ahmed Tinubu has finally unveiled a detailed fiscal report outlining the exact breakdown of the N15.8 trillion saved since the official cessation of the petrol subsidy regime.
+    category: 'Politics',
+    summary: 'The Federal Government of Nigeria has unveiled a detailed fiscal roadmap outlining the direct deployment of funds saved from fuel subsidy removal into critical healthcare, education, and road infrastructure projects.',
+    content: `The Federal Government has formally released a transparent breakdown detailing how revenue generated from the removal of the petrol subsidy is being reallocated across the 36 states and the Federal Capital Territory.
 
-According to figures released by the Ministry of Budget and Economic Planning, over 65% of the total accrued savings have been directly disbursed across the 36 states and the Federal Capital Territory (FCT) to fund critical infrastructure, healthcare expansion, and agricultural revitalization programs.
+According to figures released by the Ministry of Finance and the Revenue Mobilization Allocation and Fiscal Commission (RMAFC), over ₦1.8 trillion has been disbursed directly to state governors for rural infrastructure, security technology upgrades, and agricultural palliatives.
 
-### Key Highlights of the Allocation:
-- **N4.2 Trillion** allocated to state road networks and interstate transit bridges.
-- **N3.1 Trillion** directed towards agricultural subsidies, seed distributions, and local fertilizer manufacturing.
-- **N2.8 Trillion** funneled into healthcare facility modernization and primary health centers.
-- **N1.9 Trillion** designated for youth technology empowerment and vocational training hubs.
+Minister of Information and National Orientation highlighted that the primary objective of the fiscal restructuring is to ensure long-term economic stability and direct capital investments into primary healthcare centers and student loan funds.
 
-Speaking during a press conference in Abuja, senior government officials emphasized that transparency remains the cornerstone of the economic reforms.
+Key highlights of the allocation include:
+1. ₦400 Billion earmarked for state primary healthcare infrastructure.
+2. ₦250 Billion committed to the National Student Education Loan Scheme (NELFUND).
+3. ₦500 Billion allocated for interstate highway repair and bridge maintenance.
 
-"Every naira saved from the subsidy era is now accounted for and directly working for the Nigerian people," the official stated.
-
-Community leaders and economic analysts across West Africa have welcomed the detailed report, noting that public accountability fosters trust in national development projects.`,
-    category: 'Breaking',
-    author: 'Adetayo Omotoyosi Adeolu',
-    authorRole: 'Chief Political Correspondent',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-    publishedAt: 'AUGUST 19TH, 2026 • 11M AGO',
-    readTime: '4 min read',
-    imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&q=80&w=1200',
-    views: 14820,
-    likes: 1240,
+Economic analysts from the West Africa Financial Bureau noted that while short-term inflation remains a challenge, targeted disbursements into productive sectors will build resilient economic buffers.`,
+    imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '15 minutes ago',
+    readTime: '3 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
     isBreaking: true,
-    whatsappChannelLink: 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32',
-    commentsList: [
-      {
-        id: 'c1',
-        name: 'Chidi Okechukwu',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100',
-        text: 'This transparency is what we have been asking for. Let us see the execution at the state level now.',
-        createdAt: '15 mins ago',
-      },
-      {
-        id: 'c2',
-        name: 'Fatima Bello',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-        text: 'Investing N3.1 Trillion in agriculture will boost food security across the region!',
-        createdAt: '30 mins ago',
-      },
-    ],
+    views: 1420,
+    likes: 384,
+    commentsCount: 42,
   },
   {
-    id: 'wbn-102',
-    slug: 'west-african-tech-hubs-raise-2-billion-record-funding',
-    title: "West African Tech Ecosystem Hits Record $2.4B In Early 2026 Startup Funding",
-    summary: "Fintech, clean energy, and artificial intelligence startups across Lagos, Accra, and Abidjan lead regional venture capital boom.",
-    content: `Venture capital investments in West African technology startups have reached an all-time high of $2.4 Billion in the first half of 2026, solidifying the region as the continent's primary innovation engine.
-
-Data from West Bridge Network Intelligence reveals that fintech solutions led the funding charts, closely followed by renewable solar energy startups and localized AI development hubs.`,
-    category: 'Tech',
-    author: 'Kofi Mensah',
-    authorRole: 'Senior Tech Editor',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-    publishedAt: 'AUGUST 19TH, 2026 • 2H AGO',
-    readTime: '3 min read',
-    imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1200',
-    views: 8930,
-    likes: 640,
-    isBreaking: false,
-    whatsappChannelLink: 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32',
-    commentsList: [],
-  },
-  {
-    id: 'wbn-103',
-    slug: 'ecowas-announces-new-regional-trade-corridor-expansion',
-    title: "ECOWAS Approves New Multi-Billion Dollar Coastal Railway Corridor Project",
-    summary: "The ambitious transport initiative will link six West African coastal nations to boost intra-regional trade and commerce.",
-    content: `The Economic Community of West African States (ECOWAS) has officially signed off on a landmark transport infrastructure project connecting major port cities across Nigeria, Benin, Togo, Ghana, Ivory Coast, and Senegal.`,
+    id: 'wbn-002',
+    title: 'Central Bank of Nigeria Implements New Forex Liquidity Framework for International Traders',
+    slug: 'cbn-implements-new-forex-liquidity-framework',
     category: 'Business',
-    author: 'Amina Sanusi',
-    authorRole: 'Trade & Markets Analyst',
-    authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
-    publishedAt: 'AUGUST 19TH, 2026 • 4H AGO',
-    readTime: '5 min read',
-    imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200',
-    views: 6520,
-    likes: 410,
+    summary: 'In a bold move to stabilize the Naira and enhance market transparency, the Central Bank of Nigeria has launched a streamlined electronic FX clearing portal for verified commercial importers.',
+    content: `The Central Bank of Nigeria (CBN) has issued new operational guidelines designed to boost liquidity in the official Nigerian Autonomous Foreign Exchange Market (NAFEM).
+
+The framework establishes an automated matching system that allows commercial banks and authorized dealers to settle FX transactions in real-time, eliminating backlogs for manufacturing and raw material importers.
+
+Financial experts have commended the policy, noting that dollar supply in the official window surged by 35% within the first 48 hours of implementation.`,
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '1 hour ago',
+    readTime: '4 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
     isBreaking: false,
-    whatsappChannelLink: 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32',
-    commentsList: [],
+    views: 980,
+    likes: 195,
+    commentsCount: 18,
   },
   {
-    id: 'wbn-104',
-    slug: 'super-eagles-qualify-for-afcon-semifinals-with-3-0-victory',
-    title: "Super Eagles Secure AFCON Semifinal Spot With Dominant 3-0 Victory",
-    summary: "Nigeria's national team displayed exceptional teamwork and tactical precision to advance to the tournament semifinals.",
-    content: `Nigeria's Super Eagles delivered a masterclass performance to secure a commanding 3-0 win in the tournament quarterfinals, captivating football fans across the continent.`,
-    category: 'Sports',
-    author: 'Emeka Nwosu',
-    authorRole: 'Sports Bureau Lead',
-    authorAvatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=200',
-    publishedAt: 'AUGUST 19TH, 2026 • 6H AGO',
-    readTime: '3 min read',
-    imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=1200',
-    views: 11200,
-    likes: 980,
+    id: 'wbn-003',
+    title: 'ECOWAS Summit Resolves to Boost Sub-Regional Trade & Cross-Border Security Synergies',
+    slug: 'ecowas-summit-resolves-sub-regional-trade-and-security',
+    category: 'World',
+    summary: 'Heads of State across West Africa have agreed on a unified joint border patrol protocol and reduced customs tariffs to accelerate regional economic integration.',
+    content: `At the 65th Ordinary Session of the Authority of ECOWAS Heads of State and Government held in Abuja, regional leaders signed a landmark pact aimed at bolstering security cooperation along shared borders.
+
+The resolution establishes a joint intelligence-sharing task force to combat cross-border insurgency while streamlining trade corridors from Lagos to Abidjan.`,
+    imageUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '3 hours ago',
+    readTime: '5 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
     isBreaking: false,
-    whatsappChannelLink: 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32',
-    commentsList: [],
+    views: 850,
+    likes: 142,
+    commentsCount: 12,
+  },
+  {
+    id: 'wbn-004',
+    title: 'Nigerian Tech Hubs Secure $120M in Sovereign Innovation Seed Grants for AI & Fintech',
+    slug: 'nigerian-tech-hubs-secure-120m-sovereign-seed-grants',
+    category: 'Tech',
+    summary: 'The Federal Ministry of Communications and Digital Economy has announced direct grant distributions to 45 tech startups across Lagos, Abuja, and Port Harcourt.',
+    content: `Nigeria’s technology ecosystem has received a major boost following the rollout of the ₦120 Billion National AI & Digital Innovation Fund.
+
+Beneficiary startups operating in agricultural tech, artificial intelligence, and payment infrastructure will receive equity-free seed grants and cloud computing subsidies.`,
+    imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '5 hours ago',
+    readTime: '3 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+    isBreaking: false,
+    views: 1100,
+    likes: 275,
+    commentsCount: 31,
   },
 ];
 
-// Local Storage Helper Functions
-export const getStoredArticles = (): Article[] => {
+export function getStoredArticles(): Article[] {
   if (typeof window === 'undefined') return INITIAL_ARTICLES;
-  const data = localStorage.getItem('wbn_articles');
-  if (!data) {
+  const stored = localStorage.getItem('wbn_articles');
+  if (!stored) {
     localStorage.setItem('wbn_articles', JSON.stringify(INITIAL_ARTICLES));
     return INITIAL_ARTICLES;
   }
   try {
-    return JSON.parse(data);
-  } catch {
+    const parsed = JSON.parse(stored);
+    return parsed.map((a: Article) => ({
+      ...a,
+      author: 'West Bridge Network',
+      authorAvatar: '/logo.png',
+    }));
+  } catch (e) {
     return INITIAL_ARTICLES;
   }
-};
+}
 
-export const saveArticle = (newArticle: Article) => {
-  const articles = getStoredArticles();
-  const updated = [newArticle, ...articles];
+export function saveArticlesToStore(articles: Article[]): void {
   if (typeof window !== 'undefined') {
+    const updated = articles.map((a) => ({
+      ...a,
+      author: 'West Bridge Network',
+      authorAvatar: '/logo.png',
+    }));
     localStorage.setItem('wbn_articles', JSON.stringify(updated));
   }
-  return updated;
-};
+}
 
-export const getArticleBySlug = (slug: string): Article | undefined => {
+export function getArticleBySlug(slug: string): Article | undefined {
   const articles = getStoredArticles();
-  return articles.find((a) => a.slug === slug || a.id === slug);
-};
+  return articles.find((a) => a.slug === slug);
+}
+
+export function saveArticle(article: Article): void {
+  const articles = getStoredArticles();
+  const index = articles.findIndex((a) => a.id === article.id || a.slug === article.slug);
+  const updatedArticle = {
+    ...article,
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+  };
+  if (index >= 0) {
+    articles[index] = updatedArticle;
+  } else {
+    articles.unshift(updatedArticle);
+  }
+  saveArticlesToStore(articles);
+}

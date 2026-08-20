@@ -86,17 +86,6 @@ export default function ArticleDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
-      {/* Dynamic OpenGraph Metadata Tags for WhatsApp Link Preview */}
-      <head>
-        <title>{article.title} | West Bridge Network</title>
-        <meta name="description" content={article.summary} />
-        <meta property="og:title" content={article.title} />
-        <meta property="og:description" content={article.summary} />
-        <meta property="og:image" content={article.imageUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:site_name" content="West Bridge Network (WBN)" />
-      </head>
-
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -153,7 +142,7 @@ export default function ArticleDetailPage() {
 
               {/* Join WhatsApp Channel Button */}
               <a
-                href={article.whatsappChannelLink || 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32'}
+                href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex flex-col items-center text-emerald-600 hover:text-emerald-700 transition-colors pt-2 border-t border-slate-100"
@@ -175,16 +164,16 @@ export default function ArticleDetailPage() {
                 {article.title}
               </h1>
 
-              {/* Author & Timestamp Bar */}
+              {/* Reported By West Bridge Network Tag */}
               <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-slate-100 text-xs">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-full overflow-hidden border border-wbn-blue shadow-sm">
-                    <Image src={article.authorAvatar} alt={article.author} fill className="object-cover" />
+                  <div className="relative w-11 h-11 rounded-full overflow-hidden border border-wbn-blue shadow-sm bg-slate-50 p-1">
+                    <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
                   </div>
                   <div>
-                    <span className="block text-[10px] text-slate-400 font-semibold uppercase">Published by:</span>
-                    <h4 className="font-bold text-wbn-navy text-sm">{article.author}</h4>
-                    <p className="text-[11px] text-wbn-slate">{article.publishedAt}</p>
+                    <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Reported by:</span>
+                    <h4 className="font-extrabold text-wbn-navy text-sm">West Bridge Network</h4>
+                    <p className="text-[11px] text-wbn-slate font-medium">{article.publishedAt}</p>
                   </div>
                 </div>
 
@@ -200,40 +189,55 @@ export default function ArticleDetailPage() {
             </div>
 
             {/* Featured Image */}
-            <div className="relative h-[300px] sm:h-[450px] rounded-2xl overflow-hidden shadow-md">
+            <div className="relative h-64 sm:h-96 rounded-2xl overflow-hidden shadow-md">
               <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
             </div>
 
-            {/* Main Article Body Text */}
-            <div className="prose prose-slate max-w-none text-slate-800 leading-relaxed text-sm sm:text-base space-y-4">
-              {article.content.split('\n\n').map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+            {/* Main Article Text */}
+            <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base space-y-4">
+              {article.content.split('\n\n').map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
               ))}
             </div>
 
-            {/* Mobile Social Bar */}
-            <div className="lg:hidden flex items-center justify-around py-4 border-y border-slate-200">
-              <button onClick={handleLike} className="flex items-center gap-2 text-xs font-bold text-rose-600">
-                <Heart className={`w-5 h-5 ${hasLiked ? 'fill-current' : ''}`} /> {likesCount} Loves
-              </button>
-              <button onClick={handleShare} className="flex items-center gap-2 text-xs font-bold text-wbn-blue">
-                <Share2 className="w-5 h-5" /> {copiedLink ? 'Link Copied' : 'Share'}
-              </button>
+            {/* Share Footer */}
+            <div className="pt-6 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLike}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    hasLiked ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${hasLiked ? 'fill-current' : ''}`} />
+                  <span>{likesCount} Loves</span>
+                </button>
+
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>{copiedLink ? 'Link Copied!' : 'Share Article'}</span>
+                </button>
+              </div>
+
               <a
-                href={article.whatsappChannelLink || 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32'}
+                href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow"
               >
-                <MessageSquare className="w-4 h-4 fill-current" /> Join Channel
+                <MessageSquare className="w-4 h-4 fill-current" />
+                <span>Join WBN WhatsApp Channel</span>
               </a>
             </div>
 
-            {/* Comments Section */}
-            <div id="comments" className="pt-8 border-t border-slate-200 space-y-6">
-              <h3 className="text-xl font-bold text-wbn-navy flex items-center gap-2">
+            {/* Reader Comments Section */}
+            <section id="comments" className="pt-8 border-t border-slate-100 space-y-6">
+              <h3 className="font-extrabold text-lg text-wbn-navy flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-wbn-blue" />
-                Comments ({comments.length})
+                Reader Discussion ({comments.length})
               </h3>
 
               {/* Add Comment Form */}
@@ -241,10 +245,10 @@ export default function ArticleDetailPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
-                    placeholder="Your Name (optional)"
+                    placeholder="Your Name (Optional)"
                     value={newCommentName}
                     onChange={(e) => setNewCommentName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   />
                 </div>
                 <textarea
@@ -252,60 +256,51 @@ export default function ArticleDetailPage() {
                   placeholder="Share your thoughts on this story..."
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
-                  className="w-full p-4 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   required
                 ></textarea>
                 <button
                   type="submit"
-                  className="bg-wbn-blue hover:bg-wbn-cobalt text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
+                  className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
                 >
-                  <Send className="w-3.5 h-3.5" /> Post Comment
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Post Comment</span>
                 </button>
               </form>
 
               {/* Comments List */}
               <div className="space-y-4">
                 {comments.map((c) => (
-                  <div key={c.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex gap-3">
-                    <div className="w-9 h-9 rounded-full bg-wbn-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
-                      {c.name.charAt(0)}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-wbn-navy text-xs">{c.name}</h4>
-                        <span className="text-[10px] text-slate-400">• {c.createdAt}</span>
+                  <div key={c.id} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-wbn-blue text-white rounded-full flex items-center justify-center font-bold text-xs">
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-bold text-xs text-wbn-navy">{c.name}</span>
                       </div>
-                      <p className="text-xs text-slate-700 leading-relaxed">{c.text}</p>
+                      <span className="text-[10px] text-slate-400 font-medium">{c.createdAt}</span>
                     </div>
+                    <p className="text-xs text-slate-600 leading-relaxed pl-9">{c.text}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar (Col 3) */}
           <aside className="lg:col-span-3 space-y-6">
             <AdBanner slotType="sidebar" />
-
-            {/* Trending Articles Sidebar Widget */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
-              <h3 className="font-extrabold text-sm text-wbn-navy border-b border-slate-100 pb-2">
-                Trending In {article.category}
-              </h3>
-              <div className="space-y-3">
-                {trending.map((t) => (
-                  <Link key={t.id} href={`/news/${t.slug}`} className="block group">
-                    <h4 className="text-xs font-bold text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
-                      {t.title}
-                    </h4>
-                    <span className="text-[10px] text-slate-400">{t.views} views</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </aside>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-wbn-navy text-slate-300 text-xs py-10 mt-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500">
+          © 2026 West Bridge Network (WBN). All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }
