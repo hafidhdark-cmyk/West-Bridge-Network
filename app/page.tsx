@@ -36,6 +36,7 @@ export default function HomePage() {
     ? articles
     : articles.filter((a) => a.category.toLowerCase() === activeCategory.toLowerCase());
 
+  // Dynamic Lead Top Story of the Day (Selected by Admin)
   const mainLeadStory = articles.find((a) => a.isBreaking) || articles[0];
   const sideSubLeads = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   const regularNews = filteredArticles.filter((a) => a.id !== mainLeadStory?.id);
@@ -67,9 +68,9 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Lead Story Card (Col 8) */}
+              {/* Lead Top Story Card (Col 8) - Generous Spacing & No White Dot */}
               <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group border border-slate-800">
-                <div className="md:col-span-7 relative min-h-[300px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
+                <div className="md:col-span-7 relative min-h-[280px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
                   <Image
                     src={mainLeadStory.imageUrl}
                     alt={mainLeadStory.title}
@@ -79,36 +80,41 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-wbn-navy via-wbn-navy/40 to-transparent"></div>
                   <span className="absolute top-4 left-4 bg-wbn-blue text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow flex items-center gap-1">
-                    <Zap className="w-3 h-3 fill-current" /> TOP STORY
+                    <Zap className="w-3.5 h-3.5 fill-current" /> TOP STORY
                   </span>
                 </div>
 
                 <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy">
-                  <div className="space-y-3">
-                    {/* Fixed Timestamp & Meta Formatting (No Awkward Line Wrapping) */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-300 uppercase">
-                      <span className="text-wbn-cobalt bg-blue-950 px-2.5 py-0.5 rounded border border-blue-800 whitespace-nowrap">
-                        {mainLeadStory.category}
-                      </span>
-                      <span>•</span>
-                      <span className="text-slate-400 font-medium flex items-center gap-1 whitespace-nowrap">
+                  <div className="space-y-5">
+                    {/* Category Pill & Date Timestamp (No White Dot, Generous Gap) */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-3">
+                        <span className="text-wbn-cobalt bg-blue-950 px-3 py-1 rounded text-[11px] font-extrabold uppercase tracking-wider border border-blue-800 whitespace-nowrap">
+                          {mainLeadStory.category}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium whitespace-nowrap pt-1">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        {mainLeadStory.publishedAt}
-                      </span>
+                        <span>{mainLeadStory.publishedAt}</span>
+                      </div>
                     </div>
 
-                    <Link href={`/news/${mainLeadStory.slug}`}>
+                    {/* Headline Title with Generous Margin & Gap */}
+                    <Link href={`/news/${mainLeadStory.slug}`} className="block pt-1">
                       <h1 className="text-xl sm:text-2xl font-black font-editorial-heading text-white hover:text-slate-200 transition-colors leading-snug">
                         {mainLeadStory.title}
                       </h1>
                     </Link>
-                    <p className="text-slate-300 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+
+                    {/* Summary Paragraph */}
+                    <p className="text-slate-300 text-xs sm:text-sm line-clamp-3 leading-relaxed pt-1">
                       {mainLeadStory.summary}
                     </p>
                   </div>
 
-                  {/* Clean Desktop Read Story Button */}
-                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-3">
+                  {/* Clean Desktop & Mobile Read Story Button */}
+                  <div className="pt-5 border-t border-slate-800 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white">
                         <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
@@ -216,7 +222,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Load More News Reports (Pagination & Past News History) */}
+            {/* Load More News Reports */}
             {visibleCount < regularNews.length && (
               <div className="text-center pt-4">
                 <button
