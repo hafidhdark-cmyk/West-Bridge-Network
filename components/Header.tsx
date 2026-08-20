@@ -45,10 +45,10 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
             </button>
           </div>
 
-          {/* Official Brand Logo */}
+          {/* Clean Official Logo (No Artificial Double Circle Border) */}
           <div className="flex-1 lg:flex-none flex justify-center lg:justify-start">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 overflow-hidden rounded-full border border-wbn-blue bg-white p-0.5 shadow-sm">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
                 <Image
                   src="/logo.png"
                   alt="West Bridge Network"
@@ -58,11 +58,11 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-black text-lg sm:text-xl text-wbn-navy tracking-tight uppercase leading-none font-editorial-heading group-hover:text-wbn-blue transition-colors">
+                <span className="font-extrabold text-base sm:text-lg text-wbn-navy tracking-tight group-hover:text-wbn-blue transition-colors">
                   West Bridge Network
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-bold text-wbn-slate uppercase tracking-widest mt-0.5">
-                  JOURNALISTIC INTEGRITY & SPEED
+                <span className="text-[10px] sm:text-[11px] font-bold text-wbn-slate tracking-wider mt-0.5">
+                  Journalistic Integrity & Speed
                 </span>
               </div>
             </Link>
