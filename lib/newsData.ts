@@ -40,16 +40,9 @@ export const INITIAL_ARTICLES: Article[] = [
 
 According to figures released by the Ministry of Finance and the Revenue Mobilization Allocation and Fiscal Commission (RMAFC), over ₦1.8 trillion has been disbursed directly to state governors for rural infrastructure, security technology upgrades, and agricultural palliatives.
 
-Minister of Information and National Orientation highlighted that the primary objective of the fiscal restructuring is to ensure long-term economic stability and direct capital investments into primary healthcare centers and student loan funds.
-
-Key highlights of the allocation include:
-1. ₦400 Billion earmarked for state primary healthcare infrastructure.
-2. ₦250 Billion committed to the National Student Education Loan Scheme (NELFUND).
-3. ₦500 Billion allocated for interstate highway repair and bridge maintenance.
-
-Economic analysts from the West Africa Financial Bureau noted that while short-term inflation remains a challenge, targeted disbursements into productive sectors will build resilient economic buffers.`,
+Minister of Information and National Orientation highlighted that the primary objective of the fiscal restructuring is to ensure long-term economic stability and direct capital investments into primary healthcare centers and student loan funds.`,
     imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '15 minutes ago',
+    publishedAt: '15 mins ago',
     readTime: '3 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
@@ -67,16 +60,14 @@ Economic analysts from the West Africa Financial Bureau noted that while short-t
     summary: 'In a bold move to stabilize the Naira and enhance market transparency, the Central Bank of Nigeria has launched a streamlined electronic FX clearing portal for verified commercial importers.',
     content: `The Central Bank of Nigeria (CBN) has issued new operational guidelines designed to boost liquidity in the official Nigerian Autonomous Foreign Exchange Market (NAFEM).
 
-The framework establishes an automated matching system that allows commercial banks and authorized dealers to settle FX transactions in real-time, eliminating backlogs for manufacturing and raw material importers.
-
-Financial experts have commended the policy, noting that dollar supply in the official window surged by 35% within the first 48 hours of implementation.`,
+The framework establishes an automated matching system that allows commercial banks and authorized dealers to settle FX transactions in real-time, eliminating backlogs for manufacturing and raw material importers.`,
     imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '1 hour ago',
+    publishedAt: '45 mins ago',
     readTime: '4 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
     isTopStory: false,
-    isBreaking: false,
+    isBreaking: true,
     views: 980,
     likes: 195,
     commentsCount: 18,
@@ -87,11 +78,9 @@ Financial experts have commended the policy, noting that dollar supply in the of
     slug: 'ecowas-summit-resolves-sub-regional-trade-and-security',
     category: 'World',
     summary: 'Heads of State across West Africa have agreed on a unified joint border patrol protocol and reduced customs tariffs to accelerate regional economic integration.',
-    content: `At the 65th Ordinary Session of the Authority of ECOWAS Heads of State and Government held in Abuja, regional leaders signed a landmark pact aimed at bolstering security cooperation along shared borders.
-
-The resolution establishes a joint intelligence-sharing task force to combat cross-border insurgency while streamlining trade corridors from Lagos to Abidjan.`,
+    content: `At the 65th Ordinary Session of the Authority of ECOWAS Heads of State and Government held in Abuja, regional leaders signed a landmark pact aimed at bolstering security cooperation along shared borders.`,
     imageUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '3 hours ago',
+    publishedAt: '2 hours ago',
     readTime: '5 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
@@ -107,11 +96,9 @@ The resolution establishes a joint intelligence-sharing task force to combat cro
     slug: 'nigerian-tech-hubs-secure-120m-sovereign-seed-grants',
     category: 'Tech',
     summary: 'The Federal Ministry of Communications and Digital Economy has announced direct grant distributions to 45 tech startups across Lagos, Abuja, and Port Harcourt.',
-    content: `Nigeria’s technology ecosystem has received a major boost following the rollout of the ₦120 Billion National AI & Digital Innovation Fund.
-
-Beneficiary startups operating in agricultural tech, artificial intelligence, and payment infrastructure will receive equity-free seed grants and cloud computing subsidies.`,
+    content: `Nigeria’s technology ecosystem has received a major boost following the rollout of the ₦120 Billion National AI & Digital Innovation Fund.`,
     imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '5 hours ago',
+    publishedAt: '3 hours ago',
     readTime: '3 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
@@ -120,6 +107,78 @@ Beneficiary startups operating in agricultural tech, artificial intelligence, an
     views: 1100,
     likes: 275,
     commentsCount: 31,
+  },
+  {
+    id: 'wbn-005',
+    title: 'Super Eagles Secure 3-0 Victory in AFCON Qualifier Opener with Outstanding Performance',
+    slug: 'super-eagles-secure-victory-afcon-qualifier',
+    category: 'Sports',
+    summary: 'Nigeria’s national football team delivered a masterclass attacking display to defeat their opponents in a thrilling continental championship match.',
+    content: `The Super Eagles of Nigeria launched their AFCON qualification campaign with a convincing 3-0 triumph before a roaring home crowd. Powerful goals in both halves sealed maximum points.`,
+    imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '4 hours ago',
+    readTime: '3 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+    isTopStory: false,
+    isBreaking: false,
+    views: 1650,
+    likes: 512,
+    commentsCount: 64,
+  },
+  {
+    id: 'wbn-006',
+    title: 'Nollywood Box Office Records ₦4.2 Billion Annual Revenue Milestone across Global Cinemas',
+    slug: 'nollywood-box-office-records-4-billion-revenue',
+    category: 'Entertainment',
+    summary: 'Nigerian film producers celebrate record theatrical attendance and streaming distribution deals across North America, Europe, and West Africa.',
+    content: `Nigeria's vibrant film industry has shattered previous revenue records, exceeding ₦4.2 Billion in domestic and international box office grosses this fiscal year.`,
+    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '5 hours ago',
+    readTime: '4 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+    isTopStory: false,
+    isBreaking: false,
+    views: 1280,
+    likes: 310,
+    commentsCount: 29,
+  },
+  {
+    id: 'wbn-007',
+    title: 'Lagos State Unveils 250 Megawatt Solar Energy Power Plant for Industrial Zones',
+    slug: 'lagos-state-unveils-solar-energy-power-plant',
+    category: 'Business',
+    summary: 'A new clean energy grid infrastructure project promises uninterrupted electricity for manufacturing hubs across Lekki and Ikeja industrial corridors.',
+    content: `Lagos State Government has commissioned the first phase of a landmark 250 Megawatt solar power station designed to supply clean energy directly to industrial zones.`,
+    imageUrl: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '6 hours ago',
+    readTime: '4 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+    isTopStory: false,
+    isBreaking: false,
+    views: 940,
+    likes: 210,
+    commentsCount: 15,
+  },
+  {
+    id: 'wbn-008',
+    title: 'African Union Announces New Free Trade Tariff Reductions for Agriculture & Textiles',
+    slug: 'african-union-free-trade-tariff-reductions',
+    category: 'World',
+    summary: 'The AfCFTA Secretariat has officially launched zero-tariff trade routes across 24 participating African nations for agro-processed food commodities.',
+    content: `Intra-African commerce received a transformative boost as the AfCFTA Secretariat enacted zero-duty tariffs on over 1,500 agricultural and textile products.`,
+    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+    publishedAt: '7 hours ago',
+    readTime: '5 min read',
+    author: 'West Bridge Network',
+    authorAvatar: '/logo.png',
+    isTopStory: false,
+    isBreaking: false,
+    views: 890,
+    likes: 180,
+    commentsCount: 19,
   },
 ];
 

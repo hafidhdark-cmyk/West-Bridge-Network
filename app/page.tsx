@@ -20,7 +20,8 @@ import {
   RotateCcw,
   Sparkles,
   Radio,
-  Lock
+  Lock,
+  Search
 } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
@@ -28,6 +29,7 @@ const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Home');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(6);
 
   useEffect(() => {
@@ -42,14 +44,28 @@ export default function HomePage() {
     });
   }, []);
 
-  const filteredArticles = activeCategory === 'Home' || activeCategory === 'All'
-    ? articles
-    : articles.filter((a) => a.category.toLowerCase() === activeCategory.toLowerCase());
+  // Filter by Search Query & Category
+  const filteredArticles = articles.filter((a) => {
+    const matchesCategory = activeCategory === 'Home' || activeCategory === 'All'
+      ? true
+      : a.category.toLowerCase() === activeCategory.toLowerCase();
+
+    const matchesSearch = !searchQuery.trim()
+      ? true
+      : a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  });
 
   // Dynamic Lead Top Story of the Day (Selected by Admin)
   const mainLeadStory = articles.find((a) => a.isTopStory) || articles.find((a) => a.isBreaking) || articles[0];
-  const sideSubLeads = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
-  const regularNews = filteredArticles.filter((a) => a.id !== mainLeadStory?.id);
+  
+  // Latest News (Most recently uploaded sub-lead reports for side widget)
+  const sideLatestNews = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
+  
+  const regularNews = filteredArticles.filter((a) => a.id !== mainLeadStory?.id || searchQuery.trim() !== '');
   const displayedNews = regularNews.slice(0, visibleCount);
   const trendingReads = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
 
@@ -59,13 +75,31 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF9]">
-      <Header activeCategory={activeCategory} onSelectCategory={setActiveCategory} />
+      <Header 
+        activeCategory={activeCategory} 
+        onSelectCategory={setActiveCategory}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       <BreakingTicker articles={articles} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
+        {/* Active Search Results Header */}
+        {searchQuery.trim() !== '' && (
+          <div className="bg-wbn-blue text-white p-4 rounded-2xl flex justify-between items-center text-xs sm:text-sm font-bold shadow-sm">
+            <span>Showing search results for: &quot;{searchQuery}&quot; ({filteredArticles.length} found)</span>
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg transition-colors"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
+
         {/* Newspaper Hero Grid */}
-        {activeCategory === 'Home' && mainLeadStory && (
+        {activeCategory === 'Home' && !searchQuery && mainLeadStory && (
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
@@ -145,16 +179,16 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Stacked Sub-Lead Stories (Col 4) with 1st Item Photo Sitting in White Space Above Text */}
+              {/* Latest News Sub-Lead Widget (Col 4) - Dynamically Shows Recently Uploaded Articles */}
               <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 p-5 space-y-4 flex flex-col justify-between shadow-sm">
                 <h3 className="font-extrabold text-xs text-wbn-slate uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-wbn-blue" />
-                  Top Priority Reports
+                  Latest News
                 </h3>
 
                 <div className="space-y-4 flex-1">
-                  {sideSubLeads.map((sub, idx) => {
-                    // 1st Item in Top Priority Reports: Full Cover Photo sits in white space ABOVE its text!
+                  {sideLatestNews.map((sub, idx) => {
+                    // 1st Item in Latest News: Full Cover Photo sits in white space ABOVE its text!
                     if (idx === 0) {
                       return (
                         <div key={sub.id} className="pb-4 magazine-rule space-y-3 group">
@@ -162,7 +196,7 @@ export default function HomePage() {
                             <Link href={`/news/${sub.slug}`} className="block relative w-full h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs">
                               <Image src={sub.imageUrl} alt={sub.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                               <span className="absolute top-2.5 left-2.5 bg-wbn-navy text-white text-[9px] font-extrabold px-2 py-0.5 rounded shadow uppercase">
-                                Priority Focus
+                                Latest Report
                               </span>
                             </Link>
                           )}
@@ -184,7 +218,7 @@ export default function HomePage() {
 
                     // Remaining sub-lead items below it
                     return (
-                      <div key={sub.id} className={`pb-3 ${idx < sideSubLeads.length - 1 ? 'magazine-rule' : ''} group flex items-start justify-between gap-3`}>
+                      <div key={sub.id} className={`pb-3 ${idx < sideLatestNews.length - 1 ? 'magazine-rule' : ''} group flex items-start justify-between gap-3`}>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2 text-[10px] font-extrabold text-wbn-cobalt uppercase mb-1">
                             <span className="whitespace-nowrap">{sub.category}</span>
@@ -219,63 +253,77 @@ export default function HomePage() {
             <div className="flex justify-between items-center magazine-rule-dark pb-2">
               <h2 className="text-base font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2.5 h-5 bg-wbn-blue rounded-full"></span>
-                {activeCategory === 'Home' ? 'Journalistic News Feed & History Archive' : `${activeCategory} Coverage`}
+                {searchQuery ? 'Filtered Search Results' : activeCategory === 'Home' ? 'Journalistic News Feed & History Archive' : `${activeCategory} Coverage`}
               </h2>
               <span className="text-xs font-semibold text-slate-500">
                 Showing {displayedNews.length} of {regularNews.length} Reports
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {displayedNews.map((art) => (
-                <article
-                  key={art.id}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group bbc-card-hover"
+            {displayedNews.length === 0 ? (
+              <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+                <Search className="w-8 h-8 text-slate-300 mx-auto" />
+                <h3 className="text-base font-bold text-wbn-navy">No articles found matching &quot;{searchQuery}&quot;</h3>
+                <p className="text-xs text-slate-500">Try searching for keywords like Politics, Business, Tech, ECOWAS, or Sports.</p>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="bg-wbn-blue text-white font-bold text-xs px-4 py-2 rounded-xl mt-2"
                 >
-                  <div className="relative h-48 bg-slate-100 overflow-hidden">
-                    <Image
-                      src={art.imageUrl}
-                      alt={art.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <span className="absolute top-3 left-3 bg-wbn-navy text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded shadow">
-                      {art.category}
-                    </span>
-                  </div>
-
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium whitespace-nowrap">
-                        <Clock className="w-3.5 h-3.5 text-wbn-slate" />
-                        <span>{art.publishedAt}</span>
-                      </div>
-                      <Link href={`/news/${art.slug}`}>
-                        <h3 className="font-extrabold font-editorial-heading text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
-                          {art.title}
-                        </h3>
-                      </Link>
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        {art.summary}
-                      </p>
+                  Clear Search Filter
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {displayedNews.map((art) => (
+                  <article
+                    key={art.id}
+                    className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group bbc-card-hover"
+                  >
+                    <div className="relative h-48 bg-slate-100 overflow-hidden">
+                      <Image
+                        src={art.imageUrl}
+                        alt={art.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <span className="absolute top-3 left-3 bg-wbn-navy text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded shadow">
+                        {art.category}
+                      </span>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1 font-semibold text-slate-600" title="Real-time reader count">
-                          <Eye className="w-3.5 h-3.5 text-wbn-blue" /> {art.views} Reads
-                        </span>
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                          <Clock className="w-3.5 h-3.5 text-wbn-slate" />
+                          <span>{art.publishedAt}</span>
+                        </div>
+                        <Link href={`/news/${art.slug}`}>
+                          <h3 className="font-extrabold font-editorial-heading text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                            {art.title}
+                          </h3>
+                        </Link>
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                          {art.summary}
+                        </p>
                       </div>
-                      {/* Single-line "Read Story →" Text Link */}
-                      <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1 whitespace-nowrap">
-                        <span>Read Story</span>
-                        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-                      </Link>
+
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1 font-semibold text-slate-600" title="Real-time reader count">
+                            <Eye className="w-3.5 h-3.5 text-wbn-blue" /> {art.views} Reads
+                          </span>
+                        </div>
+                        {/* Single-line "Read Story →" Text Link */}
+                        <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1 whitespace-nowrap">
+                          <span>Read Story</span>
+                          <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
             {/* Load More News Reports */}
             {visibleCount < regularNews.length && (
