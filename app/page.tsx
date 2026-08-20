@@ -19,7 +19,8 @@ import {
   ArrowUpRight,
   RotateCcw,
   Sparkles,
-  Radio
+  Radio,
+  Lock
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -52,21 +53,21 @@ export default function HomePage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
-        {/* Asymmetric Newspaper Hero Grid */}
+        {/* Newspaper Hero Grid */}
         {activeCategory === 'Home' && mainLeadStory && (
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
                 <Radio className="w-4 h-4 text-wbn-blue animate-pulse" />
-                Lead Editorial Coverage
+                Top Headlines
               </h2>
               <span className="text-xs font-semibold text-wbn-slate flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" /> Updated 5 mins ago
+                <Clock className="w-3.5 h-3.5 text-wbn-blue" /> Updated live
               </span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Lead Story Card (Col 8) - Blue & Slate Gray Theme */}
+              {/* Lead Story Card (Col 8) */}
               <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group border border-slate-800">
                 <div className="md:col-span-7 relative min-h-[300px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
                   <Image
@@ -78,21 +79,26 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-wbn-navy via-wbn-navy/40 to-transparent"></div>
                   <span className="absolute top-4 left-4 bg-wbn-blue text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow flex items-center gap-1">
-                    <Zap className="w-3 h-3 fill-current" /> LEAD REPORT
+                    <Zap className="w-3 h-3 fill-current" /> TOP STORY
                   </span>
                 </div>
 
                 <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase">
-                      <span className="text-wbn-cobalt bg-blue-950 px-2 py-0.5 rounded border border-blue-800">{mainLeadStory.category}</span>
+                    {/* Fixed Timestamp & Meta Formatting (No Awkward Line Wrapping) */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-300 uppercase">
+                      <span className="text-wbn-cobalt bg-blue-950 px-2.5 py-0.5 rounded border border-blue-800 whitespace-nowrap">
+                        {mainLeadStory.category}
+                      </span>
                       <span>•</span>
-                      <span className="text-slate-400 font-medium flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-slate-400" /> {mainLeadStory.publishedAt}
+                      <span className="text-slate-400 font-medium flex items-center gap-1 whitespace-nowrap">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        {mainLeadStory.publishedAt}
                       </span>
                     </div>
+
                     <Link href={`/news/${mainLeadStory.slug}`}>
-                      <h1 className="text-2xl sm:text-3xl font-black font-serif-editorial text-white hover:text-slate-200 transition-colors leading-tight">
+                      <h1 className="text-xl sm:text-2xl font-black font-editorial-heading text-white hover:text-slate-200 transition-colors leading-snug">
                         {mainLeadStory.title}
                       </h1>
                     </Link>
@@ -101,8 +107,8 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  {/* Clean Desktop Read Story Button Placement */}
-                  <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                  {/* Clean Desktop Read Story Button */}
+                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white">
                         <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
@@ -130,9 +136,9 @@ export default function HomePage() {
                 {sideSubLeads.map((sub, idx) => (
                   <div key={sub.id} className={`pb-3 ${idx < sideSubLeads.length - 1 ? 'magazine-rule' : ''} group`}>
                     <div className="flex items-center gap-2 text-[10px] font-extrabold text-wbn-cobalt uppercase mb-1">
-                      <span>{sub.category}</span>
+                      <span className="whitespace-nowrap">{sub.category}</span>
                       <span>•</span>
-                      <span className="text-slate-400 font-normal">{sub.readTime}</span>
+                      <span className="text-slate-400 font-normal whitespace-nowrap">{sub.readTime}</span>
                     </div>
                     <Link href={`/news/${sub.slug}`}>
                       <h4 className="font-extrabold text-sm text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
@@ -180,12 +186,12 @@ export default function HomePage() {
 
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium whitespace-nowrap">
                         <Clock className="w-3.5 h-3.5 text-wbn-slate" />
                         <span>{art.publishedAt}</span>
                       </div>
                       <Link href={`/news/${art.slug}`}>
-                        <h3 className="font-extrabold font-serif-editorial text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                        <h3 className="font-extrabold font-editorial-heading text-base text-wbn-navy hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
                           {art.title}
                         </h3>
                       </Link>
@@ -196,11 +202,8 @@ export default function HomePage() {
 
                     <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                       <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3.5 h-3.5 text-slate-400" /> {art.views}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3.5 h-3.5 text-wbn-blue" /> {art.likes}
+                        <span className="flex items-center gap-1 font-semibold text-slate-600" title="Real-time reader count">
+                          <Eye className="w-3.5 h-3.5 text-wbn-blue" /> {art.views} Reads
                         </span>
                       </div>
                       <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1">
@@ -229,7 +232,7 @@ export default function HomePage() {
 
           {/* Right Sidebar (Col 4) */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* WBN WhatsApp Group Chat Box (Accurate Copy + White WhatsApp Icon) */}
+            {/* WBN WhatsApp Group Chat Box */}
             <div className="bg-emerald-700 text-white rounded-3xl p-6 shadow-lg space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -265,7 +268,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 {trendingReads.map((t, idx) => (
                   <div key={t.id} className="flex items-start gap-3 group">
-                    <span className="text-2xl font-black font-serif-editorial text-slate-300 group-hover:text-wbn-blue transition-colors">
+                    <span className="text-2xl font-black font-editorial-heading text-slate-300 group-hover:text-wbn-blue transition-colors">
                       0{idx + 1}
                     </span>
                     <div className="space-y-1">
@@ -296,7 +299,7 @@ export default function HomePage() {
               <div className="relative w-8 h-8">
                 <Image src="/logo.png" alt="WBN" fill className="object-contain" />
               </div>
-              <span className="font-black text-white text-lg font-serif-editorial">west bridge network</span>
+              <span className="font-black text-white text-lg font-editorial-heading">west bridge network</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed">
               West Bridge Network (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.
@@ -341,8 +344,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 text-center text-slate-500">
-          © 2026 West Bridge Network (WBN). All rights reserved.
+        {/* Bottom Footer Bar with Secret Publisher Admin Studio Link */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 flex flex-wrap justify-between items-center gap-4 text-slate-500">
+          <div>© 2026 West Bridge Network (WBN). All rights reserved.</div>
+          <Link href="/admin" className="text-slate-600 hover:text-slate-400 transition-colors flex items-center gap-1 text-[11px]">
+            <Lock className="w-3 h-3" />
+            <span>Publisher Admin Studio</span>
+          </Link>
         </div>
       </footer>
     </div>

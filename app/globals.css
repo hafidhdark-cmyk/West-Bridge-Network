@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -17,9 +17,11 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Editorial Headline Typography */
-.font-serif-editorial {
-  font-family: 'Playfair Display', Georgia, serif;
+/* Modern Editorial Headline Typography */
+.font-editorial-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
 /* Magazine 1px Rule Lines */
