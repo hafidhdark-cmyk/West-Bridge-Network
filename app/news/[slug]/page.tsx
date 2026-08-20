@@ -6,8 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { getArticleBySlug, getStoredArticles, Article, CommentItem } from '@/lib/newsData';
-import { Heart, MessageSquare, Share2, Eye, Clock, ChevronRight, User, Send, Check } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Eye, Clock, ChevronRight, Send, Check } from 'lucide-react';
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -81,9 +82,6 @@ export default function ArticleDetailPage() {
     }
   };
 
-  const allArticles = getStoredArticles();
-  const trending = [...allArticles].sort((a, b) => b.views - a.views).slice(0, 5);
-
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
       <Header />
@@ -105,10 +103,10 @@ export default function ArticleDetailPage() {
               {/* Love / Like Button */}
               <button
                 onClick={handleLike}
-                className="group flex flex-col items-center text-slate-600 hover:text-rose-500 transition-colors"
+                className="group flex flex-col items-center text-slate-600 hover:text-wbn-blue transition-colors"
                 title="Love this story"
               >
-                <div className={`p-2.5 rounded-xl ${hasLiked ? 'bg-rose-500 text-white' : 'bg-slate-100 group-hover:bg-rose-50'}`}>
+                <div className={`p-2.5 rounded-xl ${hasLiked ? 'bg-wbn-blue text-white' : 'bg-slate-100 group-hover:bg-blue-50'}`}>
                   <Heart className={`w-5 h-5 ${hasLiked ? 'fill-current' : ''}`} />
                 </div>
                 <span className="text-[10px] font-bold mt-1">{likesCount}</span>
@@ -140,18 +138,18 @@ export default function ArticleDetailPage() {
                 <span className="text-[10px] font-bold mt-1">{copiedLink ? 'Copied!' : 'Share'}</span>
               </button>
 
-              {/* Join WhatsApp Channel Button */}
+              {/* Join WhatsApp Group Chat Button */}
               <a
-                href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
+                href="https://chat.whatsapp.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex flex-col items-center text-emerald-600 hover:text-emerald-700 transition-colors pt-2 border-t border-slate-100"
-                title="Join WBN WhatsApp Channel"
+                className="group flex flex-col items-center text-emerald-700 hover:text-emerald-800 transition-colors pt-2 border-t border-slate-100"
+                title="Join our WhatsApp group chat"
               >
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <MessageSquare className="w-5 h-5 fill-current" />
+                <div className="p-2.5 rounded-xl bg-emerald-700 text-white shadow-sm hover:bg-emerald-800 transition-colors">
+                  <WhatsAppIcon className="w-5 h-5 text-white fill-current" />
                 </div>
-                <span className="text-[9px] font-bold text-center mt-1">Join WA</span>
+                <span className="text-[9px] font-bold text-center mt-1">WA Group</span>
               </a>
             </div>
           </div>
@@ -160,7 +158,7 @@ export default function ArticleDetailPage() {
           <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
             {/* Title & Metadata */}
             <div className="space-y-4">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-wbn-navy leading-tight">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-wbn-navy leading-tight font-serif-editorial">
                 {article.title}
               </h1>
 
@@ -206,7 +204,7 @@ export default function ArticleDetailPage() {
                 <button
                   onClick={handleLike}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    hasLiked ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                    hasLiked ? 'bg-wbn-blue text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${hasLiked ? 'fill-current' : ''}`} />
@@ -223,13 +221,13 @@ export default function ArticleDetailPage() {
               </div>
 
               <a
-                href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
+                href="https://chat.whatsapp.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow"
+                className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow"
               >
-                <MessageSquare className="w-4 h-4 fill-current" />
-                <span>Join WBN WhatsApp Channel</span>
+                <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
+                <span>Join our WhatsApp group chat</span>
               </a>
             </div>
 

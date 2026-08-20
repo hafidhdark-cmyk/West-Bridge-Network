@@ -6,12 +6,12 @@ import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
 import BreakingTicker from '@/components/BreakingTicker';
 import AdBanner from '@/components/AdBanner';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { getStoredArticles, Article } from '@/lib/newsData';
 import { 
   Clock, 
   Eye, 
   Heart, 
-  MessageSquare, 
   TrendingUp, 
   Zap, 
   Calendar, 
@@ -19,7 +19,6 @@ import {
   ArrowUpRight,
   RotateCcw,
   Sparkles,
-  ShieldCheck,
   Radio
 } from 'lucide-react';
 
@@ -58,7 +57,7 @@ export default function HomePage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
-                <Radio className="w-4 h-4 text-wbn-red animate-pulse" />
+                <Radio className="w-4 h-4 text-wbn-blue animate-pulse" />
                 Lead Editorial Coverage
               </h2>
               <span className="text-xs font-semibold text-wbn-slate flex items-center gap-1">
@@ -67,8 +66,8 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Giant Lead Story (Col 8) */}
-              <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group">
+              {/* Lead Story Card (Col 8) - Blue & Slate Gray Theme */}
+              <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group border border-slate-800">
                 <div className="md:col-span-7 relative min-h-[300px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
                   <Image
                     src={mainLeadStory.imageUrl}
@@ -77,23 +76,23 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                  <span className="absolute top-4 left-4 bg-wbn-red text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow flex items-center gap-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-wbn-navy via-wbn-navy/40 to-transparent"></div>
+                  <span className="absolute top-4 left-4 bg-wbn-blue text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow flex items-center gap-1">
                     <Zap className="w-3 h-3 fill-current" /> LEAD REPORT
                   </span>
                 </div>
 
-                <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-4 bg-gradient-to-b from-wbn-navy to-slate-900">
+                <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase">
-                      <span>{mainLeadStory.category}</span>
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase">
+                      <span className="text-wbn-cobalt bg-blue-950 px-2 py-0.5 rounded border border-blue-800">{mainLeadStory.category}</span>
                       <span>•</span>
                       <span className="text-slate-400 font-medium flex items-center gap-1">
-                        <Calendar className="w-3 h-3" /> {mainLeadStory.publishedAt}
+                        <Calendar className="w-3 h-3 text-slate-400" /> {mainLeadStory.publishedAt}
                       </span>
                     </div>
                     <Link href={`/news/${mainLeadStory.slug}`}>
-                      <h1 className="text-2xl sm:text-3xl font-black font-serif-editorial text-white hover:text-amber-300 transition-colors leading-tight">
+                      <h1 className="text-2xl sm:text-3xl font-black font-serif-editorial text-white hover:text-slate-200 transition-colors leading-tight">
                         {mainLeadStory.title}
                       </h1>
                     </Link>
@@ -102,9 +101,10 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                  {/* Clean Desktop Read Story Button Placement */}
+                  <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-400 p-0.5 bg-white">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white">
                         <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
                       </div>
                       <span className="text-xs font-extrabold text-slate-200">West Bridge Network</span>
@@ -112,7 +112,7 @@ export default function HomePage() {
 
                     <Link
                       href={`/news/${mainLeadStory.slug}`}
-                      className="bg-amber-400 hover:bg-amber-300 text-wbn-navy font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow flex items-center gap-1"
+                      className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 w-fit"
                     >
                       <span>Read Story</span>
                       <ArrowUpRight className="w-4 h-4" />
@@ -200,7 +200,7 @@ export default function HomePage() {
                           <Eye className="w-3.5 h-3.5 text-slate-400" /> {art.views}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Heart className="w-3.5 h-3.5 text-rose-500" /> {art.likes}
+                          <Heart className="w-3.5 h-3.5 text-wbn-blue" /> {art.likes}
                         </span>
                       </div>
                       <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1">
@@ -229,27 +229,28 @@ export default function HomePage() {
 
           {/* Right Sidebar (Col 4) */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* WBN WhatsApp Channel Subscription Card */}
-            <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 text-white rounded-3xl p-6 shadow-lg space-y-4">
+            {/* WBN WhatsApp Group Chat Box (Accurate Copy + White WhatsApp Icon) */}
+            <div className="bg-emerald-700 text-white rounded-3xl p-6 shadow-lg space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 fill-current text-white" />
+                  <WhatsAppIcon className="w-6 h-6 text-white fill-current" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base">WBN WhatsApp Channel</h3>
-                  <p className="text-xs text-emerald-100">Verified news broadcasts on your phone</p>
+                  <h3 className="font-extrabold text-base">Join our WhatsApp group chat</h3>
+                  <p className="text-xs text-emerald-100">Breaking news delivered directly to your phone</p>
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-emerald-50">
-                Join over 50,000+ subscribers receiving instant news reports directly in their WhatsApp app.
+                Get instant breaking news updates delivered directly to your WhatsApp.
               </p>
               <a
-                href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
+                href="https://chat.whatsapp.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center bg-white text-emerald-900 hover:bg-emerald-50 font-black text-xs py-3 rounded-xl transition-all shadow"
+                className="block w-full text-center bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs py-3 rounded-xl transition-all shadow flex items-center justify-center gap-2"
               >
-                ⚡ Follow WBN Channel Now
+                <WhatsAppIcon className="w-4 h-4 text-emerald-800 fill-current" />
+                <span>Join our WhatsApp group chat</span>
               </a>
             </div>
 
@@ -259,7 +260,7 @@ export default function HomePage() {
             {/* Top Read Stories Sidebar Widget */}
             <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-sm">
               <h3 className="font-extrabold text-sm text-wbn-navy magazine-rule-dark pb-2 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-wbn-red" /> Top 5 Trending Reports
+                <TrendingUp className="w-4 h-4 text-wbn-blue" /> Top 5 Trending Reports
               </h3>
               <div className="space-y-4">
                 {trendingReads.map((t, idx) => (
@@ -326,16 +327,16 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider">WhatsApp Broadcast</h4>
+            <h4 className="font-bold text-white uppercase tracking-wider">WhatsApp Group Chat</h4>
             <p className="text-slate-400">Get breaking headlines directly on WhatsApp.</p>
             <a
-              href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
+              href="https://chat.whatsapp.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl transition-all shadow flex items-center gap-2 justify-center"
+              className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow flex items-center gap-2 justify-center"
             >
-              <MessageSquare className="w-4 h-4 fill-current text-white" />
-              <span>Join WhatsApp Channel</span>
+              <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
+              <span>Join our WhatsApp group chat</span>
             </a>
           </div>
         </div>

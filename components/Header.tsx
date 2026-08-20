@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, Menu, X, ChevronRight } from 'lucide-react';
+import WhatsAppIcon from './WhatsAppIcon';
 
 interface HeaderProps {
   activeCategory?: string;
@@ -27,7 +28,7 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
       {/* Main Editorial Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         {/* WBN Emblem Logo & Editorial Masthead Title */}
@@ -72,7 +73,7 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
         </div>
       </div>
 
-      {/* Editorial Category Navigation Bar */}
+      {/* Editorial Category Navigation Bar (Blue & Gray Theme) */}
       <div className="bg-wbn-navy text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-start overflow-x-auto no-scrollbar">
           {CATEGORIES.map((cat) => (
@@ -81,7 +82,7 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
               onClick={() => onSelectCategory && onSelectCategory(cat)}
               className={`px-4 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-extrabold whitespace-nowrap transition-all border-b-2 uppercase tracking-wider ${
                 activeCategory === cat
-                  ? 'border-wbn-red text-white bg-slate-800/90'
+                  ? 'border-wbn-blue text-white bg-slate-800/90 font-black'
                   : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-800/40'
               }`}
             >
@@ -93,7 +94,7 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
 
       {/* Mobile Drawer Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-5 space-y-3 shadow-xl animate-fade-in">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-5 space-y-4 shadow-xl">
           <div className="font-extrabold text-xs uppercase tracking-wider text-wbn-slate border-b pb-2">
             Editorial Sections
           </div>
@@ -116,13 +117,25 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
               </button>
             ))}
           </div>
+
+          <div className="pt-2 border-t border-slate-100">
+            <a
+              href="https://chat.whatsapp.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow"
+            >
+              <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
+              <span>Join our WhatsApp group chat</span>
+            </a>
+          </div>
         </div>
       )}
 
       {/* Search Modal */}
       {showSearchModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 sm:pt-24 px-4">
-          <div className="bg-white w-full max-w-xl rounded-3xl p-5 shadow-2xl space-y-4 animate-scale-up">
+          <div className="bg-white w-full max-w-xl rounded-3xl p-5 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-extrabold text-wbn-navy text-sm">Search West Bridge Network</h3>
               <button onClick={() => setShowSearchModal(false)} className="text-slate-400 hover:text-slate-600">
