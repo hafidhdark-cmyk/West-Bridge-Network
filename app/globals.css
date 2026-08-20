@@ -14,6 +14,7 @@ body {
   background: #FAFAF9;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Editorial Headline Typography */
@@ -30,6 +31,15 @@ body {
   border-bottom: 2px solid #0F172A;
 }
 
+/* Hide Scrollbar for Horizontal Scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -43,7 +53,7 @@ body {
   border-radius: 4px;
 }
 
-/* Marquee Ticker */
+/* Ticker Marquee Animation */
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
@@ -57,4 +67,13 @@ body {
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+/* Card Hover Lift */
+.bbc-card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bbc-card-hover:hover {
+  transform: translateY(-3px);
 }

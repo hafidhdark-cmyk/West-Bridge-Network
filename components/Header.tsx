@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, ChevronRight } from 'lucide-react';
 
 interface HeaderProps {
   activeCategory?: string;
@@ -27,12 +27,12 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
       {/* Main Editorial Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         {/* WBN Emblem Logo & Editorial Masthead Title */}
-        <Link href="/" className="flex items-center gap-4 group">
-          <div className="relative w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 transition-transform group-hover:scale-105">
+        <Link href="/" className="flex items-center gap-3 sm:gap-4 group">
+          <div className="relative w-9 h-9 sm:w-12 sm:h-12 flex-shrink-0 transition-transform group-hover:scale-105">
             <Image
               src="/logo.png"
               alt="West Bridge Network Emblem"
@@ -42,20 +42,20 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl sm:text-3xl font-black font-serif-editorial text-wbn-navy leading-none tracking-tight">
+            <span className="text-lg sm:text-2xl font-black font-serif-editorial text-wbn-navy leading-none tracking-tight">
               west bridge network
             </span>
-            <span className="text-[10px] font-extrabold tracking-widest text-wbn-slate uppercase mt-1">
+            <span className="text-[9px] sm:text-[10px] font-extrabold tracking-widest text-wbn-slate uppercase mt-1">
               Truth • Speed • Reach
             </span>
           </div>
         </Link>
 
-        {/* Quick Search Button */}
-        <div className="flex items-center gap-3">
+        {/* Quick Search & Mobile Drawer Trigger */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setShowSearchModal(true)}
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-xs font-bold transition-colors"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition-colors"
           >
             <Search className="w-4 h-4 text-wbn-navy" />
             <span className="hidden sm:inline">Search Headlines</span>
@@ -64,23 +64,24 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
+            aria-label="Toggle navigation menu"
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X className="w-6 h-6 text-wbn-navy" /> : <Menu className="w-6 h-6 text-wbn-navy" />}
           </button>
         </div>
       </div>
 
       {/* Editorial Category Navigation Bar */}
       <div className="bg-wbn-navy text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-start overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-start overflow-x-auto no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => onSelectCategory && onSelectCategory(cat)}
-              className={`px-5 py-3 text-xs font-bold whitespace-nowrap transition-all border-b-2 uppercase tracking-wider ${
+              className={`px-4 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-extrabold whitespace-nowrap transition-all border-b-2 uppercase tracking-wider ${
                 activeCategory === cat
-                  ? 'border-wbn-red text-white bg-slate-800/80 font-black'
+                  ? 'border-wbn-red text-white bg-slate-800/90'
                   : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-800/40'
               }`}
             >
@@ -92,8 +93,10 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
 
       {/* Mobile Drawer Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2">
-          <div className="font-bold text-xs uppercase tracking-wider text-wbn-slate mb-2">Editorial Sections</div>
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-5 space-y-3 shadow-xl animate-fade-in">
+          <div className="font-extrabold text-xs uppercase tracking-wider text-wbn-slate border-b pb-2">
+            Editorial Sections
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {CATEGORIES.map((cat) => (
               <button
@@ -102,11 +105,14 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
                   onSelectCategory && onSelectCategory(cat);
                   setIsMenuOpen(false);
                 }}
-                className={`text-left px-3 py-2 rounded-lg text-xs font-bold ${
-                  activeCategory === cat ? 'bg-wbn-blue text-white' : 'bg-slate-100 text-slate-700'
+                className={`text-left px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+                  activeCategory === cat
+                    ? 'bg-wbn-blue text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                 }`}
               >
-                {cat}
+                <span>{cat}</span>
+                <ChevronRight className="w-3.5 h-3.5 opacity-60" />
               </button>
             ))}
           </div>
@@ -115,22 +121,22 @@ export default function Header({ activeCategory = 'Home', onSelectCategory }: He
 
       {/* Search Modal */}
       {showSearchModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
-          <div className="bg-white w-full max-w-xl rounded-2xl p-4 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 sm:pt-24 px-4">
+          <div className="bg-white w-full max-w-xl rounded-3xl p-5 shadow-2xl space-y-4 animate-scale-up">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-wbn-navy">Search West Bridge Network</h3>
+              <h3 className="font-extrabold text-wbn-navy text-sm">Search West Bridge Network</h3>
               <button onClick={() => setShowSearchModal(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-3.5 text-slate-400 w-5 h-5" />
+              <Search className="absolute left-3.5 top-3.5 text-slate-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search headlines, politics, business, tech news..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-wbn-blue text-sm"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-wbn-blue text-sm"
                 autoFocus
               />
             </div>
