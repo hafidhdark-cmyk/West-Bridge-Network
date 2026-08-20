@@ -113,8 +113,8 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  {/* Clean Desktop & Mobile Read Story Button (Generous Desktop Padding md:px-6 md:py-3) */}
-                  <div className="pt-5 border-t border-slate-800 flex items-center justify-between gap-3">
+                  {/* Clean Column Stack Layout: Read Story sits UNDER West Bridge Network */}
+                  <div className="pt-5 border-t border-slate-800 flex flex-col items-start gap-4">
                     <div className="flex items-center gap-2.5">
                       <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white flex-shrink-0">
                         <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
@@ -124,7 +124,7 @@ export default function HomePage() {
 
                     <Link
                       href={`/news/${mainLeadStory.slug}`}
-                      className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs md:text-sm px-4 md:px-6 py-2.5 md:py-3 rounded-xl transition-all shadow-md flex items-center gap-2 whitespace-nowrap flex-shrink-0"
+                      className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs md:text-sm px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto"
                     >
                       <span>Read Story</span>
                       <ArrowUpRight className="w-4 h-4 flex-shrink-0" />
