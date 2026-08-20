@@ -68,7 +68,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Lead Top Story Card (Col 8) - Generous Spacing & No White Dot */}
+              {/* Lead Top Story Card (Col 8) */}
               <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group border border-slate-800">
                 <div className="md:col-span-7 relative min-h-[280px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
                   <Image
@@ -86,7 +86,7 @@ export default function HomePage() {
 
                 <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy">
                   <div className="space-y-5">
-                    {/* Category Pill & Date Timestamp (No White Dot, Generous Gap) */}
+                    {/* Category Pill & Date Timestamp */}
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-3">
                         <span className="text-wbn-cobalt bg-blue-950 px-3 py-1 rounded text-[11px] font-extrabold uppercase tracking-wider border border-blue-800 whitespace-nowrap">
@@ -100,7 +100,7 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* Headline Title with Generous Margin & Gap */}
+                    {/* Headline Title */}
                     <Link href={`/news/${mainLeadStory.slug}`} className="block pt-1">
                       <h1 className="text-xl sm:text-2xl font-black font-editorial-heading text-white hover:text-slate-200 transition-colors leading-snug">
                         {mainLeadStory.title}
@@ -212,8 +212,9 @@ export default function HomePage() {
                           <Eye className="w-3.5 h-3.5 text-wbn-blue" /> {art.views} Reads
                         </span>
                       </div>
+                      {/* Explicit "Read Story →" Text Link */}
                       <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1">
-                        <span>Read</span>
+                        <span>Read Story</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
