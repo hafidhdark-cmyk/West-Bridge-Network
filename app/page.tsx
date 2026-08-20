@@ -141,24 +141,32 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Stacked Sub-Lead Stories (Col 4) */}
+              {/* Stacked Sub-Lead Stories (Col 4) with Mini Thumbnails */}
               <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 p-5 space-y-4 flex flex-col justify-between shadow-sm">
                 <h3 className="font-extrabold text-xs text-wbn-slate uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-wbn-blue" />
                   Top Priority Reports
                 </h3>
                 {sideSubLeads.map((sub, idx) => (
-                  <div key={sub.id} className={`pb-3 ${idx < sideSubLeads.length - 1 ? 'magazine-rule' : ''} group`}>
-                    <div className="flex items-center gap-2 text-[10px] font-extrabold text-wbn-cobalt uppercase mb-1">
-                      <span className="whitespace-nowrap">{sub.category}</span>
-                      <span>•</span>
-                      <span className="text-slate-400 font-normal whitespace-nowrap">{sub.readTime}</span>
+                  <div key={sub.id} className={`pb-3 ${idx < sideSubLeads.length - 1 ? 'magazine-rule' : ''} group flex items-start justify-between gap-3`}>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2 text-[10px] font-extrabold text-wbn-cobalt uppercase mb-1">
+                        <span className="whitespace-nowrap">{sub.category}</span>
+                        <span>•</span>
+                        <span className="text-slate-400 font-normal whitespace-nowrap">{sub.readTime}</span>
+                      </div>
+                      <Link href={`/news/${sub.slug}`}>
+                        <h4 className="font-extrabold text-xs sm:text-sm text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
+                          {sub.title}
+                        </h4>
+                      </Link>
                     </div>
-                    <Link href={`/news/${sub.slug}`}>
-                      <h4 className="font-extrabold text-sm text-wbn-navy group-hover:text-wbn-cobalt transition-colors line-clamp-2 leading-snug">
-                        {sub.title}
-                      </h4>
-                    </Link>
+
+                    {sub.imageUrl && (
+                      <Link href={`/news/${sub.slug}`} className="relative w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
+                        <Image src={sub.imageUrl} alt={sub.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                      </Link>
+                    )}
                   </div>
                 ))}
               </div>
