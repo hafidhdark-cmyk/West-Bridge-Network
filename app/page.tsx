@@ -7,11 +7,26 @@ import Header, { CATEGORIES } from '@/components/Header';
 import BreakingTicker from '@/components/BreakingTicker';
 import AdBanner from '@/components/AdBanner';
 import { getStoredArticles, Article } from '@/lib/newsData';
-import { Clock, Eye, Heart, MessageSquare, TrendingUp, Flame, ArrowRight, Zap, Bookmark } from 'lucide-react';
+import { 
+  Clock, 
+  Eye, 
+  Heart, 
+  MessageSquare, 
+  TrendingUp, 
+  Zap, 
+  Calendar, 
+  ChevronRight, 
+  ArrowUpRight,
+  RotateCcw,
+  Sparkles,
+  ShieldCheck,
+  Radio
+} from 'lucide-react';
 
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Home');
+  const [visibleCount, setVisibleCount] = useState<number>(6);
 
   useEffect(() => {
     setArticles(getStoredArticles());
@@ -24,7 +39,12 @@ export default function HomePage() {
   const mainLeadStory = articles.find((a) => a.isBreaking) || articles[0];
   const sideSubLeads = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   const regularNews = filteredArticles.filter((a) => a.id !== mainLeadStory?.id);
+  const displayedNews = regularNews.slice(0, visibleCount);
   const trendingReads = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 6);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF9]">
@@ -38,10 +58,12 @@ export default function HomePage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-wbn-red rounded-full animate-ping"></span>
+                <Radio className="w-4 h-4 text-wbn-red animate-pulse" />
                 Lead Editorial Coverage
               </h2>
-              <span className="text-xs font-semibold text-wbn-slate">Updated 5 mins ago</span>
+              <span className="text-xs font-semibold text-wbn-slate flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" /> Updated 5 mins ago
+              </span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -56,8 +78,8 @@ export default function HomePage() {
                     priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                  <span className="absolute top-4 left-4 bg-wbn-red text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow">
-                    LEAD REPORT
+                  <span className="absolute top-4 left-4 bg-wbn-red text-white text-[11px] font-black uppercase px-3 py-1 rounded shadow flex items-center gap-1">
+                    <Zap className="w-3 h-3 fill-current" /> LEAD REPORT
                   </span>
                 </div>
 
@@ -66,7 +88,9 @@ export default function HomePage() {
                     <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase">
                       <span>{mainLeadStory.category}</span>
                       <span>•</span>
-                      <span className="text-slate-400 font-medium">{mainLeadStory.publishedAt}</span>
+                      <span className="text-slate-400 font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> {mainLeadStory.publishedAt}
+                      </span>
                     </div>
                     <Link href={`/news/${mainLeadStory.slug}`}>
                       <h1 className="text-2xl sm:text-3xl font-black font-serif-editorial text-white hover:text-amber-300 transition-colors leading-tight">
@@ -80,17 +104,18 @@ export default function HomePage() {
 
                   <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-400">
-                        <Image src={mainLeadStory.authorAvatar} alt={mainLeadStory.author} fill className="object-cover" />
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-400 p-0.5 bg-white">
+                        <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
                       </div>
-                      <span className="text-xs font-bold text-slate-200">{mainLeadStory.author}</span>
+                      <span className="text-xs font-extrabold text-slate-200">West Bridge Network</span>
                     </div>
 
                     <Link
                       href={`/news/${mainLeadStory.slug}`}
-                      className="bg-amber-400 hover:bg-amber-300 text-wbn-navy font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow"
+                      className="bg-amber-400 hover:bg-amber-300 text-wbn-navy font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow flex items-center gap-1"
                     >
-                      Read Full Story →
+                      <span>Read Story</span>
+                      <ArrowUpRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
@@ -98,7 +123,8 @@ export default function HomePage() {
 
               {/* Stacked Sub-Lead Stories (Col 4) */}
               <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 p-5 space-y-4 flex flex-col justify-between shadow-sm">
-                <h3 className="font-extrabold text-xs text-wbn-slate uppercase tracking-wider border-b border-slate-100 pb-2">
+                <h3 className="font-extrabold text-xs text-wbn-slate uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-wbn-blue" />
                   Top Priority Reports
                 </h3>
                 {sideSubLeads.map((sub, idx) => (
@@ -127,18 +153,18 @@ export default function HomePage() {
             <div className="flex justify-between items-center magazine-rule-dark pb-2">
               <h2 className="text-base font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2.5 h-5 bg-wbn-blue rounded-full"></span>
-                {activeCategory === 'Home' ? 'Journalistic Intelligence Feed' : `${activeCategory} Coverage`}
+                {activeCategory === 'Home' ? 'Journalistic News Feed & History Archive' : `${activeCategory} Coverage`}
               </h2>
               <span className="text-xs font-semibold text-slate-500">
-                {regularNews.length} Reports
+                Showing {displayedNews.length} of {regularNews.length} Reports
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {regularNews.map((art) => (
+              {displayedNews.map((art) => (
                 <article
                   key={art.id}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group bbc-card-hover"
                 >
                   <div className="relative h-48 bg-slate-100 overflow-hidden">
                     <Image
@@ -177,14 +203,28 @@ export default function HomePage() {
                           <Heart className="w-3.5 h-3.5 text-rose-500" /> {art.likes}
                         </span>
                       </div>
-                      <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline">
-                        Read →
+                      <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1">
+                        <span>Read</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
                 </article>
               ))}
             </div>
+
+            {/* Load More News Reports (Pagination & Past News History) */}
+            {visibleCount < regularNews.length && (
+              <div className="text-center pt-4">
+                <button
+                  onClick={handleLoadMore}
+                  className="bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-xs px-8 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 mx-auto"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Load Previous News Reports & Past Archives</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right Sidebar (Col 4) */}
@@ -193,7 +233,7 @@ export default function HomePage() {
             <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 text-white rounded-3xl p-6 shadow-lg space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 fill-current" />
+                  <MessageSquare className="w-5 h-5 fill-current text-white" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base">WBN WhatsApp Channel</h3>
@@ -292,9 +332,10 @@ export default function HomePage() {
               href="https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl transition-all shadow"
+              className="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl transition-all shadow flex items-center gap-2 justify-center"
             >
-              Join WhatsApp Channel
+              <MessageSquare className="w-4 h-4 fill-current text-white" />
+              <span>Join WhatsApp Channel</span>
             </a>
           </div>
         </div>
