@@ -113,21 +113,21 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  {/* Clean Desktop & Mobile Read Story Button */}
+                  {/* Clean Desktop & Mobile Read Story Button (Fixed Single-Line Whitespace-Nowrap) */}
                   <div className="pt-5 border-t border-slate-800 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-600 p-0.5 bg-white flex-shrink-0">
                         <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
                       </div>
-                      <span className="text-xs font-extrabold text-slate-200">West Bridge Network</span>
+                      <span className="text-xs font-extrabold text-slate-200 whitespace-nowrap">West Bridge Network</span>
                     </div>
 
                     <Link
                       href={`/news/${mainLeadStory.slug}`}
-                      className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 w-fit"
+                      className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 whitespace-nowrap flex-shrink-0"
                     >
                       <span>Read Story</span>
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-4 h-4 flex-shrink-0" />
                     </Link>
                   </div>
                 </div>
@@ -212,10 +212,10 @@ export default function HomePage() {
                           <Eye className="w-3.5 h-3.5 text-wbn-blue" /> {art.views} Reads
                         </span>
                       </div>
-                      {/* Explicit "Read Story →" Text Link */}
-                      <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1">
+                      {/* Single-line "Read Story →" Text Link */}
+                      <Link href={`/news/${art.slug}`} className="font-extrabold text-wbn-blue hover:underline flex items-center gap-1 whitespace-nowrap">
                         <span>Read Story</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
+                        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
                       </Link>
                     </div>
                   </div>
