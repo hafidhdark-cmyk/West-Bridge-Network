@@ -78,9 +78,10 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Lead Top Story Card (Col 8) */}
-              <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 group border border-slate-800">
-                <div className="md:col-span-7 relative min-h-[280px] sm:min-h-[420px] bg-slate-900 overflow-hidden">
+              {/* Lead Top Story Card (Col 8) - Picture Sits ABOVE Description Text on Desktop */}
+              <div className="lg:col-span-8 bg-wbn-navy text-white rounded-3xl overflow-hidden shadow-xl flex flex-col group border border-slate-800">
+                {/* Photo Sits Above Description */}
+                <div className="relative w-full h-[280px] sm:h-[360px] md:h-[400px] bg-slate-900 overflow-hidden">
                   <Image
                     src={mainLeadStory.imageUrl}
                     alt={mainLeadStory.title}
@@ -94,10 +95,11 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="md:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy">
-                  <div className="space-y-5">
+                {/* Description Text Container Directly Below Photo */}
+                <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-wbn-navy flex-1">
+                  <div className="space-y-4">
                     {/* Category Pill & Date Timestamp */}
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <span className="text-wbn-cobalt bg-blue-950 px-3 py-1 rounded text-[11px] font-extrabold uppercase tracking-wider border border-blue-800 whitespace-nowrap">
                           {mainLeadStory.category}
@@ -112,7 +114,7 @@ export default function HomePage() {
 
                     {/* Headline Title */}
                     <Link href={`/news/${mainLeadStory.slug}`} className="block pt-1">
-                      <h1 className="text-xl sm:text-2xl font-black font-editorial-heading text-white hover:text-slate-200 transition-colors leading-snug">
+                      <h1 className="text-xl sm:text-3xl font-black font-editorial-heading text-white hover:text-slate-200 transition-colors leading-snug">
                         {mainLeadStory.title}
                       </h1>
                     </Link>
