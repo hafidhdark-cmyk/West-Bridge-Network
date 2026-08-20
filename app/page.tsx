@@ -23,6 +23,8 @@ import {
   Lock
 } from 'lucide-react';
 
+const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
+
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Home');
@@ -270,7 +272,7 @@ export default function HomePage() {
                 Get instant breaking news updates delivered directly to your WhatsApp.
               </p>
               <a
-                href="https://chat.whatsapp.com/"
+                href={OFFICIAL_WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs py-3 rounded-xl transition-all shadow flex items-center justify-center gap-2"
@@ -356,7 +358,7 @@ export default function HomePage() {
             <h4 className="font-bold text-white uppercase tracking-wider">WhatsApp Group Chat</h4>
             <p className="text-slate-400">Get breaking headlines directly on WhatsApp.</p>
             <a
-              href="https://chat.whatsapp.com/"
+              href={OFFICIAL_WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow flex items-center gap-2 justify-center"

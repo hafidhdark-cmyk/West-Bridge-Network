@@ -7,8 +7,10 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
-import { getArticleBySlug, getStoredArticles, Article, CommentItem } from '@/lib/newsData';
+import { getArticleBySlug, Article, CommentItem } from '@/lib/newsData';
 import { Heart, MessageSquare, Share2, Eye, Clock, ChevronRight, Send, Check } from 'lucide-react';
+
+const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -140,7 +142,7 @@ export default function ArticleDetailPage() {
 
               {/* Join WhatsApp Group Chat Button */}
               <a
-                href="https://chat.whatsapp.com/"
+                href={OFFICIAL_WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex flex-col items-center text-emerald-700 hover:text-emerald-800 transition-colors pt-2 border-t border-slate-100"
@@ -221,7 +223,7 @@ export default function ArticleDetailPage() {
               </div>
 
               <a
-                href="https://chat.whatsapp.com/"
+                href={OFFICIAL_WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow"
