@@ -1,317 +1,283 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
-import { saveArticle, Article } from '@/lib/newsData';
-import { Sparkles, Copy, Check, Send, Globe, MessageSquare, ShieldCheck, Newspaper, ArrowLeft } from 'lucide-react';
+import { getStoredArticles, saveArticleToSupabase, Article } from '@/lib/newsData';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Sparkles, Send } from 'lucide-react';
 
 export default function AdminPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Politics');
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [isTopStory, setIsTopStory] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
-  const [publishedSuccess, setPublishedSuccess] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
-  // Free ChatGPT Journalist Assistant Prompt State
-  const [promptTopic, setPromptTopic] = useState('');
-  const [generatedPrompt, setGeneratedPrompt] = useState('');
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
+  useEffect(() => {
+    setArticles(getStoredArticles());
+  }, []);
 
-  // WhatsApp Broadcast Payload State
-  const [broadcastPayload, setBroadcastPayload] = useState('');
-  const [copiedPayload, setCopiedPayload] = useState(false);
-
-  const handleGeneratePrompt = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!promptTopic.trim()) return;
-
-    const template = `Write a comprehensive, professional 500-word news article on the topic: "${promptTopic}".
-Format your response cleanly with the following sections:
-1. HEADLINE: Catchy, authoritative news title.
-2. SUMMARY: 2-sentence executive summary.
-3. BODY: 3 detailed paragraphs with facts, context, and impact.
-
-Tone: Serious, investigative, unbiased, professional journalism for West Bridge Network (WBN).`;
-
-    setGeneratedPrompt(template);
-  };
-
-  const handleCopyPrompt = () => {
-    if (navigator.clipboard && generatedPrompt) {
-      navigator.clipboard.writeText(generatedPrompt);
-      setCopiedPrompt(true);
-      setTimeout(() => setCopiedPrompt(false), 3000);
-    }
-  };
-
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
 
-    const slug = title
+    setIsPublishing(true);
+
+    const generatedSlug = title
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-');
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
 
-    const defaultImage = imageUrl.trim() || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80';
-
-    const newArt: Article = {
+    const newArticle: Article = {
       id: `wbn-${Date.now()}`,
       title: title.trim(),
-      slug,
+      slug: generatedSlug,
       category,
       summary: summary.trim() || title.trim(),
       content: content.trim(),
-      imageUrl: defaultImage,
-      publishedAt: 'JUST NOW',
-      readTime: '3 min read',
+      imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
+      publishedAt: 'Just now',
+      readTime: `${Math.max(2, Math.ceil(content.split(' ').length / 200))} min read`,
       author: 'West Bridge Network',
       authorAvatar: '/logo.png',
+      isTopStory,
       isBreaking,
       views: 1,
       likes: 0,
       commentsCount: 0,
-      whatsappChannelLink: 'https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32',
     };
 
-    saveArticle(newArt);
-    setPublishedSuccess(true);
+    const saved = await saveArticleToSupabase(newArticle);
+    setArticles([newArticle, ...articles]);
+    setIsPublishing(false);
+    setPublishSuccess(true);
 
-    // Auto-generate 1-Click WhatsApp Broadcast Payload
-    const waPayload = `🚨 *BREAKING NEWS | WEST BRIDGE NETWORK*
-
-*${newArt.title}*
-
-${newArt.summary}
-
-📖 *Read Full Report Here:*
-http://localhost:3000/news/${newArt.slug}
-
-📲 *Join WBN WhatsApp Channel for Live News Updates:*
-https://whatsapp.com/channel/0029Va9WjfK4Y9Ifdqw4Mi32`;
-
-    setBroadcastPayload(waPayload);
+    // Reset Form
+    setTitle('');
+    setSummary('');
+    setContent('');
+    setImageUrl('');
+    setIsTopStory(false);
+    setIsBreaking(false);
 
     setTimeout(() => {
-      setPublishedSuccess(false);
-    }, 5000);
-  };
-
-  const handleCopyPayload = () => {
-    if (navigator.clipboard && broadcastPayload) {
-      navigator.clipboard.writeText(broadcastPayload);
-      setCopiedPayload(true);
-      setTimeout(() => setCopiedPayload(false), 3000);
-    }
+      setPublishSuccess(false);
+    }, 4000);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Admin Header Bar */}
-        <div className="bg-wbn-navy text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-lg">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Top Header Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-wbn-navy text-white p-6 rounded-3xl shadow-lg border border-slate-800">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs text-amber-400 font-bold uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4" /> WBN Private Publisher Studio
+            <div className="flex items-center gap-2 text-xs text-wbn-cobalt uppercase font-extrabold tracking-wider">
+              <Lock className="w-4 h-4 text-blue-400" />
+              <span>West Bridge Network Editorial Suite</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-serif-editorial">Admin Journalist Dashboard</h1>
-            <p className="text-xs text-slate-300">
-              Publish breaking news reports directly tagged as <strong className="text-white">Reported by West Bridge Network</strong>.
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-black font-editorial-heading">Publisher Admin Studio</h1>
+            <p className="text-slate-300 text-xs">Publish reports directly into PostgreSQL live on Vercel</p>
           </div>
+
           <Link
             href="/"
-            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
+            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-slate-700"
           >
-            <ArrowLeft className="w-4 h-4" /> View Live Website
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Live Site</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Article Publisher Form (Col 7) */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b pb-4">
-              <h2 className="text-lg font-extrabold text-wbn-navy flex items-center gap-2">
-                <Newspaper className="w-5 h-5 text-wbn-blue" />
-                Publish News Article
-              </h2>
-              <span className="text-xs text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full font-bold">
-                Author: West Bridge Network
-              </span>
+        {/* Publish Success Alert Banner */}
+        {publishSuccess && (
+          <div className="bg-emerald-950 border border-emerald-800 text-emerald-200 p-4 rounded-2xl flex items-center gap-3 animate-fade-in shadow-md">
+            <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+            <div>
+              <h4 className="font-extrabold text-sm text-emerald-100">Article Published Successfully!</h4>
+              <p className="text-xs text-emerald-300">Your report has been saved into PostgreSQL and is live for readers.</p>
             </div>
+          </div>
+        )}
 
-            {publishedSuccess && (
-              <div className="bg-emerald-500 text-white p-4 rounded-2xl font-bold text-xs flex items-center gap-2 shadow">
-                <Check className="w-5 h-5" /> Article Published Successfully! Check your homepage and WhatsApp payload below.
-              </div>
-            )}
+        {/* Main Publishing Form */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
+          <h2 className="text-lg font-black text-wbn-navy magazine-rule-dark pb-3 flex items-center gap-2">
+            <PlusCircle className="w-5 h-5 text-wbn-blue" />
+            Publish New News Article
+          </h2>
 
-            <form onSubmit={handlePublish} className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-wbn-navy">Article Title / Headline *</label>
+          <form onSubmit={handlePublish} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {/* Headline Title */}
+              <div className="md:col-span-8 space-y-2">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                  Article Headline Title *
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Federal Government Announces Major Infrastructure Fund..."
+                  placeholder="e.g., FG Releases Breakdown of Fuel Subsidy Savings Allocation"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-wbn-navy">News Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                  >
-                    <option value="Politics">Politics</option>
-                    <option value="Business">Business</option>
-                    <option value="World">World</option>
-                    <option value="Tech">Tech</option>
-                    <option value="Security">Security</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Entertainment">Entertainment</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-wbn-navy">Feature Image URL (Optional)</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                  />
-                </div>
+              {/* Category Dropdown */}
+              <div className="md:col-span-4 space-y-2">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                  Category *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                >
+                  <option value="Politics">Politics</option>
+                  <option value="Business">Business</option>
+                  <option value="World">World</option>
+                  <option value="Tech">Tech</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Opinion">Opinion</option>
+                </select>
               </div>
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-wbn-navy">Executive Summary (2 Sentences)</label>
-                <textarea
-                  rows={2}
-                  placeholder="Brief summary that appears on news cards and WhatsApp previews..."
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                  className="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                ></textarea>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-wbn-navy">Full News Article Content *</label>
-                <textarea
-                  rows={8}
-                  placeholder="Paste your news report here..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                  required
-                ></textarea>
-              </div>
-
-              <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 p-3.5 rounded-xl">
+            {/* Dynamic Placement Toggles (Top Story & Breaking Marquee) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white transition-colors">
                 <input
                   type="checkbox"
-                  id="breaking"
+                  checked={isTopStory}
+                  onChange={(e) => setIsTopStory(e.target.checked)}
+                  className="w-4 h-4 text-wbn-blue rounded focus:ring-wbn-blue"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-extrabold text-wbn-navy flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                    Set as Top Story of the Day
+                  </span>
+                  <p className="text-[11px] text-slate-500">Puts this report on the main Lead Hero Card on homepage</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white transition-colors">
+                <input
+                  type="checkbox"
                   checked={isBreaking}
                   onChange={(e) => setIsBreaking(e.target.checked)}
                   className="w-4 h-4 text-wbn-blue rounded focus:ring-wbn-blue"
                 />
-                <label htmlFor="breaking" className="text-xs font-bold text-amber-900 cursor-pointer">
-                  Mark as BREAKING NEWS (Pushes story to top marquee banner)
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-sm py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" /> Publish Story to West Bridge Network
-              </button>
-            </form>
-          </div>
-
-          {/* Right Column: Free ChatGPT Prompt Generator & WhatsApp Studio (Col 5) */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Free ChatGPT Prompt Assistant Card */}
-            <div className="bg-gradient-to-br from-slate-900 to-wbn-navy text-white rounded-3xl p-6 shadow-md space-y-4">
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <h3 className="font-extrabold text-base">Free ChatGPT Prompt Assistant</h3>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Generate professional news stories without paid API keys. Type a news topic, copy the prompt, and paste it into free ChatGPT!
-              </p>
-
-              <form onSubmit={handleGeneratePrompt} className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="e.g. ECOWAS summit outcomes in Abuja..."
-                  value={promptTopic}
-                  onChange={(e) => setPromptTopic(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-amber-400 hover:bg-amber-300 text-wbn-navy font-bold text-xs py-2.5 rounded-xl transition-all"
-                >
-                  Generate Journalist Prompt
-                </button>
-              </form>
-
-              {generatedPrompt && (
-                <div className="space-y-2 pt-2 border-t border-white/10">
-                  <textarea
-                    rows={6}
-                    value={generatedPrompt}
-                    readOnly
-                    className="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-xs font-mono text-slate-200"
-                  ></textarea>
-                  <button
-                    onClick={handleCopyPrompt}
-                    className="w-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-2 transition-all"
-                  >
-                    {copiedPrompt ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    <span>{copiedPrompt ? 'Copied Prompt!' : 'Copy Prompt for ChatGPT'}</span>
-                  </button>
+                <div className="space-y-0.5">
+                  <span className="text-xs font-extrabold text-wbn-navy flex items-center gap-1.5">
+                    <Radio className="w-3.5 h-3.5 text-wbn-blue animate-pulse" />
+                    Push to Live Moving Breaking Marquee
+                  </span>
+                  <p className="text-[11px] text-slate-500">Headline will loop across the top breaking news banner</p>
                 </div>
-              )}
+              </label>
             </div>
 
-            {/* 1-Click WhatsApp Broadcast Studio */}
-            {broadcastPayload && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 text-emerald-800">
-                  <MessageSquare className="w-5 h-5 fill-current" />
-                  <h3 className="font-extrabold text-base">1-Click WhatsApp Broadcast Studio</h3>
+            {/* Image URL */}
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                Feature Image URL (Unsplash or Image Link)
+              </label>
+              <input
+                type="url"
+                placeholder="https://images.unsplash.com/..."
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+              />
+            </div>
+
+            {/* Summary */}
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                Executive Summary / Deck Line
+              </label>
+              <input
+                type="text"
+                placeholder="Brief 1-2 sentence overview of the news report"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+              />
+            </div>
+
+            {/* Main Content Body */}
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                Full Article Content Body *
+              </label>
+              <textarea
+                rows={10}
+                placeholder="Write the complete news article text here..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full p-4 bg-slate-50 border border-slate-300 rounded-2xl text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                required
+              ></textarea>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isPublishing}
+              className="w-full bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-sm py-4 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              {isPublishing ? (
+                <span>Saving to Supabase Database...</span>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Publish Article Live</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Recently Published Articles List */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
+          <h3 className="font-extrabold text-base text-wbn-navy magazine-rule-dark pb-2 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-wbn-blue" />
+            Recently Published Articles ({articles.length})
+          </h3>
+          <div className="space-y-3">
+            {articles.map((art) => (
+              <div
+                key={art.id}
+                className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-wbn-cobalt uppercase">
+                    <span>{art.category}</span>
+                    <span>•</span>
+                    <span className="text-slate-400">{art.publishedAt}</span>
+                    {art.isTopStory && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[9px]">Top Story</span>}
+                    {art.isBreaking && <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[9px]">Breaking</span>}
+                  </div>
+                  <h4 className="font-bold text-wbn-navy text-sm line-clamp-1">{art.title}</h4>
                 </div>
-                <p className="text-xs text-emerald-700">
-                  Your formatted broadcast payload is ready to copy and share across WhatsApp groups & channels!
-                </p>
-                <textarea
-                  rows={7}
-                  value={broadcastPayload}
-                  readOnly
-                  className="w-full p-3.5 bg-white border border-emerald-300 rounded-2xl text-xs font-mono text-slate-800"
-                ></textarea>
-                <button
-                  onClick={handleCopyPayload}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 shadow transition-all"
+                <Link
+                  href={`/news/${art.slug}`}
+                  className="bg-white border border-slate-300 hover:bg-slate-100 text-wbn-navy font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap"
                 >
-                  {copiedPayload ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  <span>{copiedPayload ? 'Broadcast Copied!' : 'Copy WhatsApp Broadcast Payload'}</span>
-                </button>
+                  View Article →
+                </Link>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </main>

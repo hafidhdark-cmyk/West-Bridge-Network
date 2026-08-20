@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 export interface CommentItem {
   id: string;
   name: string;
@@ -18,6 +20,7 @@ export interface Article {
   readTime: string;
   author: string;
   authorAvatar: string;
+  isTopStory?: boolean;
   isBreaking?: boolean;
   views: number;
   likes: number;
@@ -50,6 +53,7 @@ Economic analysts from the West Africa Financial Bureau noted that while short-t
     readTime: '3 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
+    isTopStory: true,
     isBreaking: true,
     views: 1420,
     likes: 384,
@@ -71,6 +75,7 @@ Financial experts have commended the policy, noting that dollar supply in the of
     readTime: '4 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
+    isTopStory: false,
     isBreaking: false,
     views: 980,
     likes: 195,
@@ -90,6 +95,7 @@ The resolution establishes a joint intelligence-sharing task force to combat cro
     readTime: '5 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
+    isTopStory: false,
     isBreaking: false,
     views: 850,
     likes: 142,
@@ -109,6 +115,7 @@ Beneficiary startups operating in agricultural tech, artificial intelligence, an
     readTime: '3 min read',
     author: 'West Bridge Network',
     authorAvatar: '/logo.png',
+    isTopStory: false,
     isBreaking: false,
     views: 1100,
     likes: 275,
@@ -149,6 +156,73 @@ export function saveArticlesToStore(articles: Article[]): void {
 export function getArticleBySlug(slug: string): Article | undefined {
   const articles = getStoredArticles();
   return articles.find((a) => a.slug === slug);
+}
+
+export async function fetchArticlesFromSupabase(): Promise<Article[]> {
+  if (!supabase) return getStoredArticles();
+  try {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*')
+      .order('published_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return getStoredArticles();
+    }
+
+    return data.map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      category: item.category,
+      summary: item.summary,
+      content: item.content,
+      imageUrl: item.image_url,
+      publishedAt: item.published_at ? new Date(item.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Just now',
+      readTime: item.read_time || '3 min read',
+      author: 'West Bridge Network',
+      authorAvatar: '/logo.png',
+      isTopStory: item.is_top_story || false,
+      isBreaking: item.is_breaking || false,
+      views: item.views || 1,
+      likes: item.likes || 0,
+      commentsCount: item.comments_count || 0,
+    }));
+  } catch (e) {
+    return getStoredArticles();
+  }
+}
+
+export async function saveArticleToSupabase(article: Article): Promise<boolean> {
+  saveArticle(article); // Save locally as well
+  if (!supabase) return true;
+  try {
+    const { error } = await supabase.from('articles').upsert({
+      title: article.title,
+      slug: article.slug,
+      category: article.category,
+      summary: article.summary,
+      content: article.content,
+      image_url: article.imageUrl,
+      read_time: article.readTime,
+      author: 'West Bridge Network',
+      author_avatar: '/logo.png',
+      is_top_story: article.isTopStory || false,
+      is_breaking: article.isBreaking || false,
+      views: article.views || 1,
+      likes: article.likes || 0,
+      comments_count: article.commentsCount || 0,
+    }, { onConflict: 'slug' });
+
+    if (error) {
+      console.error('Supabase save error:', error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Supabase exception:', e);
+    return false;
+  }
 }
 
 export function saveArticle(article: Article): void {

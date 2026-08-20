@@ -7,7 +7,7 @@ import Header, { CATEGORIES } from '@/components/Header';
 import BreakingTicker from '@/components/BreakingTicker';
 import AdBanner from '@/components/AdBanner';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
-import { getStoredArticles, Article } from '@/lib/newsData';
+import { fetchArticlesFromSupabase, getStoredArticles, Article } from '@/lib/newsData';
 import { 
   Clock, 
   Eye, 
@@ -29,7 +29,15 @@ export default function HomePage() {
   const [visibleCount, setVisibleCount] = useState<number>(6);
 
   useEffect(() => {
+    // Initial quick load from local store
     setArticles(getStoredArticles());
+
+    // Asynchronous load from live Supabase PostgreSQL database
+    fetchArticlesFromSupabase().then((data) => {
+      if (data && data.length > 0) {
+        setArticles(data);
+      }
+    });
   }, []);
 
   const filteredArticles = activeCategory === 'Home' || activeCategory === 'All'
@@ -37,7 +45,7 @@ export default function HomePage() {
     : articles.filter((a) => a.category.toLowerCase() === activeCategory.toLowerCase());
 
   // Dynamic Lead Top Story of the Day (Selected by Admin)
-  const mainLeadStory = articles.find((a) => a.isBreaking) || articles[0];
+  const mainLeadStory = articles.find((a) => a.isTopStory) || articles.find((a) => a.isBreaking) || articles[0];
   const sideSubLeads = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   const regularNews = filteredArticles.filter((a) => a.id !== mainLeadStory?.id);
   const displayedNews = regularNews.slice(0, visibleCount);
