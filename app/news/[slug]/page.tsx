@@ -19,11 +19,12 @@ interface ArticleDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug);
   const siteUrl = 'https://west-bridge-network.vercel.app';
+  const article = await getArticleBySlug(params.slug);
 
   if (!article) {
     return {
+      metadataBase: new URL(siteUrl),
       title: 'Article Removed | West Bridge Network',
       description: 'The requested news report has been removed or is no longer available.',
     };
@@ -31,12 +32,11 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
 
-  let ogImageUrl = article.imageUrl;
-  if (!ogImageUrl || ogImageUrl.startsWith('data:image')) {
-    ogImageUrl = `${siteUrl}/api/og-image?slug=${article.slug}`;
-  }
+  // WhatsApp crawler URL ending in .jpg
+  const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${article.slug}`;
 
   return {
+    metadataBase: new URL(siteUrl),
     title: `${article.title} | West Bridge Network`,
     description: article.summary,
     alternates: {
@@ -108,10 +108,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     );
   }
 
-  let ogImageUrl = article.imageUrl;
-  if (!ogImageUrl || ogImageUrl.startsWith('data:image')) {
-    ogImageUrl = `${siteUrl}/api/og-image?slug=${article.slug}`;
-  }
+  const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${article.slug}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
