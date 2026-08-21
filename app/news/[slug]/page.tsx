@@ -28,9 +28,11 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
 
-  let validImageUrl = article.imageUrl;
-  if (!validImageUrl || validImageUrl.startsWith('data:image')) {
-    validImageUrl = `${siteUrl}/logo.png`;
+  // WhatsApp crawler requires absolute public HTTPS image URL.
+  // If base64 or local upload, proxy via /api/og-image?slug=...
+  let ogImageUrl = article.imageUrl;
+  if (!ogImageUrl || ogImageUrl.startsWith('data:image')) {
+    ogImageUrl = `${siteUrl}/api/og-image?slug=${article.slug}`;
   }
 
   return {
@@ -46,8 +48,8 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       siteName: 'West Bridge Network',
       images: [
         {
-          url: validImageUrl,
-          secureUrl: validImageUrl,
+          url: ogImageUrl,
+          secureUrl: ogImageUrl,
           width: 1200,
           height: 630,
           alt: article.title,
@@ -61,7 +63,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       card: 'summary_large_image',
       title: article.title,
       description: article.summary,
-      images: [validImageUrl],
+      images: [ogImageUrl],
       site: '@WestBridgeNet',
     },
   };
@@ -105,9 +107,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     );
   }
 
-  let validImageUrl = article.imageUrl;
-  if (!validImageUrl || validImageUrl.startsWith('data:image')) {
-    validImageUrl = `${siteUrl}/logo.png`;
+  let ogImageUrl = article.imageUrl;
+  if (!ogImageUrl || ogImageUrl.startsWith('data:image')) {
+    ogImageUrl = `${siteUrl}/api/og-image?slug=${article.slug}`;
   }
 
   return (
@@ -116,8 +118,8 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
       <head>
         <meta property="og:title" content={article.title} />
         <meta property="og:description" content={article.summary} />
-        <meta property="og:image" content={validImageUrl} />
-        <meta property="og:image:secure_url" content={validImageUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/jpeg" />
@@ -126,7 +128,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.title} />
         <meta name="twitter:description" content={article.summary} />
-        <meta name="twitter:image" content={validImageUrl} />
+        <meta name="twitter:image" content={ogImageUrl} />
       </head>
 
       <Header />
