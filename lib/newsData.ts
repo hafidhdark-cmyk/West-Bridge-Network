@@ -144,42 +144,6 @@ The framework establishes an automated matching system that allows commercial ba
     likes: 310,
     commentsCount: 29,
   },
-  {
-    id: 'wbn-007',
-    title: 'Lagos State Unveils 250 Megawatt Solar Energy Power Plant for Industrial Zones',
-    slug: 'lagos-state-unveils-solar-energy-power-plant',
-    category: 'Business',
-    summary: 'A new clean energy grid infrastructure project promises uninterrupted electricity for manufacturing hubs across Lekki and Ikeja industrial corridors.',
-    content: `Lagos State Government has commissioned the first phase of a landmark 250 Megawatt solar power station designed to supply clean energy directly to industrial zones.`,
-    imageUrl: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '6 hours ago',
-    readTime: '4 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 940,
-    likes: 210,
-    commentsCount: 15,
-  },
-  {
-    id: 'wbn-008',
-    title: 'African Union Announces New Free Trade Tariff Reductions for Agriculture & Textiles',
-    slug: 'african-union-free-trade-tariff-reductions',
-    category: 'World',
-    summary: 'The AfCFTA Secretariat has officially launched zero-tariff trade routes across 24 participating African nations for agro-processed food commodities.',
-    content: `Intra-African commerce received a transformative boost as the AfCFTA Secretariat enacted zero-duty tariffs on over 1,500 agricultural and textile products.`,
-    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '7 hours ago',
-    readTime: '5 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 890,
-    likes: 180,
-    commentsCount: 19,
-  },
 ];
 
 export function getStoredArticles(): Article[] {
@@ -280,6 +244,29 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     return true;
   } catch (e) {
     console.error('Supabase exception:', e);
+    return false;
+  }
+}
+
+export async function deleteArticleFromSupabase(idOrSlug: string): Promise<boolean> {
+  // Delete locally
+  const localArticles = getStoredArticles().filter((a) => a.id !== idOrSlug && a.slug !== idOrSlug);
+  saveArticlesToStore(localArticles);
+
+  if (!supabase) return true;
+  try {
+    const { error } = await supabase
+      .from('articles')
+      .delete()
+      .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Supabase delete exception:', e);
     return false;
   }
 }

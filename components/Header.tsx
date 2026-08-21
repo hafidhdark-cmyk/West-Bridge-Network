@@ -4,17 +4,36 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import WhatsAppIcon from './WhatsAppIcon';
-import { Menu, X, Search, ChevronRight } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  Search, 
+  ChevronRight,
+  Compass,
+  Newspaper,
+  Film,
+  Trophy,
+  HeartPulse,
+  Laptop,
+  Rocket,
+  GraduationCap,
+  Briefcase,
+  Globe,
+  MessageSquareText
+} from 'lucide-react';
 
 export const CATEGORIES = [
-  'Home',
-  'Politics',
-  'Business',
-  'World',
-  'Tech',
-  'Sports',
-  'Entertainment',
-  'Opinion',
+  { name: 'Discover', icon: Compass },
+  { name: 'Politics', icon: Newspaper },
+  { name: 'Business', icon: Briefcase },
+  { name: 'Tech', icon: Laptop },
+  { name: 'Sports', icon: Trophy },
+  { name: 'Entertainment', icon: Film },
+  { name: 'Health', icon: HeartPulse },
+  { name: 'Education', icon: GraduationCap },
+  { name: 'Career', icon: Rocket },
+  { name: 'World', icon: Globe },
+  { name: 'Opinion', icon: MessageSquareText },
 ];
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
@@ -27,7 +46,7 @@ interface HeaderProps {
 }
 
 export default function Header({ 
-  activeCategory = 'Home', 
+  activeCategory = 'Discover', 
   onSelectCategory,
   searchQuery = '',
   onSearchChange
@@ -106,7 +125,7 @@ export default function Header({
             <Search className="w-4 h-4 text-wbn-blue flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search news by keyword (e.g. Tinubu, Forex, Tech, ECOWAS, Sports)..."
+              placeholder="Search news by keyword (e.g. Tinubu, Forex, Tech, Health, Education, Sports)..."
               value={searchQuery}
               onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
               className="w-full bg-transparent text-xs sm:text-sm font-semibold text-wbn-navy focus:outline-none placeholder:text-slate-400"
@@ -125,44 +144,52 @@ export default function Header({
 
         {/* Category Navigation Bar (Desktop) */}
         <nav className="hidden lg:flex items-center gap-1 py-2 magazine-rule overflow-x-auto no-scrollbar">
-          {CATEGORIES.map((cat) => {
-            const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+          {CATEGORIES.map((catObj) => {
+            const cat = catObj.name;
+            const Icon = catObj.icon;
+            const isActive = activeCategory.toLowerCase() === cat.toLowerCase() || (activeCategory === 'Home' && cat === 'Discover');
             return (
               <button
                 key={cat}
-                onClick={() => onSelectCategory && onSelectCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                onClick={() => onSelectCategory && onSelectCategory(cat === 'Discover' ? 'Home' : cat)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                   isActive
                     ? 'bg-wbn-blue text-white shadow-sm'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-wbn-navy'
                 }`}
               >
-                {cat}
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{cat}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Intel Region Style Mobile Drawer Navigation */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-6 space-y-4 animate-fade-in">
-          <div className="grid grid-cols-2 gap-2">
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+          <div className="space-y-1 divide-y divide-slate-100">
+            {CATEGORIES.map((catObj) => {
+              const cat = catObj.name;
+              const Icon = catObj.icon;
+              const isActive = activeCategory.toLowerCase() === cat.toLowerCase() || (activeCategory === 'Home' && cat === 'Discover');
               return (
                 <button
                   key={cat}
                   onClick={() => {
-                    if (onSelectCategory) onSelectCategory(cat);
+                    if (onSelectCategory) onSelectCategory(cat === 'Discover' ? 'Home' : cat);
                     setMobileMenuOpen(false);
                   }}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
-                    isActive ? 'bg-wbn-blue text-white' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    isActive ? 'bg-emerald-50 text-emerald-800 border-l-4 border-emerald-600 font-bold' : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span>{cat}</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-700' : 'text-slate-500'}`} />
+                    <span>{cat}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
                 </button>
               );
             })}
@@ -172,7 +199,7 @@ export default function Header({
             href={OFFICIAL_WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-md"
+            className="w-full flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-md mt-4"
           >
             <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
             <span>Join our WhatsApp group chat</span>

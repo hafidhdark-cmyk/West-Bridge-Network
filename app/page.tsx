@@ -46,7 +46,7 @@ export default function HomePage() {
 
   // Filter by Search Query & Category
   const filteredArticles = articles.filter((a) => {
-    const matchesCategory = activeCategory === 'Home' || activeCategory === 'All'
+    const matchesCategory = activeCategory === 'Home' || activeCategory === 'All' || activeCategory === 'Discover'
       ? true
       : a.category.toLowerCase() === activeCategory.toLowerCase();
 
@@ -99,7 +99,7 @@ export default function HomePage() {
         )}
 
         {/* Newspaper Hero Grid */}
-        {activeCategory === 'Home' && !searchQuery && mainLeadStory && (
+        {(activeCategory === 'Home' || activeCategory === 'Discover') && !searchQuery && mainLeadStory && (
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
@@ -253,7 +253,7 @@ export default function HomePage() {
             <div className="flex justify-between items-center magazine-rule-dark pb-2">
               <h2 className="text-base font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2.5 h-5 bg-wbn-blue rounded-full"></span>
-                {searchQuery ? 'Filtered Search Results' : activeCategory === 'Home' ? 'Journalistic News Feed & History Archive' : `${activeCategory} Coverage`}
+                {searchQuery ? 'Filtered Search Results' : (activeCategory === 'Home' || activeCategory === 'Discover') ? 'Journalistic News Feed & History Archive' : `${activeCategory} Coverage`}
               </h2>
               <span className="text-xs font-semibold text-slate-500">
                 Showing {displayedNews.length} of {regularNews.length} Reports
@@ -263,13 +263,16 @@ export default function HomePage() {
             {displayedNews.length === 0 ? (
               <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
                 <Search className="w-8 h-8 text-slate-300 mx-auto" />
-                <h3 className="text-base font-bold text-wbn-navy">No articles found matching &quot;{searchQuery}&quot;</h3>
-                <p className="text-xs text-slate-500">Try searching for keywords like Politics, Business, Tech, ECOWAS, or Sports.</p>
+                <h3 className="text-base font-bold text-wbn-navy">No articles found matching &quot;{searchQuery || activeCategory}&quot;</h3>
+                <p className="text-xs text-slate-500">Try searching for keywords like Politics, Business, Tech, Health, Education, or Sports.</p>
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('Home');
+                  }}
                   className="bg-wbn-blue text-white font-bold text-xs px-4 py-2 rounded-xl mt-2"
                 >
-                  Clear Search Filter
+                  Clear Filter
                 </button>
               </div>
             ) : (
@@ -419,9 +422,9 @@ export default function HomePage() {
             <h4 className="font-bold text-white mb-3 uppercase tracking-wider">Editorial Hubs</h4>
             <ul className="space-y-2">
               {CATEGORIES.slice(1, 6).map((c) => (
-                <li key={c}>
-                  <button onClick={() => setActiveCategory(c)} className="hover:text-white transition-colors">
-                    {c} News
+                <li key={c.name}>
+                  <button onClick={() => setActiveCategory(c.name)} className="hover:text-white transition-colors">
+                    {c.name} News
                   </button>
                 </li>
               ))}

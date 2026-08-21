@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Header from '@/components/Header';
-import { getStoredArticles, saveArticleToSupabase, Article } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Sparkles, Send } from 'lucide-react';
+import Header, { CATEGORIES } from '@/components/Header';
+import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon } from 'lucide-react';
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -14,14 +14,32 @@ export default function AdminPage() {
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isTopStory, setIsTopStory] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     setArticles(getStoredArticles());
+    fetchArticlesFromSupabase().then((data) => {
+      if (data && data.length > 0) setArticles(data);
+    });
   }, []);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImageUrl(result);
+        setImagePreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +71,7 @@ export default function AdminPage() {
       commentsCount: 0,
     };
 
-    const saved = await saveArticleToSupabase(newArticle);
+    await saveArticleToSupabase(newArticle);
     setArticles([newArticle, ...articles]);
     setIsPublishing(false);
     setPublishSuccess(true);
@@ -63,12 +81,21 @@ export default function AdminPage() {
     setSummary('');
     setContent('');
     setImageUrl('');
+    setImagePreview(null);
     setIsTopStory(false);
     setIsBreaking(false);
 
     setTimeout(() => {
       setPublishSuccess(false);
     }, 4000);
+  };
+
+  const handleDelete = async (id: string, slug: string) => {
+    if (!confirm('Are you sure you want to delete this article?')) return;
+    setDeletingId(id);
+    await deleteArticleFromSupabase(id);
+    setArticles(articles.filter((a) => a.id !== id && a.slug !== slug));
+    setDeletingId(null);
   };
 
   return (
@@ -84,7 +111,7 @@ export default function AdminPage() {
               <span>West Bridge Network Editorial Suite</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-editorial-heading">Publisher Admin Studio</h1>
-            <p className="text-slate-300 text-xs">Publish reports directly into PostgreSQL live on Vercel</p>
+            <p className="text-slate-300 text-xs">Publish, upload photos, and manage reports live in Supabase PostgreSQL</p>
           </div>
 
           <Link
@@ -131,7 +158,7 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Category Dropdown */}
+              {/* Category Dropdown (Intel Region Full Category List) */}
               <div className="md:col-span-4 space-y-2">
                 <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
                   Category *
@@ -141,18 +168,16 @@ export default function AdminPage() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 >
-                  <option value="Politics">Politics</option>
-                  <option value="Business">Business</option>
-                  <option value="World">World</option>
-                  <option value="Tech">Tech</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Entertainment">Entertainment</option>
-                  <option value="Opinion">Opinion</option>
+                  {CATEGORIES.filter((c) => c.name !== 'Discover').map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Dynamic Placement Toggles (Top Story & Breaking Marquee) */}
+            {/* Dynamic Placement Toggles */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
               <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white transition-colors">
                 <input
@@ -187,18 +212,48 @@ export default function AdminPage() {
               </label>
             </div>
 
-            {/* Image URL */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                Feature Image URL (Unsplash or Image Link)
+            {/* Direct Image File Upload & Web URL Option */}
+            <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-wbn-blue" />
+                Feature Image (Direct Upload or Web Link)
               </label>
-              <input
-                type="url"
-                placeholder="https://images.unsplash.com/..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                {/* Direct File Input */}
+                <div className="space-y-1">
+                  <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors text-xs font-bold text-wbn-navy shadow-xs">
+                    <Upload className="w-4 h-4 text-wbn-blue" />
+                    <span>Upload Image File from Device</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-[10px] text-slate-400 text-center">Supports PNG, JPG, WEBP photos</p>
+                </div>
+
+                {/* Web Image URL Alternative */}
+                <input
+                  type="url"
+                  placeholder="Or paste image URL (e.g. Unsplash link)"
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    setImagePreview(e.target.value);
+                  }}
+                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                />
+              </div>
+
+              {/* Image Live Thumbnail Preview */}
+              {imagePreview && (
+                <div className="relative h-32 w-48 rounded-xl overflow-hidden border border-slate-300 shadow-xs mt-2">
+                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                </div>
+              )}
             </div>
 
             {/* Summary */}
@@ -248,19 +303,19 @@ export default function AdminPage() {
           </form>
         </div>
 
-        {/* Recently Published Articles List */}
+        {/* Recently Published Articles List & Delete Controls */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
           <h3 className="font-extrabold text-base text-wbn-navy magazine-rule-dark pb-2 flex items-center gap-2">
             <FileText className="w-5 h-5 text-wbn-blue" />
-            Recently Published Articles ({articles.length})
+            Manage Published Articles ({articles.length})
           </h3>
           <div className="space-y-3">
             {articles.map((art) => (
               <div
                 key={art.id}
-                className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs"
+                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs"
               >
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1 min-w-[240px]">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-wbn-cobalt uppercase">
                     <span>{art.category}</span>
                     <span>•</span>
@@ -270,12 +325,25 @@ export default function AdminPage() {
                   </div>
                   <h4 className="font-bold text-wbn-navy text-sm line-clamp-1">{art.title}</h4>
                 </div>
-                <Link
-                  href={`/news/${art.slug}`}
-                  className="bg-white border border-slate-300 hover:bg-slate-100 text-wbn-navy font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap"
-                >
-                  View Article →
-                </Link>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/news/${art.slug}`}
+                    className="bg-white border border-slate-300 hover:bg-slate-100 text-wbn-navy font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap"
+                  >
+                    View Article →
+                  </Link>
+
+                  <button
+                    onClick={() => handleDelete(art.id, art.slug)}
+                    disabled={deletingId === art.id}
+                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5"
+                    title="Delete Article"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>{deletingId === art.id ? 'Deleting...' : 'Delete'}</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
