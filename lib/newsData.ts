@@ -29,130 +29,10 @@ export interface Article {
   commentsList?: CommentItem[];
 }
 
-export const INITIAL_ARTICLES: Article[] = [
-  {
-    id: 'wbn-001',
-    title: 'Tinubu Administration Releases Comprehensive Blueprint on Fuel Subsidy Savings Allocation',
-    slug: 'tinubu-government-gives-breakdown-of-fuel-subsidy-removal-savings',
-    category: 'Politics',
-    summary: 'The Federal Government of Nigeria has unveiled a detailed fiscal roadmap outlining the direct deployment of funds saved from fuel subsidy removal into critical healthcare, education, and road infrastructure projects.',
-    content: `The Federal Government has formally released a transparent breakdown detailing how revenue generated from the removal of the petrol subsidy is being reallocated across the 36 states and the Federal Capital Territory.
-
-According to figures released by the Ministry of Finance and the Revenue Mobilization Allocation and Fiscal Commission (RMAFC), over ₦1.8 trillion has been disbursed directly to state governors for rural infrastructure, security technology upgrades, and agricultural palliatives.
-
-Minister of Information and National Orientation highlighted that the primary objective of the fiscal restructuring is to ensure long-term economic stability and direct capital investments into primary healthcare centers and student loan funds.`,
-    imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '15 mins ago',
-    readTime: '3 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: true,
-    isBreaking: true,
-    views: 1420,
-    likes: 384,
-    commentsCount: 42,
-  },
-  {
-    id: 'wbn-002',
-    title: 'Central Bank of Nigeria Implements New Forex Liquidity Framework for International Traders',
-    slug: 'cbn-implements-new-forex-liquidity-framework',
-    category: 'Business',
-    summary: 'In a bold move to stabilize the Naira and enhance market transparency, the Central Bank of Nigeria has launched a streamlined electronic FX clearing portal for verified commercial importers.',
-    content: `The Central Bank of Nigeria (CBN) has issued new operational guidelines designed to boost liquidity in the official Nigerian Autonomous Foreign Exchange Market (NAFEM).
-
-The framework establishes an automated matching system that allows commercial banks and authorized dealers to settle FX transactions in real-time, eliminating backlogs for manufacturing and raw material importers.`,
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '45 mins ago',
-    readTime: '4 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: true,
-    views: 980,
-    likes: 195,
-    commentsCount: 18,
-  },
-  {
-    id: 'wbn-003',
-    title: 'ECOWAS Summit Resolves to Boost Sub-Regional Trade & Cross-Border Security Synergies',
-    slug: 'ecowas-summit-resolves-sub-regional-trade-and-security',
-    category: 'World',
-    summary: 'Heads of State across West Africa have agreed on a unified joint border patrol protocol and reduced customs tariffs to accelerate regional economic integration.',
-    content: `At the 65th Ordinary Session of the Authority of ECOWAS Heads of State and Government held in Abuja, regional leaders signed a landmark pact aimed at bolstering security cooperation along shared borders.`,
-    imageUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '2 hours ago',
-    readTime: '5 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 850,
-    likes: 142,
-    commentsCount: 12,
-  },
-  {
-    id: 'wbn-004',
-    title: 'Nigerian Tech Hubs Secure $120M in Sovereign Innovation Seed Grants for AI & Fintech',
-    slug: 'nigerian-tech-hubs-secure-120m-sovereign-seed-grants',
-    category: 'Tech',
-    summary: 'The Federal Ministry of Communications and Digital Economy has announced direct grant distributions to 45 tech startups across Lagos, Abuja, and Port Harcourt.',
-    content: `Nigeria’s technology ecosystem has received a major boost following the rollout of the ₦120 Billion National AI & Digital Innovation Fund.`,
-    imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '3 hours ago',
-    readTime: '3 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 1100,
-    likes: 275,
-    commentsCount: 31,
-  },
-  {
-    id: 'wbn-005',
-    title: 'Super Eagles Secure 3-0 Victory in AFCON Qualifier Opener with Outstanding Performance',
-    slug: 'super-eagles-secure-victory-afcon-qualifier',
-    category: 'Sports',
-    summary: 'Nigeria’s national football team delivered a masterclass attacking display to defeat their opponents in a thrilling continental championship match.',
-    content: `The Super Eagles of Nigeria launched their AFCON qualification campaign with a convincing 3-0 triumph before a roaring home crowd. Powerful goals in both halves sealed maximum points.`,
-    imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '4 hours ago',
-    readTime: '3 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 1650,
-    likes: 512,
-    commentsCount: 64,
-  },
-  {
-    id: 'wbn-006',
-    title: 'Nollywood Box Office Records ₦4.2 Billion Annual Revenue Milestone across Global Cinemas',
-    slug: 'nollywood-box-office-records-4-billion-revenue',
-    category: 'Entertainment',
-    summary: 'Nigerian film producers celebrate record theatrical attendance and streaming distribution deals across North America, Europe, and West Africa.',
-    content: `Nigeria's vibrant film industry has shattered previous revenue records, exceeding ₦4.2 Billion in domestic and international box office grosses this fiscal year.`,
-    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: '5 hours ago',
-    readTime: '4 min read',
-    author: 'West Bridge Network',
-    authorAvatar: '/logo.png',
-    isTopStory: false,
-    isBreaking: false,
-    views: 1280,
-    likes: 310,
-    commentsCount: 29,
-  },
-];
-
 export function getStoredArticles(): Article[] {
-  if (typeof window === 'undefined') return INITIAL_ARTICLES;
+  if (typeof window === 'undefined') return [];
   const stored = localStorage.getItem('wbn_articles');
-  if (!stored) {
-    localStorage.setItem('wbn_articles', JSON.stringify(INITIAL_ARTICLES));
-    return INITIAL_ARTICLES;
-  }
+  if (!stored) return [];
   try {
     const parsed = JSON.parse(stored);
     return parsed.map((a: Article) => ({
@@ -161,7 +41,7 @@ export function getStoredArticles(): Article[] {
       authorAvatar: '/logo.png',
     }));
   } catch (e) {
-    return INITIAL_ARTICLES;
+    return [];
   }
 }
 
@@ -176,11 +56,6 @@ export function saveArticlesToStore(articles: Article[]): void {
   }
 }
 
-export function getArticleBySlug(slug: string): Article | undefined {
-  const articles = getStoredArticles();
-  return articles.find((a) => a.slug === slug);
-}
-
 export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   if (!supabase) return getStoredArticles();
   try {
@@ -189,12 +64,13 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       .select('*')
       .order('published_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
+    if (error || !data) {
+      console.error('Supabase fetch error:', error);
       return getStoredArticles();
     }
 
-    return data.map((item: any) => ({
-      id: item.id,
+    const mapped: Article[] = data.map((item: any) => ({
+      id: item.id || item.slug,
       title: item.title,
       slug: item.slug,
       category: item.category,
@@ -211,9 +87,46 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       likes: item.likes || 0,
       commentsCount: item.comments_count || 0,
     }));
+
+    // Update local cache with real Supabase data
+    saveArticlesToStore(mapped);
+    return mapped;
   } catch (e) {
+    console.error('Supabase exception:', e);
     return getStoredArticles();
   }
+}
+
+export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  const local = getStoredArticles().find((a) => a.slug === slug);
+  if (local) return local;
+
+  if (supabase) {
+    try {
+      const { data } = await supabase.from('articles').select('*').eq('slug', slug).single();
+      if (data) {
+        return {
+          id: data.id || data.slug,
+          title: data.title,
+          slug: data.slug,
+          category: data.category,
+          summary: data.summary,
+          content: data.content,
+          imageUrl: data.image_url,
+          publishedAt: data.published_at ? new Date(data.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Just now',
+          readTime: data.read_time || '3 min read',
+          author: 'West Bridge Network',
+          authorAvatar: '/logo.png',
+          isTopStory: data.is_top_story || false,
+          isBreaking: data.is_breaking || false,
+          views: data.views || 1,
+          likes: data.likes || 0,
+          commentsCount: data.comments_count || 0,
+        };
+      }
+    } catch (e) {}
+  }
+  return undefined;
 }
 
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {

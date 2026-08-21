@@ -1,13 +1,11 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
-import WhatsAppIcon from '@/components/WhatsAppIcon';
 import ArticleClientActions from './ArticleClientActions';
 import { getArticleBySlug } from '@/lib/newsData';
-import { Clock, Eye, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
@@ -18,7 +16,7 @@ interface ArticleDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
-  const article = getArticleBySlug(params.slug);
+  const article = await getArticleBySlug(params.slug);
   if (!article) {
     return {
       title: 'West Bridge Network | News Report',
@@ -56,9 +54,9 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   };
 }
 
-export default function ArticleDetailPage({ params }: ArticleDetailPageProps) {
+export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const slug = params?.slug;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     return (
