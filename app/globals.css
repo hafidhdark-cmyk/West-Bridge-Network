@@ -1,30 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 250, 250, 249;
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0F172A;
+    background-color: #FAFAF9;
+  }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: #FAFAF9;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Modern Editorial Headline Typography */
 .font-editorial-heading {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.025em;
+  font-family: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 
-/* Magazine 1px Rule Lines */
+/* Custom Magazine Rule Utilities */
 .magazine-rule {
   border-bottom: 1px solid #E2E8F0;
 }
@@ -33,29 +23,17 @@ body {
   border-bottom: 2px solid #0F172A;
 }
 
-/* Hide Scrollbar for Horizontal Scroll */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* BBC Card Hover Effects */
+.bbc-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #F1F5F9;
-}
-::-webkit-scrollbar-thumb {
-  background: #1E3A8A;
-  border-radius: 4px;
+.bbc-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 }
 
-/* Ticker Marquee Animation */
+/* Marquee Animation */
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
@@ -63,19 +41,19 @@ body {
 
 .animate-marquee {
   display: flex;
-  width: 200%;
-  animation: marquee 25s linear infinite;
+  width: max-content;
+  animation: marquee 35s linear infinite;
 }
 
 .animate-marquee:hover {
   animation-play-state: paused;
 }
 
-/* Card Hover Lift */
-.bbc-card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* Custom Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-.bbc-card-hover:hover {
-  transform: translateY(-3px);
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

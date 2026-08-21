@@ -17,6 +17,8 @@ interface ArticleDetailPageProps {
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug);
+  const siteUrl = 'https://west-bridge-network.vercel.app';
+
   if (!article) {
     return {
       title: 'West Bridge Network | News Report',
@@ -24,12 +26,20 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
     };
   }
 
-  const siteUrl = 'https://west-bridge-network.vercel.app';
   const fullUrl = `${siteUrl}/news/${article.slug}`;
+
+  // Ensure image is a valid absolute HTTPS URL for WhatsApp crawler
+  let validImageUrl = article.imageUrl;
+  if (!validImageUrl || validImageUrl.startsWith('data:image')) {
+    validImageUrl = `${siteUrl}/logo.png`;
+  }
 
   return {
     title: `${article.title} | West Bridge Network`,
     description: article.summary,
+    alternates: {
+      canonical: fullUrl,
+    },
     openGraph: {
       title: article.title,
       description: article.summary,
@@ -37,19 +47,23 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       siteName: 'West Bridge Network',
       images: [
         {
-          url: article.imageUrl,
+          url: validImageUrl,
+          secureUrl: validImageUrl,
           width: 1200,
           height: 630,
           alt: article.title,
+          type: 'image/jpeg',
         },
       ],
+      locale: 'en_US',
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.summary,
-      images: [article.imageUrl],
+      images: [validImageUrl],
+      site: '@WestBridgeNet',
     },
   };
 }
@@ -57,6 +71,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const slug = params?.slug;
   const article = await getArticleBySlug(slug);
+  const siteUrl = 'https://west-bridge-network.vercel.app';
 
   if (!article) {
     return (
@@ -73,22 +88,44 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     );
   }
 
+  let validImageUrl = article.imageUrl;
+  if (!validImageUrl || validImageUrl.startsWith('data:image')) {
+    validImageUrl = `${siteUrl}/logo.png`;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
+      {/* Explicit Raw HTML Meta Tags for WhatsApp Crawler */}
+      <head>
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.summary} />
+        <meta property="og:image" content={validImageUrl} />
+        <meta property="og:image:secure_url" content={validImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:url" content={`${siteUrl}/news/${article.slug}`} />
+        <meta property="og:site_name" content="West Bridge Network" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={article.title} />
+        <meta name="twitter:description" content={article.summary} />
+        <meta name="twitter:image" content={validImageUrl} />
+      </head>
+
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold mb-6">
-          <Link href="/" className="hover:text-wbn-blue">DISCOVER</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-wbn-blue uppercase">{article.category}</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-slate-400 line-clamp-1 max-w-xs">{article.title}</span>
+        <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold mb-6 overflow-x-auto no-scrollbar">
+          <Link href="/" className="hover:text-wbn-blue flex-shrink-0">DISCOVER</Link>
+          <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="text-wbn-blue uppercase flex-shrink-0">{article.category}</span>
+          <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="text-slate-400 line-clamp-1">{article.title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
-          {/* Article Interactive Client Component (Likes, Comments, Sharing) */}
+          {/* Article Interactive Client Component */}
           <ArticleClientActions article={article} officialWhatsAppLink={OFFICIAL_WHATSAPP_LINK} />
 
           {/* Right Sidebar (Col 3) */}
