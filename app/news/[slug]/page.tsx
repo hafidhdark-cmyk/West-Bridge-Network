@@ -7,6 +7,9 @@ import ArticleClientActions from './ArticleClientActions';
 import { getArticleBySlug } from '@/lib/newsData';
 import { ChevronRight, FileX } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 interface ArticleDetailPageProps {
@@ -28,8 +31,6 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
 
-  // WhatsApp crawler requires absolute public HTTPS image URL.
-  // If base64 or local upload, proxy via /api/og-image?slug=...
   let ogImageUrl = article.imageUrl;
   if (!ogImageUrl || ogImageUrl.startsWith('data:image')) {
     ogImageUrl = `${siteUrl}/api/og-image?slug=${article.slug}`;

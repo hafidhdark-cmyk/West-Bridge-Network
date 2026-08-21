@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getArticleBySlug } from '@/lib/newsData';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get('slug');
@@ -32,7 +35,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'Content-Type': mimeType,
             'Content-Length': buffer.length.toString(),
-            'Cache-Control': 'public, max-age=31536000, immutable',
+            'Cache-Control': 'no-store, max-age=0',
           },
         });
       }
