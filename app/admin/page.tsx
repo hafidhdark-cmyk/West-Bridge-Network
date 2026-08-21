@@ -4,8 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon } from 'lucide-react';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, Share2 } from 'lucide-react';
+
+const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -98,6 +101,16 @@ export default function AdminPage() {
     setDeletingId(null);
   };
 
+  const handleShareToWhatsApp = (article: Article) => {
+    const siteUrl = 'https://west-bridge-network.vercel.app';
+    const articleUrl = `${siteUrl}/news/${article.slug}`;
+
+    const formattedMessage = `${article.title}\n${articleUrl}\n\n---\n⚡ Join our WhatsApp group chat for faster updates and videos; simply click on this link [${OFFICIAL_WHATSAPP_LINK}] and follow.`;
+
+    const encoded = encodeURIComponent(formattedMessage);
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-wbn-bg">
       <Header />
@@ -111,7 +124,7 @@ export default function AdminPage() {
               <span>West Bridge Network Editorial Suite</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-editorial-heading">Publisher Admin Studio</h1>
-            <p className="text-slate-300 text-xs">Publish, upload photos, and manage reports live in Supabase PostgreSQL</p>
+            <p className="text-slate-300 text-xs">Publish, upload photos, share to WhatsApp, and manage reports live in Supabase PostgreSQL</p>
           </div>
 
           <Link
@@ -158,7 +171,7 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Category Dropdown (Intel Region Full Category List) */}
+              {/* Category Dropdown */}
               <div className="md:col-span-4 space-y-2">
                 <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
                   Category *
@@ -303,11 +316,11 @@ export default function AdminPage() {
           </form>
         </div>
 
-        {/* Recently Published Articles List & Delete Controls */}
+        {/* Recently Published Articles List & WhatsApp Share Controls */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
           <h3 className="font-extrabold text-base text-wbn-navy magazine-rule-dark pb-2 flex items-center gap-2">
             <FileText className="w-5 h-5 text-wbn-blue" />
-            Manage Published Articles ({articles.length})
+            Manage & Share Published Articles ({articles.length})
           </h3>
           <div className="space-y-3">
             {articles.map((art) => (
@@ -326,12 +339,22 @@ export default function AdminPage() {
                   <h4 className="font-bold text-wbn-navy text-sm line-clamp-1">{art.title}</h4>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* 1-Click WhatsApp Share Button with Intel Region Format */}
+                  <button
+                    onClick={() => handleShareToWhatsApp(art)}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                    title="Share directly to WhatsApp with headline & group link"
+                  >
+                    <WhatsAppIcon className="w-3.5 h-3.5 text-white fill-current" />
+                    <span>Share to WA 📲</span>
+                  </button>
+
                   <Link
                     href={`/news/${art.slug}`}
                     className="bg-white border border-slate-300 hover:bg-slate-100 text-wbn-navy font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap"
                   >
-                    View Article →
+                    View →
                   </Link>
 
                   <button
