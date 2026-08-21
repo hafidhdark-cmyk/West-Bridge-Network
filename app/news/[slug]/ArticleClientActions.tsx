@@ -53,16 +53,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     }
   };
 
-  const handleShareToWhatsApp = () => {
-    const siteUrl = 'https://west-bridge-network.vercel.app';
-    const articleUrl = `${siteUrl}/news/${article.slug}`;
-
-    const formattedMessage = `${article.title}\n${articleUrl}\n\n---\n⚡ Join our WhatsApp group chat for faster updates and videos; simply click on this link [${officialWhatsAppLink}] and follow.`;
-
-    const encoded = encodeURIComponent(formattedMessage);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
-  };
-
   return (
     <>
       {/* Floating Left Social Action Dock */}
@@ -94,7 +84,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             <span className="text-[9px] text-slate-400">Comments</span>
           </a>
 
-          {/* Share Button */}
+          {/* Copy Link Share Button */}
           <button
             onClick={handleShare}
             className="group flex flex-col items-center text-slate-600 hover:text-wbn-cobalt transition-colors"
@@ -106,17 +96,19 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             <span className="text-[10px] font-bold mt-1">{copiedLink ? 'Copied!' : 'Share'}</span>
           </button>
 
-          {/* Direct WhatsApp Share Button */}
-          <button
-            onClick={handleShareToWhatsApp}
+          {/* Join WhatsApp Group Chat Button */}
+          <a
+            href={officialWhatsAppLink}
+            target="_blank"
+            rel="noopener noreferrer"
             className="group flex flex-col items-center text-emerald-700 hover:text-emerald-800 transition-colors pt-2 border-t border-slate-100"
-            title="Share story directly to WhatsApp"
+            title="Join our WhatsApp group chat"
           >
             <div className="p-2.5 rounded-xl bg-emerald-700 text-white shadow-sm hover:bg-emerald-800 transition-colors">
               <WhatsAppIcon className="w-5 h-5 text-white fill-current" />
             </div>
-            <span className="text-[9px] font-bold text-center mt-1">WA Share</span>
-          </button>
+            <span className="text-[9px] font-bold text-center mt-1">WA Group</span>
+          </a>
         </div>
       </div>
 
@@ -186,13 +178,15 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             </button>
           </div>
 
-          <button
-            onClick={handleShareToWhatsApp}
+          <a
+            href={officialWhatsAppLink}
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow"
           >
             <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
-            <span>Share to WhatsApp 📲</span>
-          </button>
+            <span>Join our WhatsApp group chat</span>
+          </a>
         </div>
 
         {/* Reader Comments Section */}
