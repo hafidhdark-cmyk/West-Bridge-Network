@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
 import ArticleClientActions from './ArticleClientActions';
 import { getArticleBySlug } from '@/lib/newsData';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, FileX } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
@@ -21,14 +21,13 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
   if (!article) {
     return {
-      title: 'West Bridge Network | News Report',
-      description: 'Premier digital news platform committed to speed and accuracy across West Africa.',
+      title: 'Article Removed | West Bridge Network',
+      description: 'The requested news report has been removed or is no longer available.',
     };
   }
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
 
-  // Ensure image is a valid absolute HTTPS URL for WhatsApp crawler
   let validImageUrl = article.imageUrl;
   if (!validImageUrl || validImageUrl.startsWith('data:image')) {
     validImageUrl = `${siteUrl}/logo.png`;
@@ -77,13 +76,31 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     return (
       <div className="min-h-screen flex flex-col bg-wbn-bg">
         <Header />
-        <div className="flex-1 max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-          <h2 className="text-2xl font-bold text-wbn-navy">Article Loading / Not Found</h2>
-          <p className="text-slate-600 text-sm">The news report you requested could not be located.</p>
-          <Link href="/" className="inline-block bg-wbn-blue text-white font-bold px-6 py-2.5 rounded-xl">
-            ← Return to Headlines
+        <main className="flex-1 max-w-4xl mx-auto px-4 py-24 text-center space-y-6">
+          <div className="w-16 h-16 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center mx-auto">
+            <FileX className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-wbn-navy font-editorial-heading">
+              Article Has Been Removed
+            </h1>
+            <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
+              The news report you are looking for has been deleted by the editorial team or is no longer available on West Bridge Network.
+            </p>
+          </div>
+          <Link
+            href="/"
+            className="inline-block bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-xs px-8 py-3.5 rounded-2xl shadow-md transition-all"
+          >
+            ← Return to Live Headlines & Discover
           </Link>
-        </div>
+        </main>
+
+        <footer className="bg-wbn-navy text-slate-300 text-xs py-10 border-t border-slate-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500">
+            © 2026 West Bridge Network (WBN). All rights reserved.
+          </div>
+        </footer>
       </div>
     );
   }

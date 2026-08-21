@@ -66,7 +66,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
 
     if (error || !data) {
       console.error('Supabase fetch error:', error);
-      return getStoredArticles();
+      return [];
     }
 
     const mapped: Article[] = data.map((item: any) => ({
@@ -93,18 +93,16 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
     return mapped;
   } catch (e) {
     console.error('Supabase exception:', e);
-    return getStoredArticles();
+    return [];
   }
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
-  const local = getStoredArticles().find((a) => a.slug === slug);
-  if (local) return local;
-
+  // Query Supabase directly FIRST if available
   if (supabase) {
     try {
-      const { data } = await supabase.from('articles').select('*').eq('slug', slug).single();
-      if (data) {
+      const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).single();
+      if (data && !error) {
         return {
           id: data.id || data.slug,
           title: data.title,
@@ -124,13 +122,21 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           commentsCount: data.comments_count || 0,
         };
       }
-    } catch (e) {}
+      if (error) {
+        // Article does not exist in Supabase (deleted)
+        return undefined;
+      }
+    } catch (e) {
+      return undefined;
+    }
   }
-  return undefined;
+
+  // Fallback to local storage if Supabase is offline
+  return getStoredArticles().find((a) => a.slug === slug);
 }
 
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
-  saveArticle(article); // Save locally as well
+  saveArticle(article);
   if (!supabase) return true;
   try {
     const { error } = await supabase.from('articles').upsert({
