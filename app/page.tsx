@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Header, { CATEGORIES } from '@/components/Header';
+import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
+import Footer from '@/components/Footer';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { fetchArticlesFromSupabase, getStoredArticles, Article } from '@/lib/newsData';
 import { 
@@ -18,7 +19,6 @@ import {
   RotateCcw,
   Sparkles,
   Radio,
-  Lock,
   Search
 } from 'lucide-react';
 
@@ -396,68 +396,8 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-wbn-navy text-slate-300 text-xs py-12 mt-16 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="relative w-8 h-8">
-                <Image src="/logo.png" alt="WBN" fill className="object-contain" />
-              </div>
-              <span className="font-black text-white text-lg font-editorial-heading">west bridge network</span>
-            </div>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              West Bridge Network (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-3 uppercase tracking-wider">Editorial Hubs</h4>
-            <ul className="space-y-2">
-              {CATEGORIES.slice(1, 6).map((c) => (
-                <li key={c.name}>
-                  <button onClick={() => setActiveCategory(c.name)} className="hover:text-white transition-colors">
-                    {c.name} News
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-3 uppercase tracking-wider">Legal & Contact</h4>
-            <ul className="space-y-2 text-slate-400">
-              <li><a href="#" className="hover:text-white">Editorial Guidelines</a></li>
-              <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white">Advertise With Us</a></li>
-              <li><a href="#" className="hover:text-white">Contact News Bureau</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider">WhatsApp Group Chat</h4>
-            <p className="text-slate-400">Get breaking headlines directly on WhatsApp.</p>
-            <a
-              href={OFFICIAL_WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow flex items-center gap-2 justify-center"
-            >
-              <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
-              <span>Join our WhatsApp group chat</span>
-            </a>
-          </div>
-        </div>
-
-        {/* Bottom Footer Bar with Secret Publisher Admin Studio Link */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 flex flex-wrap justify-between items-center gap-4 text-slate-500">
-          <div>© 2026 West Bridge Network (WBN). All rights reserved.</div>
-          <Link href="/admin" className="text-slate-600 hover:text-slate-400 transition-colors flex items-center gap-1 text-[11px]">
-            <Lock className="w-3 h-3" />
-            <span>Publisher Admin Studio</span>
-          </Link>
-        </div>
-      </footer>
+      {/* Reusable Interactive Footer */}
+      <Footer onSelectCategory={setActiveCategory} />
     </div>
   );
 }

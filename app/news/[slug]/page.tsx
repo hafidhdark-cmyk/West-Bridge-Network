@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
+import Footer from '@/components/Footer';
 import ArticleClientActions from './ArticleClientActions';
 import { getArticleBySlug } from '@/lib/newsData';
 import { ChevronRight, FileX } from 'lucide-react';
@@ -31,8 +32,6 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   }
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
-
-  // WhatsApp crawler URL ending in .jpg
   const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${article.slug}`;
 
   return {
@@ -99,11 +98,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
           </Link>
         </main>
 
-        <footer className="bg-wbn-navy text-slate-300 text-xs py-10 border-t border-slate-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500">
-            © 2026 West Bridge Network (WBN). All rights reserved.
-          </div>
-        </footer>
+        <Footer />
       </div>
     );
   }
@@ -153,11 +148,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
       </main>
 
       {/* Footer */}
-      <footer className="bg-wbn-navy text-slate-300 text-xs py-10 mt-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500">
-          © 2026 West Bridge Network (WBN). All rights reserved.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
