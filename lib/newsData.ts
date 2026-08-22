@@ -159,6 +159,30 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
   return getStoredArticles().find((a) => a.slug === slug);
 }
 
+export async function incrementArticleViews(slug: string): Promise<number> {
+  if (!supabase) return 1;
+  try {
+    const { data } = await supabase.from('articles').select('views').eq('slug', slug).single();
+    const currentViews = data?.views || 0;
+    const newViews = currentViews + 1;
+
+    await supabase.from('articles').update({ views: newViews }).eq('slug', slug);
+
+    // Update local cache
+    const articles = getStoredArticles();
+    const art = articles.find((a) => a.slug === slug);
+    if (art) {
+      art.views = newViews;
+      saveArticlesToStore(articles);
+    }
+
+    return newViews;
+  } catch (e) {
+    console.error('Failed to increment views:', e);
+    return 1;
+  }
+}
+
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
   saveArticle(article);
   if (!supabase) return true;

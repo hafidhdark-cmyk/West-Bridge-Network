@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
-import { Article, CommentItem } from '@/lib/newsData';
+import { Article, CommentItem, incrementArticleViews } from '@/lib/newsData';
 import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check } from 'lucide-react';
 
 interface ArticleClientActionsProps {
@@ -13,11 +13,21 @@ interface ArticleClientActionsProps {
 
 export default function ArticleClientActions({ article, officialWhatsAppLink }: ArticleClientActionsProps) {
   const [likesCount, setLikesCount] = useState<number>(article.likes);
+  const [viewsCount, setViewsCount] = useState<number>(article.views);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItem[]>(article.commentsList || []);
   const [newCommentName, setNewCommentName] = useState<string>('');
   const [newCommentText, setNewCommentText] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Automatically increment view count in Supabase PostgreSQL when a reader opens this page
+    incrementArticleViews(article.slug).then((updatedViews) => {
+      if (updatedViews > viewsCount) {
+        setViewsCount(updatedViews);
+      }
+    });
+  }, [article.slug]);
 
   const handleLike = () => {
     if (!hasLiked) {
@@ -137,8 +147,8 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4 text-wbn-slate" /> {article.readTime}
               </span>
-              <span className="flex items-center gap-1">
-                <Eye className="w-4 h-4 text-wbn-slate" /> {article.views} Reads
+              <span className="flex items-center gap-1 font-bold text-wbn-navy">
+                <Eye className="w-4 h-4 text-wbn-blue" /> {viewsCount} Reads
               </span>
             </div>
           </div>
