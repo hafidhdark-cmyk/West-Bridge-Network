@@ -31,9 +31,9 @@ export interface Article {
 }
 
 export function formatTimeAgo(dateInput: string | Date | undefined): string {
-  if (!dateInput) return 'Recently';
+  if (!dateInput) return 'Just now';
   const date = new Date(dateInput);
-  if (isNaN(date.getTime())) return typeof dateInput === 'string' ? dateInput : 'Recently';
+  if (isNaN(date.getTime())) return typeof dateInput === 'string' ? dateInput : 'Just now';
 
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -111,7 +111,7 @@ export async function fetchCommentsForArticle(slug: string): Promise<CommentItem
         .eq('slug', slug)
         .single();
 
-      if (artData && artData.comments_list && Array.isArray(artData.comments_list)) {
+      if (artData && artData.comments_list && Array.isArray(artData.comments_list) && artData.comments_list.length > 0) {
         const remoteList: CommentItem[] = artData.comments_list;
         saveStoredComments(slug, remoteList);
         return remoteList;
@@ -144,7 +144,6 @@ export async function fetchCommentsForArticle(slug: string): Promise<CommentItem
 }
 
 export async function saveCommentToSupabase(slug: string, comment: CommentItem): Promise<boolean> {
-  // Update local storage
   const currentLocal = getStoredComments(slug);
   const updatedComments = [comment, ...currentLocal];
   saveStoredComments(slug, updatedComments);
@@ -183,44 +182,57 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
 }
 
 export async function fetchArticlesFromSupabase(): Promise<Article[]> {
-  if (!supabase) return getStoredArticles();
+  const stored = getStoredArticles();
+  if (!supabase) return stored;
+
   try {
     const { data, error } = await supabase
       .from('articles')
       .select('*')
-      .order('published_at', { ascending: false });
+      .order('published_at', { ascending: false, nullsFirst: false });
 
-    if (error || !data) {
-      console.error('Supabase fetch error:', error);
-      return [];
+    if (error || !data || data.length === 0) {
+      console.error('Supabase fetch error or empty:', error);
+      return stored;
     }
 
-    const mapped: Article[] = data.map((item: any) => ({
-      id: item.id || item.slug,
-      title: item.title,
-      slug: item.slug,
-      category: item.category,
-      summary: item.summary,
-      content: item.content,
-      imageUrl: item.image_url,
-      createdAtRaw: item.published_at,
-      publishedAt: formatTimeAgo(item.published_at),
-      readTime: item.read_time || '3 min read',
-      author: 'West Bridge Network',
-      authorAvatar: '/logo.png',
-      isTopStory: item.is_top_story || false,
-      isBreaking: item.is_breaking || false,
-      views: item.views || 1,
-      likes: item.likes || 0,
-      commentsCount: item.comments_count || 0,
-      commentsList: item.comments_list || [],
-    }));
+    const mapped: Article[] = data.map((item: any) => {
+      const rawDate = item.published_at || item.created_at || new Date().toISOString();
+      return {
+        id: item.id || item.slug,
+        title: item.title,
+        slug: item.slug,
+        category: item.category,
+        summary: item.summary,
+        content: item.content,
+        imageUrl: item.image_url,
+        createdAtRaw: rawDate,
+        publishedAt: formatTimeAgo(rawDate),
+        readTime: item.read_time || '3 min read',
+        author: 'West Bridge Network',
+        authorAvatar: '/logo.png',
+        isTopStory: item.is_top_story || false,
+        isBreaking: item.is_breaking || false,
+        views: item.views || 1,
+        likes: item.likes || 0,
+        commentsCount: item.comments_count || 0,
+        commentsList: item.comments_list || [],
+      };
+    });
 
-    saveArticlesToStore(mapped);
-    return mapped;
+    // Merge with any local offline articles if missing remotely
+    const merged = [...mapped];
+    stored.forEach((sa) => {
+      if (!merged.some((m) => m.slug === sa.slug || m.id === sa.id)) {
+        merged.push(sa);
+      }
+    });
+
+    saveArticlesToStore(merged);
+    return merged;
   } catch (e) {
     console.error('Supabase exception:', e);
-    return [];
+    return stored;
   }
 }
 
@@ -229,6 +241,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     try {
       const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).single();
       if (data && !error) {
+        const rawDate = data.published_at || data.created_at || new Date().toISOString();
         return {
           id: data.id || data.slug,
           title: data.title,
@@ -237,8 +250,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           summary: data.summary,
           content: data.content,
           imageUrl: data.image_url,
-          createdAtRaw: data.published_at,
-          publishedAt: formatTimeAgo(data.published_at),
+          createdAtRaw: rawDate,
+          publishedAt: formatTimeAgo(rawDate),
           readTime: data.read_time || '3 min read',
           author: 'West Bridge Network',
           authorAvatar: '/logo.png',
@@ -250,11 +263,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           commentsList: data.comments_list || [],
         };
       }
-      if (error) {
-        return undefined;
-      }
     } catch (e) {
-      return undefined;
+      // Fallback below
     }
   }
 
@@ -305,6 +315,8 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       await supabase.from('articles').update({ is_top_story: false }).neq('slug', article.slug);
     }
 
+    const isoDate = article.createdAtRaw || new Date().toISOString();
+
     const { error } = await supabase.from('articles').upsert({
       title: article.title,
       slug: article.slug,
@@ -312,6 +324,7 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       summary: article.summary,
       content: article.content,
       image_url: article.imageUrl,
+      published_at: isoDate,
       read_time: article.readTime,
       author: 'West Bridge Network',
       author_avatar: '/logo.png',
