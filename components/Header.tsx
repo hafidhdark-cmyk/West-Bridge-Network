@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import BreakingTicker from '@/components/BreakingTicker';
+import AuthModal from '@/components/AuthModal';
 import { Article } from '@/lib/newsData';
+import { getLocalUser, signOutUser, UserProfile } from '@/lib/auth';
 import {
   Compass,
   Flag,
@@ -23,6 +25,9 @@ import {
   Menu,
   X,
   Lock,
+  User,
+  LogOut,
+  UserCheck,
 } from 'lucide-react';
 
 export interface CategoryItem {
@@ -62,15 +67,28 @@ export default function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const pathname = usePathname();
 
   const isMainHomepage = pathname === '/';
+
+  useEffect(() => {
+    setCurrentUser(getLocalUser());
+  }, []);
 
   const handleCategoryClick = (categoryName: string) => {
     if (onSelectCategory) {
       onSelectCategory(categoryName);
     }
     setMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setCurrentUser(null);
+    setUserDropdownOpen(false);
   };
 
   return (
@@ -135,6 +153,46 @@ export default function Header({
                 </button>
               )}
             </div>
+          )}
+
+          {/* User Sign In / Reader Account Section */}
+          {currentUser ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3 py-1.5 rounded-xl transition-all text-xs font-bold shadow-xs"
+              >
+                <div className="w-5 h-5 bg-wbn-blue rounded-full flex items-center justify-center text-[10px] text-white">
+                  {currentUser.fullName.charAt(0).toUpperCase()}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate">{currentUser.fullName}</span>
+                <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+              </button>
+
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 animate-fade-in text-xs">
+                  <div className="px-4 py-2 border-b border-slate-100 space-y-0.5">
+                    <span className="block font-bold text-wbn-navy truncate">{currentUser.fullName}</span>
+                    <span className="block text-[10px] text-slate-400 truncate">{currentUser.email}</span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
           )}
 
           {/* Admin Studio Secret Shortcut */}
@@ -226,6 +284,13 @@ export default function Header({
           </div>
         </div>
       )}
+
+      {/* Sign In & Sign Up Auth Modal Dialog */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthSuccess={(user) => setCurrentUser(user)}
+      />
     </header>
   );
 }
