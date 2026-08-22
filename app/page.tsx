@@ -25,12 +25,19 @@ import {
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 export default function HomePage() {
-  const [articles, setArticles] = useState<Article[]>(() => getStoredArticles());
+  const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Home');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(6);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    const stored = getStoredArticles();
+    if (stored && stored.length > 0) {
+      setArticles(stored);
+    }
+
     fetchArticlesFromSupabase().then((data) => {
       if (data && data.length > 0) {
         setArticles(data);
@@ -69,7 +76,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAF9]">
+    <div className="min-h-screen flex flex-col bg-[#FAFAF9]" suppressHydrationWarning>
       <Header 
         activeCategory={activeCategory} 
         onSelectCategory={(cat) => {
@@ -97,7 +104,7 @@ export default function HomePage() {
         )}
 
         {/* Newspaper Hero Grid (Visible ONLY when an article has isTopStory === true) */}
-        {isHomeView && !searchQuery && mainLeadStory && (
+        {isMounted && isHomeView && !searchQuery && mainLeadStory && (
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">

@@ -20,8 +20,11 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [newCommentName, setNewCommentName] = useState<string>('');
   const [newCommentText, setNewCommentText] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsMounted(true);
+
     // Initial load of comments from article props
     if (article.commentsList && article.commentsList.length > 0) {
       setComments(article.commentsList);
@@ -143,7 +146,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       </div>
 
       {/* Main Article Content Area */}
-      <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
+      <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6" suppressHydrationWarning>
         {/* Title & Metadata */}
         <div className="space-y-4">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-wbn-navy leading-tight font-editorial-heading">
@@ -159,7 +162,9 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               <div>
                 <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Reported by:</span>
                 <h4 className="font-extrabold text-wbn-navy text-sm">West Bridge Network</h4>
-                <p className="text-[11px] text-wbn-slate font-medium">{article.publishedAt}</p>
+                <p className="text-[11px] text-wbn-slate font-medium" suppressHydrationWarning>
+                  {isMounted ? formatTimeAgo(article.createdAtRaw || article.publishedAt) : article.publishedAt}
+                </p>
               </div>
             </div>
 
@@ -285,7 +290,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
                         <UserCheck className="w-3 h-3 text-emerald-600" />
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-medium">
+                    <span className="text-[10px] text-slate-400 font-medium" suppressHydrationWarning>
                       {formatTimeAgo(c.createdAt)}
                     </span>
                   </div>
