@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
 import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article, formatTimeAgo } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon } from 'lucide-react';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, ImagePlus } from 'lucide-react';
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -38,6 +38,27 @@ export default function AdminPage() {
         setImagePreview(result);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInsertBodyImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        const imageMarkdown = `\n\n![In-article image](${result})\n\n`;
+        setContent((prev) => prev + imageMarkdown);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInsertBodyImageUrl = () => {
+    const url = prompt('Paste Image URL (e.g. Unsplash link):');
+    if (url && url.trim()) {
+      const imageMarkdown = `\n\n![In-article image](${url.trim()})\n\n`;
+      setContent((prev) => prev + imageMarkdown);
     }
   };
 
@@ -219,7 +240,7 @@ export default function AdminPage() {
             <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
               <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-wbn-blue" />
-                Feature Image (Direct Upload or Web Link)
+                Main Cover Feature Image (Header Banner)
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
@@ -227,7 +248,7 @@ export default function AdminPage() {
                 <div className="space-y-1">
                   <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors text-xs font-bold text-wbn-navy shadow-xs">
                     <Upload className="w-4 h-4 text-wbn-blue" />
-                    <span>Upload Image File from Device</span>
+                    <span>Upload Cover Image from Device</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -273,14 +294,40 @@ export default function AdminPage() {
               />
             </div>
 
-            {/* Main Content Body */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                Full Article Content Body *
-              </label>
+            {/* Main Content Body + Inline Image Inserter Buttons */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                  Full Article Content Body *
+                </label>
+
+                {/* Helper Buttons to Insert In-Article Body Images */}
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-wbn-blue rounded-xl cursor-pointer text-xs font-bold transition-colors">
+                    <ImagePlus className="w-3.5 h-3.5" />
+                    <span>Upload Image into Article Body</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInsertBodyImage}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleInsertBodyImageUrl}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-300"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Insert Image URL</span>
+                  </button>
+                </div>
+              </div>
+
               <textarea
-                rows={10}
-                placeholder="Write the complete news article text here..."
+                rows={12}
+                placeholder="Write the complete news article text here... Click 'Upload Image into Article Body' above to insert multiple photos anywhere inside the story!"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full p-4 bg-slate-50 border border-slate-300 rounded-2xl text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-wbn-blue"
