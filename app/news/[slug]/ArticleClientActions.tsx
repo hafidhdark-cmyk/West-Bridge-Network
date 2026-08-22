@@ -5,9 +5,9 @@ import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
 import AuthModal from '@/components/AuthModal';
-import { Article, CommentItem, incrementArticleViews } from '@/lib/newsData';
+import { Article, CommentItem, incrementArticleViews, formatTimeAgo } from '@/lib/newsData';
 import { getLocalUser, UserProfile } from '@/lib/auth';
-import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, Lock, UserPlus } from 'lucide-react';
 
 interface ArticleClientActionsProps {
   article: Article;
@@ -19,7 +19,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [viewsCount, setViewsCount] = useState<number>(article.views);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItem[]>(article.commentsList || []);
-  const [newCommentName, setNewCommentName] = useState<string>('');
   const [newCommentText, setNewCommentText] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -28,9 +27,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   useEffect(() => {
     const usr = getLocalUser();
     setCurrentUser(usr);
-    if (usr && usr.fullName) {
-      setNewCommentName(usr.fullName);
-    }
 
     incrementArticleViews(article.slug).then((updatedViews) => {
       if (updatedViews > viewsCount) {
@@ -40,6 +36,11 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   }, [article.slug]);
 
   const handleLike = () => {
+    if (!currentUser) {
+      setAuthModalOpen(true);
+      return;
+    }
+
     if (!hasLiked) {
       setLikesCount((prev) => prev + 1);
       setHasLiked(true);
@@ -51,16 +52,19 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
 
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return;
+    if (!currentUser) {
+      setAuthModalOpen(true);
+      return;
+    }
 
-    const authorName = currentUser ? currentUser.fullName : (newCommentName.trim() || 'Verified Reader');
+    if (!newCommentText.trim()) return;
 
     const newC: CommentItem = {
       id: Date.now().toString(),
-      name: authorName,
-      avatar: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+      name: currentUser.fullName,
+      avatar: currentUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
       text: newCommentText.trim(),
-      createdAt: 'Just now',
+      createdAt: new Date().toISOString(),
     };
 
     setComments([newC, ...comments]);
@@ -228,53 +232,54 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               <MessageSquare className="w-5 h-5 text-wbn-blue" />
               Reader Discussion ({comments.length})
             </h3>
-
-            {!currentUser && (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="text-xs text-wbn-blue font-bold hover:underline"
-              >
-                Sign In to Post as Verified Reader →
-              </button>
-            )}
           </div>
 
-          {/* Add Comment Form */}
-          <form onSubmit={handleAddComment} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {currentUser ? (
-                <div className="flex items-center gap-2 text-xs font-bold text-wbn-navy bg-white px-3 py-2 rounded-xl border border-slate-200">
-                  <UserCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Posting as: <strong>{currentUser.fullName}</strong></span>
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  placeholder="Your Name (Optional)"
-                  value={newCommentName}
-                  onChange={(e) => setNewCommentName(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                />
-              )}
+          {/* Unauthenticated User Prompt Banner */}
+          {!currentUser ? (
+            <div className="bg-blue-50 border border-blue-200 p-6 rounded-2xl text-center space-y-3 shadow-xs">
+              <div className="w-12 h-12 bg-wbn-blue text-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <Lock className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-extrabold text-base text-wbn-navy">Join the Reader Discussion</h4>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                  Please create a free account or sign in to share your thoughts on this story.
+                </p>
+              </div>
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Create Free Account / Sign In</span>
+              </button>
             </div>
-            <textarea
-              rows={3}
-              placeholder="Share your thoughts on this story..."
-              value={newCommentText}
-              onChange={(e) => setNewCommentText(e.target.value)}
-              className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-              required
-            ></textarea>
-            <button
-              type="submit"
-              className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Post Comment</span>
-            </button>
-          </form>
+          ) : (
+            /* Add Comment Form for Authenticated Readers */
+            <form onSubmit={handleAddComment} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-wbn-navy bg-white px-3.5 py-2 rounded-xl border border-slate-200">
+                <UserCheck className="w-4 h-4 text-emerald-600" />
+                <span>Commenting as: <strong>{currentUser.fullName}</strong></span>
+              </div>
+              <textarea
+                rows={3}
+                placeholder="Share your thoughts on this story..."
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                required
+              ></textarea>
+              <button
+                type="submit"
+                className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Post Comment</span>
+              </button>
+            </form>
+          )}
 
-          {/* Comments List */}
+          {/* Comments List with Dynamic Time Ago */}
           <div className="space-y-4">
             {comments.map((c) => (
               <div key={c.id} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
@@ -288,7 +293,9 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
                       <UserCheck className="w-3 h-3 text-emerald-600" />
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-medium">{c.createdAt}</span>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    {formatTimeAgo(c.createdAt)}
+                  </span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed pl-9">{c.text}</p>
               </div>
@@ -302,7 +309,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={(usr) => {
           setCurrentUser(usr);
-          setNewCommentName(usr.fullName);
         }}
       />
     </>
