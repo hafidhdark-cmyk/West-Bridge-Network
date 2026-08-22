@@ -22,7 +22,6 @@ import {
   Search,
   Menu,
   X,
-  Lock,
 } from 'lucide-react';
 
 export interface CategoryItem {
@@ -136,15 +135,6 @@ export default function Header({
               )}
             </div>
           )}
-
-          {/* Admin Studio Secret Shortcut */}
-          <Link
-            href="/admin"
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition-colors"
-            title="Publisher Admin Studio"
-          >
-            <Lock className="w-4 h-4" />
-          </Link>
 
           {/* Mobile Navigation Drawer Toggle */}
           <button
