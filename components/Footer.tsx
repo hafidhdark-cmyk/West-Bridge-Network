@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { CATEGORIES } from '@/components/Header';
-import { Lock, Mail, ShieldCheck, FileText, HelpCircle, X } from 'lucide-react';
+import { Lock, ShieldCheck, FileText, HelpCircle, X } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
+const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20Network,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
 
 interface FooterProps {
   onSelectCategory?: (category: string) => void;
@@ -97,11 +98,13 @@ export default function Footer({ onSelectCategory }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="mailto:ads@westbridgenetwork.com?subject=Corporate%20Advertising%20Inquiry%20-%20WBN"
-                  className="hover:text-white transition-colors hover:underline flex items-center gap-1.5"
+                  href={ADVERTISE_WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors hover:underline flex items-center gap-1.5 text-emerald-400 font-bold"
                 >
-                  <Mail className="w-3.5 h-3.5 text-wbn-blue" />
-                  <span>Advertise With Us</span>
+                  <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-400 fill-current" />
+                  <span>Advertise With Us (WhatsApp)</span>
                 </a>
               </li>
               <li>

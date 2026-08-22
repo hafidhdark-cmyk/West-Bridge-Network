@@ -2,6 +2,9 @@
 
 import React, { useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
+
+const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20Network,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
 
 interface AdBannerProps {
   slotType?: 'header' | 'inline' | 'sidebar' | 'footer' | 'article-inline';
@@ -49,7 +52,7 @@ export default function AdBanner({
     );
   }
 
-  // Clean Native Sponsored Ad Placement (No Mention of Monetization)
+  // Clean Native Sponsored Ad Placement Linking to WhatsApp 08140097546
   return (
     <div className={`w-full rounded-2xl border border-slate-200 p-5 transition-all text-center bg-white text-slate-800 shadow-xs flex flex-col items-center justify-between gap-3 ${
       slotType === 'sidebar' ? 'min-h-[240px]' : 'min-h-[100px]'
@@ -68,10 +71,13 @@ export default function AdBanner({
       </div>
 
       <a
-        href="mailto:ads@westbridgenetwork.com?subject=Inquiry%20About%20Corporate%20Partnership"
-        className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-[11px] px-4 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+        href={ADVERTISE_WHATSAPP_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] px-4 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
       >
-        <span>Partner With Us</span>
+        <WhatsAppIcon className="w-3.5 h-3.5 text-white fill-current" />
+        <span>Advertise With Us</span>
         <ExternalLink className="w-3 h-3" />
       </a>
     </div>
