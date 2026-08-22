@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
-import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
+import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article, formatTimeAgo } from '@/lib/newsData';
 import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon } from 'lucide-react';
 
 export default function AdminPage() {
@@ -52,6 +52,8 @@ export default function AdminPage() {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
 
+    const nowIso = new Date().toISOString();
+
     const newArticle: Article = {
       id: `wbn-${Date.now()}`,
       title: title.trim(),
@@ -60,6 +62,7 @@ export default function AdminPage() {
       summary: summary.trim() || title.trim(),
       content: content.trim(),
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
+      createdAtRaw: nowIso,
       publishedAt: 'Just now',
       readTime: `${Math.max(2, Math.ceil(content.split(' ').length / 200))} min read`,
       author: 'West Bridge Network',
@@ -319,7 +322,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2 text-[10px] font-bold text-wbn-cobalt uppercase">
                     <span>{art.category}</span>
                     <span>•</span>
-                    <span className="text-slate-400">{art.publishedAt}</span>
+                    <span className="text-slate-400">{formatTimeAgo(art.createdAtRaw || art.publishedAt)}</span>
                     {art.isTopStory && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[9px]">Top Story</span>}
                     {art.isBreaking && <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[9px]">Breaking</span>}
                   </div>

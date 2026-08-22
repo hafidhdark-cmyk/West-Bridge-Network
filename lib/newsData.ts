@@ -17,6 +17,7 @@ export interface Article {
   content: string;
   imageUrl: string;
   publishedAt: string;
+  createdAtRaw?: string;
   readTime: string;
   author: string;
   authorAvatar: string;
@@ -29,6 +30,30 @@ export interface Article {
   commentsList?: CommentItem[];
 }
 
+export function formatTimeAgo(dateInput: string | Date | undefined): string {
+  if (!dateInput) return 'Recently';
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return typeof dateInput === 'string' ? dateInput : 'Recently';
+
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 0) return 'Just now';
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years === 1 ? '' : 's'} ago`;
+}
+
 export function getStoredArticles(): Article[] {
   if (typeof window === 'undefined') return [];
   const stored = localStorage.getItem('wbn_articles');
@@ -37,6 +62,7 @@ export function getStoredArticles(): Article[] {
     const parsed = JSON.parse(stored);
     return parsed.map((a: Article) => ({
       ...a,
+      publishedAt: formatTimeAgo(a.createdAtRaw || a.publishedAt),
       author: 'West Bridge Network',
       authorAvatar: '/logo.png',
     }));
@@ -77,7 +103,8 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       summary: item.summary,
       content: item.content,
       imageUrl: item.image_url,
-      publishedAt: item.published_at ? new Date(item.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Just now',
+      createdAtRaw: item.published_at,
+      publishedAt: formatTimeAgo(item.published_at),
       readTime: item.read_time || '3 min read',
       author: 'West Bridge Network',
       authorAvatar: '/logo.png',
@@ -88,7 +115,6 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       commentsCount: item.comments_count || 0,
     }));
 
-    // Update local cache with real Supabase data
     saveArticlesToStore(mapped);
     return mapped;
   } catch (e) {
@@ -98,7 +124,6 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
-  // Query Supabase directly FIRST if available
   if (supabase) {
     try {
       const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).single();
@@ -111,7 +136,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           summary: data.summary,
           content: data.content,
           imageUrl: data.image_url,
-          publishedAt: data.published_at ? new Date(data.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Just now',
+          createdAtRaw: data.published_at,
+          publishedAt: formatTimeAgo(data.published_at),
           readTime: data.read_time || '3 min read',
           author: 'West Bridge Network',
           authorAvatar: '/logo.png',
@@ -123,7 +149,6 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
         };
       }
       if (error) {
-        // Article does not exist in Supabase (deleted)
         return undefined;
       }
     } catch (e) {
@@ -131,7 +156,6 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     }
   }
 
-  // Fallback to local storage if Supabase is offline
   return getStoredArticles().find((a) => a.slug === slug);
 }
 
@@ -168,7 +192,6 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
 }
 
 export async function deleteArticleFromSupabase(idOrSlug: string): Promise<boolean> {
-  // Delete locally
   const localArticles = getStoredArticles().filter((a) => a.id !== idOrSlug && a.slug !== idOrSlug);
   saveArticlesToStore(localArticles);
 
