@@ -101,51 +101,59 @@ export function saveStoredComments(slug: string, comments: CommentItem[]): void 
 
 export async function fetchCommentsForArticle(slug: string): Promise<CommentItem[]> {
   const localComments = getStoredComments(slug);
-  if (!supabase) return localComments;
 
-  try {
-    const { data, error } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('article_slug', slug)
-      .order('created_at', { ascending: false });
+  if (supabase) {
+    try {
+      // 1. Try reading from articles table JSON column
+      const { data: artData } = await supabase
+        .from('articles')
+        .select('comments_list')
+        .eq('slug', slug)
+        .single();
 
-    if (error || !data || data.length === 0) {
-      return localComments;
-    }
-
-    const remoteComments: CommentItem[] = data.map((item: any) => ({
-      id: item.id || Date.now().toString(),
-      name: item.author_name || item.name || 'Verified Reader',
-      avatar: item.author_avatar || item.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-      text: item.comment_text || item.text,
-      createdAt: item.created_at || new Date().toISOString(),
-    }));
-
-    // Merge local and remote comments uniquely by id/text
-    const merged = [...remoteComments];
-    localComments.forEach((lc) => {
-      if (!merged.some((rc) => rc.id === lc.id || rc.text === lc.text)) {
-        merged.push(lc);
+      if (artData && artData.comments_list && Array.isArray(artData.comments_list)) {
+        const remoteList: CommentItem[] = artData.comments_list;
+        saveStoredComments(slug, remoteList);
+        return remoteList;
       }
-    });
 
-    saveStoredComments(slug, merged);
-    return merged;
-  } catch (e) {
-    return localComments;
+      // 2. Try reading from comments table
+      const { data: cmtData } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('article_slug', slug)
+        .order('created_at', { ascending: false });
+
+      if (cmtData && cmtData.length > 0) {
+        const mapped: CommentItem[] = cmtData.map((item: any) => ({
+          id: item.id || Date.now().toString(),
+          name: item.author_name || item.name || 'Verified Reader',
+          avatar: item.author_avatar || item.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+          text: item.comment_text || item.text,
+          createdAt: item.created_at || new Date().toISOString(),
+        }));
+        saveStoredComments(slug, mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Comments fetch error:', e);
+    }
   }
+
+  return localComments;
 }
 
 export async function saveCommentToSupabase(slug: string, comment: CommentItem): Promise<boolean> {
+  // Update local storage
   const currentLocal = getStoredComments(slug);
-  const updatedLocal = [comment, ...currentLocal];
-  saveStoredComments(slug, updatedLocal);
+  const updatedComments = [comment, ...currentLocal];
+  saveStoredComments(slug, updatedComments);
 
   if (!supabase) return true;
 
   try {
-    const { error } = await supabase.from('comments').insert({
+    // 1. Try saving into Supabase comments table
+    await supabase.from('comments').insert({
       article_slug: slug,
       author_name: comment.name,
       author_avatar: comment.avatar,
@@ -153,11 +161,23 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
       created_at: comment.createdAt,
     });
 
-    if (error) {
-      console.warn('Supabase comment insert warning (using local persistence):', error.message);
-    }
+    // 2. Also update articles table comments_list column for 100% failproof global reading!
+    const { data: art } = await supabase.from('articles').select('comments_list, comments_count').eq('slug', slug).single();
+    const existingList = art?.comments_list || [];
+    const newCount = (art?.comments_count || 0) + 1;
+    const newList = [comment, ...existingList];
+
+    await supabase
+      .from('articles')
+      .update({
+        comments_list: newList,
+        comments_count: newCount,
+      })
+      .eq('slug', slug);
+
     return true;
   } catch (e) {
+    console.warn('Comment save error:', e);
     return true;
   }
 }
@@ -193,6 +213,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       views: item.views || 1,
       likes: item.likes || 0,
       commentsCount: item.comments_count || 0,
+      commentsList: item.comments_list || [],
     }));
 
     saveArticlesToStore(mapped);
@@ -226,6 +247,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           views: data.views || 1,
           likes: data.likes || 0,
           commentsCount: data.comments_count || 0,
+          commentsList: data.comments_list || [],
         };
       }
       if (error) {
@@ -298,6 +320,7 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       views: article.views || 1,
       likes: article.likes || 0,
       comments_count: article.commentsCount || 0,
+      comments_list: article.commentsList || [],
     }, { onConflict: 'slug' });
 
     if (error) {

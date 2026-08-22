@@ -29,7 +29,12 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     const usr = getLocalUser();
     setCurrentUser(usr);
 
-    // Fetch persisted comments for this article slug
+    // Initial load of comments from article props
+    if (article.commentsList && article.commentsList.length > 0) {
+      setComments(article.commentsList);
+    }
+
+    // Fetch latest global comments from Supabase
     fetchCommentsForArticle(article.slug).then((fetched) => {
       if (fetched && fetched.length > 0) {
         setComments(fetched);
@@ -41,7 +46,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
         setViewsCount(updatedViews);
       }
     });
-  }, [article.slug]);
+  }, [article.slug, article.commentsList]);
 
   const handleLike = () => {
     if (!currentUser) {
@@ -259,7 +264,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           </a>
         </div>
 
-        {/* Reader Comments Section */}
+        {/* Reader Discussion Section */}
         <section id="comments" className="pt-8 border-t border-slate-100 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="font-extrabold text-lg text-wbn-navy flex items-center gap-2">
