@@ -10,19 +10,18 @@ interface BreakingTickerProps {
 }
 
 export default function BreakingTicker({ articles }: BreakingTickerProps) {
-  if (!articles || articles.length === 0) {
+  // Reverted back to explicit breaking news check as requested
+  const breakingNews = articles.filter((a) => a.isBreaking);
+
+  if (!breakingNews || breakingNews.length === 0) {
     return null;
   }
 
-  // Priority: Articles explicitly marked as Breaking -> Fallback: Latest 5 published articles
-  const explicitBreaking = articles.filter((a) => a.isBreaking);
-  const displayItems = explicitBreaking.length > 0 ? explicitBreaking : articles.slice(0, 5);
-
   // Duplicate list to create a seamless infinite marquee loop
-  const tickerItems = [...displayItems, ...displayItems, ...displayItems];
+  const tickerItems = [...breakingNews, ...breakingNews, ...breakingNews];
 
   return (
-    <div className="sticky top-[56px] lg:top-[92px] z-40 bg-wbn-navy text-white border-b border-slate-800 shadow-md">
+    <div className="w-full bg-slate-950 text-white border-t border-slate-800/80 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center h-10 px-4 sm:px-6 lg:px-8">
         {/* Fixed Left Badge */}
         <div className="flex items-center gap-1.5 bg-wbn-blue text-white px-3 py-1 rounded-lg font-black text-[11px] uppercase tracking-wider flex-shrink-0 z-10 shadow-sm mr-3">

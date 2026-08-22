@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
-import BreakingTicker from '@/components/BreakingTicker';
 import AdBanner from '@/components/AdBanner';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { fetchArticlesFromSupabase, getStoredArticles, Article } from '@/lib/newsData';
@@ -54,10 +53,7 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  // STRICT SINGLE TOP STORY CONSTRAINT: Only articles explicitly checked as Top Story sit in this hero div!
   const mainLeadStory = articles.find((a) => a.isTopStory === true);
-  
-  // Latest News (Sub-lead reports for side widget excluding main top story)
   const sideLatestNews = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   
   const isHomeView = activeCategory === 'Home' || activeCategory === 'Discover' || activeCategory === 'All';
@@ -82,8 +78,8 @@ export default function HomePage() {
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        articles={articles}
       />
-      <BreakingTicker articles={articles} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import BreakingTicker from '@/components/BreakingTicker';
+import { Article } from '@/lib/newsData';
 import {
   Compass,
   Landmark,
@@ -46,6 +48,7 @@ interface HeaderProps {
   onSelectCategory?: (category: string) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  articles?: Article[];
 }
 
 export default function Header({
@@ -53,12 +56,12 @@ export default function Header({
   onSelectCategory,
   searchQuery = '',
   onSearchChange,
+  articles = [],
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const pathname = usePathname();
 
-  // Search button displays ONLY on the main homepage ('/')
   const isMainHomepage = pathname === '/';
 
   const handleCategoryClick = (categoryName: string) => {
@@ -178,6 +181,9 @@ export default function Header({
           </ul>
         </div>
       </nav>
+
+      {/* Breaking News Ticker Rendered Directly Inside Header for 100% Perfect Positioning */}
+      {articles && articles.length > 0 && <BreakingTicker articles={articles} />}
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
