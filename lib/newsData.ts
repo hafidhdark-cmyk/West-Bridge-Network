@@ -82,6 +82,86 @@ export function saveArticlesToStore(articles: Article[]): void {
   }
 }
 
+export function getStoredComments(slug: string): CommentItem[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(`wbn_comments_${slug}`);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveStoredComments(slug: string, comments: CommentItem[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(`wbn_comments_${slug}`, JSON.stringify(comments));
+  }
+}
+
+export async function fetchCommentsForArticle(slug: string): Promise<CommentItem[]> {
+  const localComments = getStoredComments(slug);
+  if (!supabase) return localComments;
+
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('article_slug', slug)
+      .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return localComments;
+    }
+
+    const remoteComments: CommentItem[] = data.map((item: any) => ({
+      id: item.id || Date.now().toString(),
+      name: item.author_name || item.name || 'Verified Reader',
+      avatar: item.author_avatar || item.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+      text: item.comment_text || item.text,
+      createdAt: item.created_at || new Date().toISOString(),
+    }));
+
+    // Merge local and remote comments uniquely by id/text
+    const merged = [...remoteComments];
+    localComments.forEach((lc) => {
+      if (!merged.some((rc) => rc.id === lc.id || rc.text === lc.text)) {
+        merged.push(lc);
+      }
+    });
+
+    saveStoredComments(slug, merged);
+    return merged;
+  } catch (e) {
+    return localComments;
+  }
+}
+
+export async function saveCommentToSupabase(slug: string, comment: CommentItem): Promise<boolean> {
+  const currentLocal = getStoredComments(slug);
+  const updatedLocal = [comment, ...currentLocal];
+  saveStoredComments(slug, updatedLocal);
+
+  if (!supabase) return true;
+
+  try {
+    const { error } = await supabase.from('comments').insert({
+      article_slug: slug,
+      author_name: comment.name,
+      author_avatar: comment.avatar,
+      comment_text: comment.text,
+      created_at: comment.createdAt,
+    });
+
+    if (error) {
+      console.warn('Supabase comment insert warning (using local persistence):', error.message);
+    }
+    return true;
+  } catch (e) {
+    return true;
+  }
+}
+
 export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   if (!supabase) return getStoredArticles();
   try {

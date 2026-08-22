@@ -5,7 +5,7 @@ import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
 import AuthModal from '@/components/AuthModal';
-import { Article, CommentItem, incrementArticleViews, formatTimeAgo } from '@/lib/newsData';
+import { Article, CommentItem, incrementArticleViews, formatTimeAgo, fetchCommentsForArticle, saveCommentToSupabase } from '@/lib/newsData';
 import { getLocalUser, UserProfile } from '@/lib/auth';
 import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, UserPlus } from 'lucide-react';
 
@@ -29,6 +29,13 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     const usr = getLocalUser();
     setCurrentUser(usr);
 
+    // Fetch persisted comments for this article slug
+    fetchCommentsForArticle(article.slug).then((fetched) => {
+      if (fetched && fetched.length > 0) {
+        setComments(fetched);
+      }
+    });
+
     incrementArticleViews(article.slug).then((updatedViews) => {
       if (updatedViews > viewsCount) {
         setViewsCount(updatedViews);
@@ -51,44 +58,50 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
 
     if (!currentUser) {
-      // Save comment text in pending state and open registration modal
+      // Save comment text in pending state and prompt registration
       setPendingCommentText(newCommentText.trim());
       setAuthModalOpen(true);
       return;
     }
 
     const newC: CommentItem = {
-      id: Date.now().toString(),
+      id: `cmt-${Date.now()}`,
       name: currentUser.fullName,
       avatar: currentUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
       text: newCommentText.trim(),
       createdAt: new Date().toISOString(),
     };
 
-    setComments([newC, ...comments]);
+    const updated = [newC, ...comments];
+    setComments(updated);
     setNewCommentText('');
     setPendingCommentText(null);
+
+    await saveCommentToSupabase(article.slug, newC);
   };
 
-  const handleAuthSuccess = (usr: UserProfile) => {
+  const handleAuthSuccess = async (usr: UserProfile) => {
     setCurrentUser(usr);
     // If there was a pending comment, post it automatically under the new account!
     if (pendingCommentText) {
       const newC: CommentItem = {
-        id: Date.now().toString(),
+        id: `cmt-${Date.now()}`,
         name: usr.fullName,
         avatar: usr.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
         text: pendingCommentText,
         createdAt: new Date().toISOString(),
       };
-      setComments([newC, ...comments]);
+      const updated = [newC, ...comments];
+      setComments(updated);
       setNewCommentText('');
       setPendingCommentText(null);
+
+      await saveCommentToSupabase(article.slug, newC);
     }
   };
 
