@@ -3,40 +3,43 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import WhatsAppIcon from './WhatsAppIcon';
-import { 
-  Menu, 
-  X, 
-  Search, 
-  ChevronRight,
+import { usePathname } from 'next/navigation';
+import {
   Compass,
-  Newspaper,
-  Film,
-  Trophy,
-  HeartPulse,
-  Laptop,
-  Rocket,
-  GraduationCap,
+  Landmark,
   Briefcase,
+  Cpu,
+  Trophy,
+  Film,
+  HeartPulse,
+  GraduationCap,
+  Briefcase as CareerIcon,
   Globe,
-  MessageSquareText
+  MessageSquareQuote,
+  Search,
+  Menu,
+  X,
+  Lock,
 } from 'lucide-react';
 
-export const CATEGORIES = [
+export interface CategoryItem {
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export const CATEGORIES: CategoryItem[] = [
   { name: 'Discover', icon: Compass },
-  { name: 'Politics', icon: Newspaper },
+  { name: 'Politics', icon: Landmark },
   { name: 'Business', icon: Briefcase },
-  { name: 'Tech', icon: Laptop },
+  { name: 'Tech', icon: Cpu },
   { name: 'Sports', icon: Trophy },
   { name: 'Entertainment', icon: Film },
   { name: 'Health', icon: HeartPulse },
   { name: 'Education', icon: GraduationCap },
-  { name: 'Career', icon: Rocket },
+  { name: 'Career', icon: CareerIcon },
   { name: 'World', icon: Globe },
-  { name: 'Opinion', icon: MessageSquareText },
+  { name: 'Opinion', icon: MessageSquareQuote },
 ];
-
-const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 interface HeaderProps {
   activeCategory?: string;
@@ -45,165 +48,174 @@ interface HeaderProps {
   onSearchChange?: (query: string) => void;
 }
 
-export default function Header({ 
-  activeCategory = 'Discover', 
+export default function Header({
+  activeCategory = 'Discover',
   onSelectCategory,
   searchQuery = '',
-  onSearchChange
+  onSearchChange,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const pathname = usePathname();
+
+  // Search button displays ONLY on the main homepage ('/')
+  const isMainHomepage = pathname === '/';
+
+  const handleCategoryClick = (categoryName: string) => {
+    if (onSelectCategory) {
+      onSelectCategory(categoryName);
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-      {/* Main Header Nav */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          
-          {/* Mobile Hamburger Button */}
-          <div className="flex items-center lg:hidden">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-wbn-navy hover:bg-slate-100 transition-colors"
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          {/* Clean Official Logo */}
-          <div className="flex-1 lg:flex-none flex justify-center lg:justify-start">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
-                <Image
-                  src="/logo.png"
-                  alt="West Bridge Network"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="font-extrabold text-base sm:text-lg text-wbn-navy tracking-tight group-hover:text-wbn-blue transition-colors">
-                  West Bridge Network
-                </span>
-                <span className="text-[10px] sm:text-[11px] font-bold text-wbn-slate tracking-wider mt-0.5">
-                  Journalistic Integrity & Speed
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Right Action Bar */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className={`p-2.5 rounded-xl transition-colors ${
-                searchOpen ? 'bg-wbn-blue text-white' : 'text-wbn-navy hover:bg-slate-100'
-              }`}
-              title="Search News Archives"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Official WhatsApp Group Chat Button */}
-            <a
-              href={OFFICIAL_WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md"
-            >
-              <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
-              <span>Join our WhatsApp group chat</span>
-            </a>
-          </div>
-        </div>
-
-        {/* Live Search Bar Dropdown */}
-        {searchOpen && (
-          <div className="py-3 px-4 magazine-rule bg-slate-50 border-t border-slate-200 animate-fade-in flex items-center gap-3">
-            <Search className="w-4 h-4 text-wbn-blue flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Search news by keyword (e.g. Tinubu, Forex, Tech, Health, Education, Sports)..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-wbn-navy focus:outline-none placeholder:text-slate-400"
-              autoFocus
+    <header className="sticky top-0 z-50 bg-wbn-navy text-white shadow-md border-b border-slate-800">
+      {/* Top Utility Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        {/* Brand Logo & Text */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform group-hover:scale-105">
+            <Image
+              src="/logo.png"
+              alt="West Bridge Network Logo"
+              fill
+              className="object-contain"
+              priority
             />
-            {searchQuery && (
-              <button
-                onClick={() => onSearchChange && onSearchChange('')}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600"
-              >
-                Clear
-              </button>
-            )}
           </div>
-        )}
+          <div className="flex flex-col">
+            <span className="font-extrabold text-base sm:text-xl text-white font-editorial-heading leading-tight tracking-tight">
+              west bridge network
+            </span>
+            <span className="text-[10px] text-wbn-cobalt font-bold tracking-widest uppercase">
+              West Africa Bureau
+            </span>
+          </div>
+        </Link>
 
-        {/* Category Navigation Bar (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-1 py-2 magazine-rule overflow-x-auto no-scrollbar">
-          {CATEGORIES.map((catObj) => {
-            const cat = catObj.name;
-            const Icon = catObj.icon;
-            const isActive = activeCategory.toLowerCase() === cat.toLowerCase() || (activeCategory === 'Home' && cat === 'Discover');
-            return (
-              <button
-                key={cat}
-                onClick={() => onSelectCategory && onSelectCategory(cat === 'Discover' ? 'Home' : cat)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                  isActive
-                    ? 'bg-wbn-blue text-white shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-wbn-navy'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{cat}</span>
-              </button>
-            );
-          })}
-        </nav>
+        {/* Right Header Actions */}
+        <div className="flex items-center gap-3">
+          {/* Search Button (ONLY VISIBLE ON MAIN HOMEPAGE '/') */}
+          {isMainHomepage && (
+            <div className="relative">
+              {showSearchInput ? (
+                <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs">
+                  <Search className="w-3.5 h-3.5 text-slate-400 mr-2 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search news stories..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                    className="bg-transparent text-white focus:outline-none w-36 sm:w-48 text-xs font-medium"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      setShowSearchInput(false);
+                      if (onSearchChange) onSearchChange('');
+                    }}
+                    className="text-slate-400 hover:text-white ml-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowSearchInput(true)}
+                  className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-bold"
+                  title="Search news articles"
+                >
+                  <Search className="w-4 h-4 text-wbn-blue" />
+                  <span className="hidden sm:inline">Search</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Admin Studio Secret Shortcut */}
+          <Link
+            href="/admin"
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition-colors"
+            title="Publisher Admin Studio"
+          >
+            <Lock className="w-4 h-4" />
+          </Link>
+
+          {/* Mobile Navigation Drawer Toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
-      {/* Intel Region Style Mobile Drawer Navigation */}
+      {/* Desktop Categories Navigation Bar */}
+      <nav className="hidden lg:block bg-slate-900 border-t border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ul className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
+            {CATEGORIES.map((cat) => {
+              const IconComp = cat.icon;
+              const isActive = activeCategory.toLowerCase() === cat.name.toLowerCase();
+              return (
+                <li key={cat.name}>
+                  <button
+                    onClick={() => handleCategoryClick(cat.name)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-wbn-blue text-white shadow-sm'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-wbn-cobalt'}`} />
+                    <span>{cat.name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
+
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-6 space-y-4 animate-fade-in">
-          <div className="space-y-1 divide-y divide-slate-100">
-            {CATEGORIES.map((catObj) => {
-              const cat = catObj.name;
-              const Icon = catObj.icon;
-              const isActive = activeCategory.toLowerCase() === cat.toLowerCase() || (activeCategory === 'Home' && cat === 'Discover');
+        <div className="lg:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 animate-fade-in">
+          {/* Mobile Search Input (ONLY ON HOMEPAGE) */}
+          {isMainHomepage && (
+            <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+              <Search className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder="Search headlines..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                className="bg-transparent text-white focus:outline-none w-full text-xs font-medium"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            {CATEGORIES.map((cat) => {
+              const IconComp = cat.icon;
+              const isActive = activeCategory.toLowerCase() === cat.name.toLowerCase();
               return (
                 <button
-                  key={cat}
-                  onClick={() => {
-                    if (onSelectCategory) onSelectCategory(cat === 'Discover' ? 'Home' : cat);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    isActive ? 'bg-emerald-50 text-emerald-800 border-l-4 border-emerald-600 font-bold' : 'text-slate-700 hover:bg-slate-50'
+                  key={cat.name}
+                  onClick={() => handleCategoryClick(cat.name)}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                    isActive
+                      ? 'bg-wbn-blue text-white'
+                      : 'bg-slate-800/60 text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-700' : 'text-slate-500'}`} />
-                    <span>{cat}</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                  <IconComp className="w-4 h-4 text-wbn-cobalt" />
+                  <span>{cat.name}</span>
                 </button>
               );
             })}
           </div>
-
-          <a
-            href={OFFICIAL_WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-md mt-4"
-          >
-            <WhatsAppIcon className="w-4 h-4 text-white fill-current" />
-            <span>Join our WhatsApp group chat</span>
-          </a>
         </div>
       )}
     </header>
