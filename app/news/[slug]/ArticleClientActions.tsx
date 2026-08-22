@@ -4,10 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
-import AuthModal from '@/components/AuthModal';
 import { Article, CommentItem, incrementArticleViews, formatTimeAgo, fetchCommentsForArticle, saveCommentToSupabase } from '@/lib/newsData';
-import { getLocalUser, UserProfile } from '@/lib/auth';
-import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, UserPlus } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck } from 'lucide-react';
 
 interface ArticleClientActionsProps {
   article: Article;
@@ -19,16 +17,11 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [viewsCount, setViewsCount] = useState<number>(article.views);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItem[]>(article.commentsList || []);
+  const [newCommentName, setNewCommentName] = useState<string>('');
   const [newCommentText, setNewCommentText] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
-  const [pendingCommentText, setPendingCommentText] = useState<string | null>(null);
 
   useEffect(() => {
-    const usr = getLocalUser();
-    setCurrentUser(usr);
-
     // Initial load of comments from article props
     if (article.commentsList && article.commentsList.length > 0) {
       setComments(article.commentsList);
@@ -49,11 +42,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   }, [article.slug, article.commentsList]);
 
   const handleLike = () => {
-    if (!currentUser) {
-      setAuthModalOpen(true);
-      return;
-    }
-
     if (!hasLiked) {
       setLikesCount((prev) => prev + 1);
       setHasLiked(true);
@@ -67,17 +55,12 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     e.preventDefault();
     if (!newCommentText.trim()) return;
 
-    if (!currentUser) {
-      // Save comment text in pending state and prompt registration
-      setPendingCommentText(newCommentText.trim());
-      setAuthModalOpen(true);
-      return;
-    }
+    const authorName = newCommentName.trim() || 'Verified Reader';
 
     const newC: CommentItem = {
       id: `cmt-${Date.now()}`,
-      name: currentUser.fullName,
-      avatar: currentUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+      name: authorName,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authorName)}`,
       text: newCommentText.trim(),
       createdAt: new Date().toISOString(),
     };
@@ -85,29 +68,9 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     const updated = [newC, ...comments];
     setComments(updated);
     setNewCommentText('');
-    setPendingCommentText(null);
+    setNewCommentName('');
 
     await saveCommentToSupabase(article.slug, newC);
-  };
-
-  const handleAuthSuccess = async (usr: UserProfile) => {
-    setCurrentUser(usr);
-    // If there was a pending comment, post it automatically under the new account!
-    if (pendingCommentText) {
-      const newC: CommentItem = {
-        id: `cmt-${Date.now()}`,
-        name: usr.fullName,
-        avatar: usr.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-        text: pendingCommentText,
-        createdAt: new Date().toISOString(),
-      };
-      const updated = [newC, ...comments];
-      setComments(updated);
-      setNewCommentText('');
-      setPendingCommentText(null);
-
-      await saveCommentToSupabase(article.slug, newC);
-    }
   };
 
   const handleShare = () => {
@@ -271,29 +234,19 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               <MessageSquare className="w-5 h-5 text-wbn-blue" />
               Reader Discussion ({comments.length})
             </h3>
-            {!currentUser && (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="text-xs font-extrabold text-wbn-blue hover:underline flex items-center gap-1"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Create Account to Post</span>
-              </button>
-            )}
           </div>
 
-          {/* Interactive Comment Input Box (Available to EVERYONE) */}
+          {/* Direct Clean Comment Input Box */}
           <form onSubmit={handleAddComment} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-            {currentUser ? (
-              <div className="flex items-center gap-2 text-xs font-bold text-wbn-navy bg-white px-3.5 py-2 rounded-xl border border-slate-200">
-                <UserCheck className="w-4 h-4 text-emerald-600" />
-                <span>Commenting as: <strong>{currentUser.fullName}</strong></span>
-              </div>
-            ) : (
-              <div className="bg-blue-50 border border-blue-200 text-blue-900 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-between">
-                <span>Type your comment below — you&apos;ll be prompted to quickly log in or create a free account to post!</span>
-              </div>
-            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Your Name (Optional)"
+                value={newCommentName}
+                onChange={(e) => setNewCommentName(e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+              />
+            </div>
 
             <textarea
               rows={3}
@@ -309,7 +262,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>{currentUser ? 'Post Comment' : 'Post Comment (Create Account)'}</span>
+              <span>Post Comment</span>
             </button>
           </form>
 
@@ -343,13 +296,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           </div>
         </section>
       </div>
-
-      {/* Auth Dialog Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-      />
     </>
   );
 }
