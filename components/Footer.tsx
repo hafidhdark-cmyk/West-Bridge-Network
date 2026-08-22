@@ -104,7 +104,7 @@ export default function Footer({ onSelectCategory }: FooterProps) {
                   className="hover:text-white transition-colors hover:underline flex items-center gap-1.5 text-emerald-400 font-bold"
                 >
                   <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-400 fill-current" />
-                  <span>Advertise With Us (WhatsApp)</span>
+                  <span>Advertise With Us</span>
                 </a>
               </li>
               <li>
