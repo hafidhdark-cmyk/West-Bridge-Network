@@ -161,39 +161,19 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
         </div>
 
-        {/* Main Article Text Body with Support for Multiple In-Article Body Images */}
+        {/* Main Article Text Body */}
         <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base space-y-4">
-          {paragraphs.map((paragraph, i) => {
-            const imageMatch = paragraph.match(/^!\[(.*?)\]\((.*?)\)$/);
-            if (imageMatch) {
-              const caption = imageMatch[1] || 'In-article photograph';
-              const imgSrc = imageMatch[2];
-              return (
-                <div key={i} className="my-6 space-y-2">
-                  <div className="relative w-full h-64 sm:h-96 rounded-2xl overflow-hidden shadow-md border border-slate-200">
-                    <Image src={imgSrc} alt={caption} fill className="object-cover" />
-                  </div>
-                  {caption && (
-                    <p className="text-center text-xs text-slate-500 italic font-medium">
-                      📷 {caption} — West Bridge Network Photo Bureau
-                    </p>
-                  )}
+          {paragraphs.map((paragraph, i) => (
+            <React.Fragment key={i}>
+              <p>{paragraph}</p>
+              {/* Insert Ad Box after the 2nd paragraph */}
+              {i === 1 && (
+                <div className="my-6">
+                  <AdBanner slotType="article-inline" />
                 </div>
-              );
-            }
-
-            return (
-              <React.Fragment key={i}>
-                <p>{paragraph}</p>
-                {/* Insert Ad Box after the 2nd paragraph */}
-                {i === 1 && (
-                  <div className="my-6">
-                    <AdBanner slotType="article-inline" />
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+              )}
+            </React.Fragment>
+          ))}
         </div>
 
         {/* Share Footer */}
