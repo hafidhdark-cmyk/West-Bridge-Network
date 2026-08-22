@@ -8,6 +8,7 @@ import BreakingTicker from '@/components/BreakingTicker';
 import { Article } from '@/lib/newsData';
 import {
   Compass,
+  Flag,
   Landmark,
   Briefcase,
   Cpu,
@@ -31,6 +32,7 @@ export interface CategoryItem {
 
 export const CATEGORIES: CategoryItem[] = [
   { name: 'Discover', icon: Compass },
+  { name: 'National', icon: Flag },
   { name: 'Politics', icon: Landmark },
   { name: 'Business', icon: Briefcase },
   { name: 'Tech', icon: Cpu },
@@ -182,7 +184,7 @@ export default function Header({
         </div>
       </nav>
 
-      {/* Breaking News Ticker Rendered Directly Inside Header for 100% Perfect Positioning */}
+      {/* Breaking News Ticker Rendered Directly Inside Header */}
       {articles && articles.length > 0 && <BreakingTicker articles={articles} />}
 
       {/* Mobile Drawer Menu */}
