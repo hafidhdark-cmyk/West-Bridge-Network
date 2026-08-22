@@ -77,7 +77,7 @@ export default function Header({
       {/* Top Utility Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* Brand Logo & Text */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform group-hover:scale-105">
             <Image
               src="/logo.png"
@@ -98,47 +98,64 @@ export default function Header({
         </Link>
 
         {/* Right Header Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Search Button (ONLY VISIBLE ON MAIN HOMEPAGE '/') */}
           {isMainHomepage && (
             <div className="relative">
-              {showSearchInput ? (
-                <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs">
-                  <Search className="w-3.5 h-3.5 text-slate-400 mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Search news stories..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                    className="bg-transparent text-white focus:outline-none w-36 sm:w-48 text-xs font-medium"
-                    autoFocus
-                  />
+              {/* Desktop Inline Search Bar */}
+              <div className="hidden sm:block">
+                {showSearchInput ? (
+                  <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs">
+                    <Search className="w-3.5 h-3.5 text-slate-400 mr-2 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search news stories..."
+                      value={searchQuery}
+                      onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                      className="bg-transparent text-white focus:outline-none w-36 sm:w-48 text-xs font-medium"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setShowSearchInput(false);
+                        if (onSearchChange) onSearchChange('');
+                      }}
+                      className="text-slate-400 hover:text-white ml-1"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    onClick={() => {
-                      setShowSearchInput(false);
-                      if (onSearchChange) onSearchChange('');
-                    }}
-                    className="text-slate-400 hover:text-white ml-1"
+                    onClick={() => setShowSearchInput(true)}
+                    className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-bold"
+                    title="Search news articles"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <Search className="w-4 h-4 text-wbn-blue" />
+                    <span>Search</span>
                   </button>
-                </div>
-              ) : (
+                )}
+              </div>
+
+              {/* Mobile Search Icon Toggle */}
+              <div className="sm:hidden">
                 <button
-                  onClick={() => setShowSearchInput(true)}
-                  className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-bold"
-                  title="Search news articles"
+                  onClick={() => setShowSearchInput(!showSearchInput)}
+                  className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+                  aria-label="Toggle Mobile Search"
                 >
-                  <Search className="w-4 h-4 text-wbn-blue" />
-                  <span className="hidden sm:inline">Search</span>
+                  {showSearchInput ? <X className="w-5 h-5 text-wbn-blue" /> : <Search className="w-5 h-5 text-wbn-blue" />}
                 </button>
-              )}
+              </div>
             </div>
           )}
 
           {/* Mobile Navigation Drawer Toggle */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              setMobileMenuOpen(!mobileMenuOpen);
+              if (showSearchInput) setShowSearchInput(false);
+            }}
             className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
             aria-label="Toggle Navigation Menu"
           >
@@ -146,6 +163,31 @@ export default function Header({
           </button>
         </div>
       </div>
+
+      {/* Full-Width Mobile Search Expandable Bar (ONLY ON MOBILE '< sm') */}
+      {isMainHomepage && showSearchInput && (
+        <div className="sm:hidden bg-slate-900 border-t border-slate-800 px-4 py-2.5 animate-fade-in">
+          <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+            <Search className="w-4 h-4 text-wbn-blue mr-2 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search news stories & headlines..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+              className="bg-transparent text-white focus:outline-none w-full text-xs font-bold placeholder-slate-400"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange && onSearchChange('')}
+                className="text-slate-400 hover:text-white ml-2"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Desktop Categories Navigation Bar */}
       <nav className="hidden lg:block bg-slate-900 border-t border-slate-800/80">
@@ -180,7 +222,7 @@ export default function Header({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 animate-fade-in">
-          {/* Mobile Search Input (ONLY ON HOMEPAGE) */}
+          {/* Mobile Search Input inside Drawer */}
           {isMainHomepage && (
             <div className="flex items-center bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs">
               <Search className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
