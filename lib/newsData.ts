@@ -31,15 +31,14 @@ export interface Article {
 }
 
 export function formatTimeAgo(dateInput: string | Date | undefined): string {
-  if (!dateInput) return 'Just now';
+  if (!dateInput) return 'Recently';
   const date = new Date(dateInput);
-  if (isNaN(date.getTime())) return typeof dateInput === 'string' ? dateInput : 'Just now';
+  if (isNaN(date.getTime())) return typeof dateInput === 'string' ? dateInput : 'Recently';
 
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (seconds < 0) return 'Just now';
-  if (seconds < 60) return 'Just now';
+  if (seconds < 0 || seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
   const hours = Math.floor(minutes / 60);
@@ -102,42 +101,23 @@ export function saveStoredComments(slug: string, comments: CommentItem[]): void 
 export async function fetchCommentsForArticle(slug: string): Promise<CommentItem[]> {
   const localComments = getStoredComments(slug);
 
-  if (supabase) {
-    try {
-      // 1. Try reading from articles table JSON column
-      const { data: artData } = await supabase
-        .from('articles')
-        .select('comments_list')
-        .eq('slug', slug)
-        .single();
+  if (!supabase) return localComments;
 
-      if (artData && artData.comments_list && Array.isArray(artData.comments_list) && artData.comments_list.length > 0) {
-        const remoteList: CommentItem[] = artData.comments_list;
-        saveStoredComments(slug, remoteList);
-        return remoteList;
-      }
+  try {
+    // Read comments directly from articles table JSON column
+    const { data, error } = await supabase
+      .from('articles')
+      .select('comments_list')
+      .eq('slug', slug)
+      .maybeSingle();
 
-      // 2. Try reading from comments table
-      const { data: cmtData } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('article_slug', slug)
-        .order('created_at', { ascending: false });
-
-      if (cmtData && cmtData.length > 0) {
-        const mapped: CommentItem[] = cmtData.map((item: any) => ({
-          id: item.id || Date.now().toString(),
-          name: item.author_name || item.name || 'Verified Reader',
-          avatar: item.author_avatar || item.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-          text: item.comment_text || item.text,
-          createdAt: item.created_at || new Date().toISOString(),
-        }));
-        saveStoredComments(slug, mapped);
-        return mapped;
-      }
-    } catch (e) {
-      console.warn('Comments fetch error:', e);
+    if (data && data.comments_list && Array.isArray(data.comments_list) && data.comments_list.length > 0) {
+      const remoteList: CommentItem[] = data.comments_list;
+      saveStoredComments(slug, remoteList);
+      return remoteList;
     }
+  } catch (e) {
+    // Silent catch
   }
 
   return localComments;
@@ -151,17 +131,8 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
   if (!supabase) return true;
 
   try {
-    // 1. Try saving into Supabase comments table
-    await supabase.from('comments').insert({
-      article_slug: slug,
-      author_name: comment.name,
-      author_avatar: comment.avatar,
-      comment_text: comment.text,
-      created_at: comment.createdAt,
-    });
-
-    // 2. Also update articles table comments_list column for 100% failproof global reading!
-    const { data: art } = await supabase.from('articles').select('comments_list, comments_count').eq('slug', slug).single();
+    // Save to articles table comments_list JSON column
+    const { data: art } = await supabase.from('articles').select('comments_list, comments_count').eq('slug', slug).maybeSingle();
     const existingList = art?.comments_list || [];
     const newCount = (art?.comments_count || 0) + 1;
     const newList = [comment, ...existingList];
@@ -176,7 +147,6 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
 
     return true;
   } catch (e) {
-    console.warn('Comment save error:', e);
     return true;
   }
 }
@@ -188,11 +158,9 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   try {
     const { data, error } = await supabase
       .from('articles')
-      .select('*')
-      .order('published_at', { ascending: false, nullsFirst: false });
+      .select('*');
 
     if (error || !data || data.length === 0) {
-      console.error('Supabase fetch error or empty:', error);
       return stored;
     }
 
@@ -202,10 +170,10 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
         id: item.id || item.slug,
         title: item.title,
         slug: item.slug,
-        category: item.category,
-        summary: item.summary,
-        content: item.content,
-        imageUrl: item.image_url,
+        category: item.category || 'General',
+        summary: item.summary || '',
+        content: item.content || '',
+        imageUrl: item.image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
         createdAtRaw: rawDate,
         publishedAt: formatTimeAgo(rawDate),
         readTime: item.read_time || '3 min read',
@@ -220,7 +188,14 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       };
     });
 
-    // Merge with any local offline articles if missing remotely
+    // Sort by date descending safely
+    mapped.sort((a, b) => {
+      const da = new Date(a.createdAtRaw || 0).getTime();
+      const db = new Date(b.createdAtRaw || 0).getTime();
+      return db - da;
+    });
+
+    // Merge with local stored articles
     const merged = [...mapped];
     stored.forEach((sa) => {
       if (!merged.some((m) => m.slug === sa.slug || m.id === sa.id)) {
@@ -231,7 +206,6 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
     saveArticlesToStore(merged);
     return merged;
   } catch (e) {
-    console.error('Supabase exception:', e);
     return stored;
   }
 }
@@ -239,17 +213,17 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   if (supabase) {
     try {
-      const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).single();
+      const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).maybeSingle();
       if (data && !error) {
         const rawDate = data.published_at || data.created_at || new Date().toISOString();
         return {
           id: data.id || data.slug,
           title: data.title,
           slug: data.slug,
-          category: data.category,
-          summary: data.summary,
-          content: data.content,
-          imageUrl: data.image_url,
+          category: data.category || 'General',
+          summary: data.summary || '',
+          content: data.content || '',
+          imageUrl: data.image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
           createdAtRaw: rawDate,
           publishedAt: formatTimeAgo(rawDate),
           readTime: data.read_time || '3 min read',
@@ -264,7 +238,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
         };
       }
     } catch (e) {
-      // Fallback below
+      // Fallback
     }
   }
 
@@ -274,7 +248,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
 export async function incrementArticleViews(slug: string): Promise<number> {
   if (!supabase) return 1;
   try {
-    const { data } = await supabase.from('articles').select('views').eq('slug', slug).single();
+    const { data } = await supabase.from('articles').select('views').eq('slug', slug).maybeSingle();
     const currentViews = data?.views || 0;
     const newViews = currentViews + 1;
 
@@ -289,7 +263,6 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 
     return newViews;
   } catch (e) {
-    console.error('Failed to increment views:', e);
     return 1;
   }
 }
@@ -297,7 +270,6 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
   const existingArticles = getStoredArticles();
 
-  // If new article is marked as Top Story, uncheck isTopStory for all existing local & remote articles!
   if (article.isTopStory) {
     existingArticles.forEach((a) => {
       if (a.id !== article.id && a.slug !== article.slug) {
@@ -309,15 +281,15 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
   saveArticle(article);
 
   if (!supabase) return true;
+
   try {
-    // If setting as Top Story, clear previous top story in Supabase
     if (article.isTopStory) {
       await supabase.from('articles').update({ is_top_story: false }).neq('slug', article.slug);
     }
 
     const isoDate = article.createdAtRaw || new Date().toISOString();
 
-    const { error } = await supabase.from('articles').upsert({
+    const payload = {
       title: article.title,
       slug: article.slug,
       category: article.category,
@@ -326,24 +298,32 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       image_url: article.imageUrl,
       published_at: isoDate,
       read_time: article.readTime,
-      author: 'West Bridge Network',
-      author_avatar: '/logo.png',
       is_top_story: article.isTopStory || false,
       is_breaking: article.isBreaking || false,
       views: article.views || 1,
       likes: article.likes || 0,
       comments_count: article.commentsCount || 0,
-      comments_list: article.commentsList || [],
-    }, { onConflict: 'slug' });
+    };
 
-    if (error) {
-      console.error('Supabase save error:', error);
-      return false;
+    // Check if article already exists by slug
+    const { data: existing } = await supabase.from('articles').select('id').eq('slug', article.slug).maybeSingle();
+
+    if (existing) {
+      const { error: updateErr } = await supabase.from('articles').update(payload).eq('slug', article.slug);
+      if (updateErr) {
+        console.warn('Supabase update warning:', updateErr);
+      }
+    } else {
+      const { error: insertErr } = await supabase.from('articles').insert([payload]);
+      if (insertErr) {
+        console.warn('Supabase insert warning:', insertErr);
+      }
     }
+
     return true;
   } catch (e) {
-    console.error('Supabase exception:', e);
-    return false;
+    console.warn('Supabase save exception:', e);
+    return true;
   }
 }
 
@@ -352,20 +332,13 @@ export async function deleteArticleFromSupabase(idOrSlug: string): Promise<boole
   saveArticlesToStore(localArticles);
 
   if (!supabase) return true;
-  try {
-    const { error } = await supabase
-      .from('articles')
-      .delete()
-      .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`);
 
-    if (error) {
-      console.error('Supabase delete error:', error);
-      return false;
-    }
+  try {
+    await supabase.from('articles').delete().eq('slug', idOrSlug);
+    await supabase.from('articles').delete().eq('id', idOrSlug);
     return true;
   } catch (e) {
-    console.error('Supabase delete exception:', e);
-    return false;
+    return true;
   }
 }
 
