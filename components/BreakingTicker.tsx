@@ -10,14 +10,16 @@ interface BreakingTickerProps {
 }
 
 export default function BreakingTicker({ articles }: BreakingTickerProps) {
-  const breakingNews = articles.filter((a) => a.isBreaking);
-
-  if (breakingNews.length === 0) {
+  if (!articles || articles.length === 0) {
     return null;
   }
 
+  // Priority: Articles explicitly marked as Breaking -> Fallback: Latest 5 published articles
+  const explicitBreaking = articles.filter((a) => a.isBreaking);
+  const displayItems = explicitBreaking.length > 0 ? explicitBreaking : articles.slice(0, 5);
+
   // Duplicate list to create a seamless infinite marquee loop
-  const tickerItems = [...breakingNews, ...breakingNews, ...breakingNews];
+  const tickerItems = [...displayItems, ...displayItems, ...displayItems];
 
   return (
     <div className="sticky top-[56px] lg:top-[92px] z-40 bg-wbn-navy text-white border-b border-slate-800 shadow-md">
