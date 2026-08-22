@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
+import AdBanner from '@/components/AdBanner';
 import { Article, CommentItem, incrementArticleViews } from '@/lib/newsData';
 import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check } from 'lucide-react';
 
@@ -21,7 +22,6 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
 
   useEffect(() => {
-    // Automatically increment view count in Supabase PostgreSQL when a reader opens this page
     incrementArticleViews(article.slug).then((updatedViews) => {
       if (updatedViews > viewsCount) {
         setViewsCount(updatedViews);
@@ -62,6 +62,8 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       setTimeout(() => setCopiedLink(false), 3000);
     }
   };
+
+  const paragraphs = article.content.split('\n\n');
 
   return (
     <>
@@ -159,10 +161,18 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
         </div>
 
-        {/* Main Article Text */}
+        {/* Main Article Text Body with Injected Inline Ad Boxes */}
         <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base space-y-4">
-          {article.content.split('\n\n').map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
+          {paragraphs.map((paragraph, i) => (
+            <React.Fragment key={i}>
+              <p>{paragraph}</p>
+              {/* Insert Ad Box after the 2nd paragraph */}
+              {i === 1 && (
+                <div className="my-6">
+                  <AdBanner slotType="article-inline" />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
 

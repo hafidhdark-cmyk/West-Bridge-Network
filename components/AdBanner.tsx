@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Megaphone, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 interface AdBannerProps {
-  slotType?: 'header' | 'inline' | 'sidebar' | 'footer';
+  slotType?: 'header' | 'inline' | 'sidebar' | 'footer' | 'article-inline';
   adClient?: string;
   adSlot?: string;
 }
@@ -49,31 +49,30 @@ export default function AdBanner({
     );
   }
 
-  // Professional Sponsor & Advertising Banner Placeholder
+  // Clean Native Sponsored Ad Placement (No Mention of Monetization)
   return (
-    <div className={`w-full rounded-2xl border border-slate-200 p-5 transition-all text-center bg-gradient-to-br from-slate-900 to-wbn-navy text-white shadow-sm flex flex-col items-center justify-between gap-3 ${
-      slotType === 'sidebar' ? 'min-h-[250px]' : 'min-h-[120px]'
+    <div className={`w-full rounded-2xl border border-slate-200 p-5 transition-all text-center bg-white text-slate-800 shadow-xs flex flex-col items-center justify-between gap-3 ${
+      slotType === 'sidebar' ? 'min-h-[240px]' : 'min-h-[100px]'
     }`}>
-      <div className="flex items-center gap-2 text-wbn-cobalt text-[10px] font-extrabold uppercase tracking-widest bg-blue-950 px-3 py-1 rounded-full border border-blue-800">
-        <Megaphone className="w-3.5 h-3.5 text-wbn-blue animate-pulse" />
-        <span>WBN Monetization & Sponsor Network</span>
+      <div className="flex items-center gap-2 text-slate-400 text-[9px] font-extrabold uppercase tracking-widest bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+        <span>SPONSORED</span>
       </div>
 
       <div className="space-y-1">
-        <h4 className="font-extrabold text-sm sm:text-base font-editorial-heading text-white">
-          Reach 50,000+ Active Daily Readers Across West Africa
+        <h4 className="font-extrabold text-xs sm:text-sm font-editorial-heading text-wbn-navy">
+          Special Feature & Corporate Partnerships
         </h4>
-        <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
-          Place your brand, business, or Google AdSense banners directly in front of decision makers and tech leaders.
+        <p className="text-[11px] text-slate-500 max-w-md mx-auto leading-relaxed">
+          Connect your organization with top executives, policymakers, and business leaders across West Africa.
         </p>
       </div>
 
       <a
-        href="mailto:ads@westbridgenetwork.com?subject=Inquiry%20About%20Ad%20Placement%20on%20WBN"
-        className="bg-wbn-blue hover:bg-blue-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all shadow flex items-center gap-1.5"
+        href="mailto:ads@westbridgenetwork.com?subject=Inquiry%20About%20Corporate%20Partnership"
+        className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-[11px] px-4 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
       >
-        <span>Advertise With Us</span>
-        <ExternalLink className="w-3.5 h-3.5" />
+        <span>Partner With Us</span>
+        <ExternalLink className="w-3 h-3" />
       </a>
     </div>
   );
