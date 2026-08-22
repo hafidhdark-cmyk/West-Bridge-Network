@@ -7,7 +7,7 @@ import AdBanner from '@/components/AdBanner';
 import AuthModal from '@/components/AuthModal';
 import { Article, CommentItem, incrementArticleViews, formatTimeAgo } from '@/lib/newsData';
 import { getLocalUser, UserProfile } from '@/lib/auth';
-import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, Lock, UserPlus } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, UserPlus } from 'lucide-react';
 
 interface ArticleClientActionsProps {
   article: Article;
@@ -23,6 +23,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
+  const [pendingCommentText, setPendingCommentText] = useState<string | null>(null);
 
   useEffect(() => {
     const usr = getLocalUser();
@@ -52,12 +53,14 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
 
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newCommentText.trim()) return;
+
     if (!currentUser) {
+      // Save comment text in pending state and open registration modal
+      setPendingCommentText(newCommentText.trim());
       setAuthModalOpen(true);
       return;
     }
-
-    if (!newCommentText.trim()) return;
 
     const newC: CommentItem = {
       id: Date.now().toString(),
@@ -69,6 +72,24 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
 
     setComments([newC, ...comments]);
     setNewCommentText('');
+    setPendingCommentText(null);
+  };
+
+  const handleAuthSuccess = (usr: UserProfile) => {
+    setCurrentUser(usr);
+    // If there was a pending comment, post it automatically under the new account!
+    if (pendingCommentText) {
+      const newC: CommentItem = {
+        id: Date.now().toString(),
+        name: usr.fullName,
+        avatar: usr.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+        text: pendingCommentText,
+        createdAt: new Date().toISOString(),
+      };
+      setComments([newC, ...comments]);
+      setNewCommentText('');
+      setPendingCommentText(null);
+    }
   };
 
   const handleShare = () => {
@@ -232,84 +253,84 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               <MessageSquare className="w-5 h-5 text-wbn-blue" />
               Reader Discussion ({comments.length})
             </h3>
-          </div>
-
-          {/* Unauthenticated User Prompt Banner */}
-          {!currentUser ? (
-            <div className="bg-blue-50 border border-blue-200 p-6 rounded-2xl text-center space-y-3 shadow-xs">
-              <div className="w-12 h-12 bg-wbn-blue text-white rounded-full flex items-center justify-center mx-auto shadow-sm">
-                <Lock className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-base text-wbn-navy">Join the Reader Discussion</h4>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                  Please create a free account or sign in to share your thoughts on this story.
-                </p>
-              </div>
+            {!currentUser && (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-flex items-center gap-2"
+                className="text-xs font-extrabold text-wbn-blue hover:underline flex items-center gap-1"
               >
-                <UserPlus className="w-4 h-4" />
-                <span>Create Free Account / Sign In</span>
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Create Account to Post</span>
               </button>
-            </div>
-          ) : (
-            /* Add Comment Form for Authenticated Readers */
-            <form onSubmit={handleAddComment} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+            )}
+          </div>
+
+          {/* Interactive Comment Input Box (Available to EVERYONE) */}
+          <form onSubmit={handleAddComment} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+            {currentUser ? (
               <div className="flex items-center gap-2 text-xs font-bold text-wbn-navy bg-white px-3.5 py-2 rounded-xl border border-slate-200">
                 <UserCheck className="w-4 h-4 text-emerald-600" />
                 <span>Commenting as: <strong>{currentUser.fullName}</strong></span>
               </div>
-              <textarea
-                rows={3}
-                placeholder="Share your thoughts on this story..."
-                value={newCommentText}
-                onChange={(e) => setNewCommentText(e.target.value)}
-                className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                required
-              ></textarea>
-              <button
-                type="submit"
-                className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Post Comment</span>
-              </button>
-            </form>
-          )}
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 text-blue-900 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-between">
+                <span>Type your comment below — you&apos;ll be prompted to quickly log in or create a free account to post!</span>
+              </div>
+            )}
 
-          {/* Comments List with Dynamic Time Ago */}
-          <div className="space-y-4">
-            {comments.map((c) => (
-              <div key={c.id} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 bg-wbn-navy text-white rounded-full flex items-center justify-center font-bold text-xs">
-                      {c.name.charAt(0).toUpperCase()}
+            <textarea
+              rows={3}
+              placeholder="Share your thoughts on this story..."
+              value={newCommentText}
+              onChange={(e) => setNewCommentText(e.target.value)}
+              className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+              required
+            ></textarea>
+
+            <button
+              type="submit"
+              className="bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{currentUser ? 'Post Comment' : 'Post Comment (Create Account)'}</span>
+            </button>
+          </form>
+
+          {/* Comments List Visible to EVERYONE with Dynamic Time Ago */}
+          <div className="space-y-4 pt-2">
+            {comments.length === 0 ? (
+              <p className="text-xs text-slate-400 italic text-center py-4">
+                Be the first reader to comment on this story!
+              </p>
+            ) : (
+              comments.map((c) => (
+                <div key={c.id} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 bg-wbn-navy text-white rounded-full flex items-center justify-center font-bold text-xs">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-bold text-xs text-wbn-navy flex items-center gap-1">
+                        {c.name}
+                        <UserCheck className="w-3 h-3 text-emerald-600" />
+                      </span>
                     </div>
-                    <span className="font-bold text-xs text-wbn-navy flex items-center gap-1">
-                      {c.name}
-                      <UserCheck className="w-3 h-3 text-emerald-600" />
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {formatTimeAgo(c.createdAt)}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    {formatTimeAgo(c.createdAt)}
-                  </span>
+                  <p className="text-xs text-slate-600 leading-relaxed pl-9">{c.text}</p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-9">{c.text}</p>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       </div>
 
+      {/* Auth Dialog Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        onAuthSuccess={(usr) => {
-          setCurrentUser(usr);
-        }}
+        onAuthSuccess={handleAuthSuccess}
       />
     </>
   );
