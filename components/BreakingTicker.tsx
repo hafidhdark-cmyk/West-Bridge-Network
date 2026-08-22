@@ -2,39 +2,46 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Radio } from 'lucide-react';
 import { Article } from '@/lib/newsData';
+import { Radio } from 'lucide-react';
 
 interface BreakingTickerProps {
   articles: Article[];
 }
 
 export default function BreakingTicker({ articles }: BreakingTickerProps) {
-  // Filter all articles marked as breaking news by the Admin
-  const breakingArticles = articles.filter((a) => a.isBreaking);
-  const tickerList = breakingArticles.length > 0 ? breakingArticles : articles.slice(0, 3);
+  const breakingNews = articles.filter((a) => a.isBreaking);
+
+  if (breakingNews.length === 0) {
+    return null;
+  }
+
+  // Duplicate list to create a seamless infinite marquee loop
+  const tickerItems = [...breakingNews, ...breakingNews, ...breakingNews];
 
   return (
-    <div className="bg-wbn-navy text-white border-y border-slate-800 py-2.5 px-4 sm:px-8 flex items-center gap-3 overflow-hidden shadow-inner">
-      {/* Sleek Label (No Red Button) */}
-      <div className="flex items-center gap-2 flex-shrink-0 text-xs font-black tracking-wider uppercase text-wbn-cobalt bg-blue-950 px-3 py-1 rounded-lg border border-blue-800">
-        <Radio className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-        <span>BREAKING</span>
-      </div>
+    <div className="sticky top-[56px] lg:top-[92px] z-40 bg-wbn-navy text-white border-b border-slate-800 shadow-md">
+      <div className="max-w-7xl mx-auto flex items-center h-10 px-4 sm:px-6 lg:px-8">
+        {/* Fixed Left Badge */}
+        <div className="flex items-center gap-1.5 bg-wbn-blue text-white px-3 py-1 rounded-lg font-black text-[11px] uppercase tracking-wider flex-shrink-0 z-10 shadow-sm mr-3">
+          <Radio className="w-3.5 h-3.5 animate-pulse text-white fill-current" />
+          <span>BREAKING</span>
+        </div>
 
-      {/* Dynamic Moving Headlines Ticker */}
-      <div className="overflow-hidden flex-1 relative">
-        <div className="animate-marquee whitespace-nowrap flex items-center gap-8 text-xs font-semibold text-slate-200">
-          {tickerList.concat(tickerList).map((art, idx) => (
-            <Link
-              key={`${art.id}-${idx}`}
-              href={`/news/${art.slug}`}
-              className="hover:text-white hover:underline transition-colors flex items-center gap-2"
-            >
-              <span>{art.title}</span>
-              <span className="text-wbn-blue font-bold">★</span>
-            </Link>
-          ))}
+        {/* Moving Marquee Ticker */}
+        <div className="relative flex-1 overflow-hidden py-1">
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-8">
+            {tickerItems.map((art, idx) => (
+              <Link
+                key={`${art.id}-${idx}`}
+                href={`/news/${art.slug}`}
+                className="inline-flex items-center gap-2 text-xs font-bold text-slate-200 hover:text-wbn-cobalt transition-colors"
+              >
+                <span className="w-1.5 h-1.5 bg-wbn-blue rounded-full"></span>
+                <span>{art.title}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
