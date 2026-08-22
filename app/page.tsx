@@ -26,14 +26,12 @@ import {
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 
 export default function HomePage() {
-  // Synchronous initial state for INSTANT 0ms rendering
   const [articles, setArticles] = useState<Article[]>(() => getStoredArticles());
   const [activeCategory, setActiveCategory] = useState<string>('Home');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(6);
 
   useEffect(() => {
-    // Quiet background update from live Supabase PostgreSQL
     fetchArticlesFromSupabase().then((data) => {
       if (data && data.length > 0) {
         setArticles(data);
@@ -41,7 +39,6 @@ export default function HomePage() {
     });
   }, []);
 
-  // Case-Insensitive Filter by Category & Search Query
   const filteredArticles = articles.filter((a) => {
     const normCategory = activeCategory.trim().toLowerCase();
     const matchesCategory = normCategory === 'home' || normCategory === 'all' || normCategory === 'discover'
@@ -57,16 +54,15 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Dynamic Lead Top Story of the Day (Selected by Admin)
-  const mainLeadStory = articles.find((a) => a.isTopStory) || articles.find((a) => a.isBreaking) || articles[0];
+  // STRICT SINGLE TOP STORY CONSTRAINT: Only articles explicitly checked as Top Story sit in this hero div!
+  const mainLeadStory = articles.find((a) => a.isTopStory === true);
   
-  // Latest News (Most recently uploaded sub-lead reports for side widget)
+  // Latest News (Sub-lead reports for side widget excluding main top story)
   const sideLatestNews = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   
-  // On Home/Discover, exclude the main top story from the bottom feed so it isn't duplicated.
   const isHomeView = activeCategory === 'Home' || activeCategory === 'Discover' || activeCategory === 'All';
-  const regularNews = isHomeView && !searchQuery.trim()
-    ? filteredArticles.filter((a) => a.id !== mainLeadStory?.id)
+  const regularNews = isHomeView && !searchQuery.trim() && mainLeadStory
+    ? filteredArticles.filter((a) => a.id !== mainLeadStory.id)
     : filteredArticles;
 
   const displayedNews = regularNews.slice(0, visibleCount);
@@ -104,13 +100,13 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Newspaper Hero Grid (Visible on Home / Discover Page) */}
+        {/* Newspaper Hero Grid (Visible ONLY when an article has isTopStory === true) */}
         {isHomeView && !searchQuery && mainLeadStory && (
           <section className="space-y-4">
             <div className="flex items-center justify-between magazine-rule-dark pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-wbn-navy flex items-center gap-2">
                 <Radio className="w-4 h-4 text-wbn-blue animate-pulse" />
-                Top Headlines
+                Top Story of the Day
               </h2>
               <span className="text-xs font-semibold text-wbn-slate flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-wbn-blue" /> Updated live

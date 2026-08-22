@@ -168,7 +168,6 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 
     await supabase.from('articles').update({ views: newViews }).eq('slug', slug);
 
-    // Update local cache
     const articles = getStoredArticles();
     const art = articles.find((a) => a.slug === slug);
     if (art) {
@@ -184,9 +183,26 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 }
 
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
+  const existingArticles = getStoredArticles();
+
+  // If new article is marked as Top Story, uncheck isTopStory for all existing local & remote articles!
+  if (article.isTopStory) {
+    existingArticles.forEach((a) => {
+      if (a.id !== article.id && a.slug !== article.slug) {
+        a.isTopStory = false;
+      }
+    });
+  }
+
   saveArticle(article);
+
   if (!supabase) return true;
   try {
+    // If setting as Top Story, clear previous top story in Supabase
+    if (article.isTopStory) {
+      await supabase.from('articles').update({ is_top_story: false }).neq('slug', article.slug);
+    }
+
     const { error } = await supabase.from('articles').upsert({
       title: article.title,
       slug: article.slug,
