@@ -42,7 +42,7 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   if (seconds < 0 || seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
-  const hours = Math.floor(minutes / 60);
+  const hours = Math.floor(seconds / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
@@ -60,12 +60,18 @@ export function getStoredArticles(): Article[] {
   if (!stored) return [];
   try {
     const parsed = JSON.parse(stored);
-    return parsed.map((a: Article) => ({
+    const mapped = parsed.map((a: Article) => ({
       ...a,
       publishedAt: formatTimeAgo(a.createdAtRaw || a.publishedAt),
       author: 'West Bridge Network',
       authorAvatar: '/logo.png',
     }));
+    mapped.sort((a: Article, b: Article) => {
+      const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
+      const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
+      return db - da;
+    });
+    return mapped;
   } catch (e) {
     return [];
   }
@@ -78,6 +84,11 @@ export function saveArticlesToStore(articles: Article[]): void {
       author: 'West Bridge Network',
       authorAvatar: '/logo.png',
     }));
+    updated.sort((a, b) => {
+      const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
+      const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
+      return db - da;
+    });
     localStorage.setItem('wbn_articles', JSON.stringify(updated));
   }
 }
@@ -105,7 +116,6 @@ export async function fetchCommentsForArticle(slug: string): Promise<CommentItem
   if (!supabase) return localComments;
 
   try {
-    // Read comments directly from articles table JSON column
     const { data } = await supabase
       .from('articles')
       .select('comments_list')
@@ -132,7 +142,6 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
   if (!supabase) return true;
 
   try {
-    // Save to articles table comments_list JSON column
     const { data: art } = await supabase.from('articles').select('comments_list, comments_count').eq('slug', slug).maybeSingle();
     const existingList = art?.comments_list || [];
     const newCount = (art?.comments_count || 0) + 1;
@@ -157,7 +166,6 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   if (!supabase) return stored;
 
   try {
-    // Query top 100 most recent articles from Supabase PostgreSQL for 1M+ article scale
     const { data, error } = await supabase
       .from('articles')
       .select('*')
@@ -194,11 +202,20 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
     });
 
     // Merge with local stored articles
-    const merged = [...mapped];
-    stored.forEach((sa) => {
-      if (!merged.some((m) => m.slug === sa.slug || m.id === sa.id)) {
-        merged.push(sa);
-      }
+    const mergedMap = new Map<string, Article>();
+    
+    // Put remote articles first
+    mapped.forEach((a) => mergedMap.set(a.slug, a));
+    // Overlay local stored articles (so local updates take immediate priority)
+    stored.forEach((sa) => mergedMap.set(sa.slug, sa));
+
+    const merged = Array.from(mergedMap.values());
+
+    // Sort combined articles strictly by publication date descending
+    merged.sort((a, b) => {
+      const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
+      const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
+      return db - da;
     });
 
     saveArticlesToStore(merged);
@@ -269,7 +286,6 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
   const existingArticles = getStoredArticles();
 
-  // If new article is marked as Top Story, uncheck isTopStory for all existing articles
   if (article.isTopStory) {
     existingArticles.forEach((a) => {
       if (a.id !== article.id && a.slug !== article.slug) {
@@ -278,7 +294,6 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     });
   }
 
-  // If new article is marked as Trending, auto-override oldest trending items if total exceeds 5
   if (article.isTrending) {
     const activeTrending = existingArticles
       .filter((a) => a.isTrending && a.id !== article.id && a.slug !== article.slug)
@@ -327,7 +342,6 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       comments_count: article.commentsCount || 0,
     };
 
-    // Check if article already exists by slug
     const { data: existing } = await supabase.from('articles').select('id').eq('slug', article.slug).maybeSingle();
 
     if (existing) {
