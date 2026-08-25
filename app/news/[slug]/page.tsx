@@ -19,13 +19,14 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   if (!article) {
     return {
       metadataBase: new URL(siteUrl),
-      title: 'News Report | West Bridge Network',
-      description: 'Read top journalistic reports and breaking news across West Africa on West Bridge Network.',
+      title: 'West Bridge Network | Journalistic Integrity & Speed',
+      description: 'Premier digital news platform committed to speed, accuracy, and investigative news across West Africa.',
     };
   }
 
   const fullUrl = `${siteUrl}/news/${article.slug}`;
-  const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${article.slug}`;
+  // Use direct article feature photo for WhatsApp, Facebook, Twitter preview cards!
+  const previewImage = article.imageUrl || `${siteUrl}/logo.png`;
 
   return {
     metadataBase: new URL(siteUrl),
@@ -41,12 +42,10 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       siteName: 'West Bridge Network',
       images: [
         {
-          url: ogImageUrl,
-          secureUrl: ogImageUrl,
+          url: previewImage,
           width: 1200,
           height: 630,
           alt: article.title,
-          type: 'image/jpeg',
         },
       ],
       locale: 'en_US',
@@ -56,7 +55,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       card: 'summary_large_image',
       title: article.title,
       description: article.summary,
-      images: [ogImageUrl],
+      images: [previewImage],
       site: '@WestBridgeNet',
     },
   };
