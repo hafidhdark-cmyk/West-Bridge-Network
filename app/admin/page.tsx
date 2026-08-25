@@ -80,40 +80,9 @@ export default function AdminPage() {
     }
   };
 
-  // Helper to count active trending reports in last 24h
-  const getActiveTrendingCount = (): number => {
-    const now = Date.now();
-    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-    return articles.filter((a) => {
-      if (!a.isTrending) return false;
-      const pubTime = new Date(a.createdAtRaw || a.publishedAt).getTime();
-      return isNaN(pubTime) || now - pubTime <= TWENTY_FOUR_HOURS_MS;
-    }).length;
-  };
-
-  const handleTrendingToggle = (checked: boolean) => {
-    if (checked) {
-      const currentTrendingCount = getActiveTrendingCount();
-      if (currentTrendingCount >= 5) {
-        alert('Only 5 articles can be added to Top 5 Trending Reports within 24 hours! Please uncheck an existing trending report first.');
-        setIsTrending(false);
-        return;
-      }
-    }
-    setIsTrending(checked);
-  };
-
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
-
-    if (isTrending) {
-      const currentTrendingCount = getActiveTrendingCount();
-      if (currentTrendingCount >= 5) {
-        alert('Only 5 articles can be added to Top 5 Trending Reports within 24 hours! Please uncheck a previous trending report first.');
-        return;
-      }
-    }
 
     setIsPublishing(true);
 
@@ -146,7 +115,7 @@ export default function AdminPage() {
     };
 
     await saveArticleToSupabase(newArticle);
-    setArticles([newArticle, ...articles]);
+    setArticles(getStoredArticles());
     setIsPublishing(false);
     setPublishSuccess(true);
 
@@ -338,7 +307,7 @@ export default function AdminPage() {
                   />
                   <div className="flex items-center gap-1.5 text-xs font-bold text-wbn-navy">
                     <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                    <span>Set as Top Story of the Day</span>
+                    <span>Set as Top Story of the Day (Auto-overrides previous top story)</span>
                   </div>
                 </label>
 
@@ -360,12 +329,12 @@ export default function AdminPage() {
                     <input
                       type="checkbox"
                       checked={isTrending}
-                      onChange={(e) => handleTrendingToggle(e.target.checked)}
+                      onChange={(e) => setIsTrending(e.target.checked)}
                       className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
                     <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-950">
                       <TrendingUp className="w-4 h-4 text-indigo-600" />
-                      <span>Set as Top Trending Report (Max 5 in 24h)</span>
+                      <span>Set as Top Trending Report (Auto-overrides oldest if &gt;5)</span>
                     </div>
                   </label>
                 </div>

@@ -273,12 +273,34 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
   const existingArticles = getStoredArticles();
 
+  // If new article is marked as Top Story, uncheck isTopStory for all existing articles
   if (article.isTopStory) {
     existingArticles.forEach((a) => {
       if (a.id !== article.id && a.slug !== article.slug) {
         a.isTopStory = false;
       }
     });
+  }
+
+  // If new article is marked as Trending, auto-override oldest trending items if total exceeds 5
+  if (article.isTrending) {
+    const activeTrending = existingArticles
+      .filter((a) => a.isTrending && a.id !== article.id && a.slug !== article.slug)
+      .sort((a, b) => {
+        const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
+        const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
+        return da - db; // oldest first
+      });
+
+    while (activeTrending.length >= 5) {
+      const oldestToOverride = activeTrending.shift();
+      if (oldestToOverride) {
+        oldestToOverride.isTrending = false;
+        if (supabase) {
+          supabase.from('articles').update({ is_trending: false }).eq('slug', oldestToOverride.slug).then();
+        }
+      }
+    }
   }
 
   saveArticle(article);
