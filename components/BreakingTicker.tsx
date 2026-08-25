@@ -10,8 +10,16 @@ interface BreakingTickerProps {
 }
 
 export default function BreakingTicker({ articles }: BreakingTickerProps) {
-  // Reverted back to explicit breaking news check as requested
-  const breakingNews = articles.filter((a) => a.isBreaking);
+  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  // Filter breaking news so items automatically expire and leave header ticker after 24 hours
+  const breakingNews = articles.filter((a) => {
+    if (!a.isBreaking) return false;
+    const pubTime = new Date(a.createdAtRaw || a.publishedAt).getTime();
+    if (isNaN(pubTime)) return true;
+    return now - pubTime <= TWENTY_FOUR_HOURS_MS;
+  });
 
   if (!breakingNews || breakingNews.length === 0) {
     return null;

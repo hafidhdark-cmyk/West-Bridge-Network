@@ -23,6 +23,7 @@ export interface Article {
   authorAvatar: string;
   isTopStory?: boolean;
   isBreaking?: boolean;
+  isTrending?: boolean;
   views: number;
   likes: number;
   commentsCount: number;
@@ -105,7 +106,7 @@ export async function fetchCommentsForArticle(slug: string): Promise<CommentItem
 
   try {
     // Read comments directly from articles table JSON column
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('articles')
       .select('comments_list')
       .eq('slug', slug)
@@ -181,6 +182,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
         authorAvatar: '/logo.png',
         isTopStory: item.is_top_story || false,
         isBreaking: item.is_breaking || false,
+        isTrending: item.is_trending || false,
         views: item.views || 1,
         likes: item.likes || 0,
         commentsCount: item.comments_count || 0,
@@ -231,6 +233,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
           authorAvatar: '/logo.png',
           isTopStory: data.is_top_story || false,
           isBreaking: data.is_breaking || false,
+          isTrending: data.is_trending || false,
           views: data.views || 1,
           likes: data.likes || 0,
           commentsCount: data.comments_count || 0,
@@ -300,6 +303,7 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       read_time: article.readTime,
       is_top_story: article.isTopStory || false,
       is_breaking: article.isBreaking || false,
+      is_trending: article.isTrending || false,
       views: article.views || 1,
       likes: article.likes || 0,
       comments_count: article.commentsCount || 0,

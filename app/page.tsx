@@ -69,7 +69,22 @@ export default function HomePage() {
     : filteredArticles;
 
   const displayedNews = regularNews.slice(0, visibleCount);
-  const trendingReads = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
+
+  // Top 5 Trending calculation (Prioritize checked isTrending within 24h, max 5)
+  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const manualTrending = articles.filter((a) => {
+    if (!a.isTrending) return false;
+    const pubTime = new Date(a.createdAtRaw || a.publishedAt).getTime();
+    return isNaN(pubTime) || now - pubTime <= TWENTY_FOUR_HOURS_MS;
+  }).slice(0, 5);
+
+  const viewsFallback = [...articles]
+    .filter((a) => !manualTrending.some((mt) => mt.id === a.id))
+    .sort((a, b) => b.views - a.views);
+
+  const trendingReads = [...manualTrending, ...viewsFallback].slice(0, 5);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 6);

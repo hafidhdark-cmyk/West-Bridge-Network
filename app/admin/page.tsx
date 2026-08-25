@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
 import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, TrendingUp, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -17,6 +17,7 @@ export default function AdminPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isTopStory, setIsTopStory] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
+  const [isTrending, setIsTrending] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
@@ -79,9 +80,40 @@ export default function AdminPage() {
     }
   };
 
+  // Helper to count active trending reports in last 24h
+  const getActiveTrendingCount = (): number => {
+    const now = Date.now();
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    return articles.filter((a) => {
+      if (!a.isTrending) return false;
+      const pubTime = new Date(a.createdAtRaw || a.publishedAt).getTime();
+      return isNaN(pubTime) || now - pubTime <= TWENTY_FOUR_HOURS_MS;
+    }).length;
+  };
+
+  const handleTrendingToggle = (checked: boolean) => {
+    if (checked) {
+      const currentTrendingCount = getActiveTrendingCount();
+      if (currentTrendingCount >= 5) {
+        alert('Only 5 articles can be added to Top 5 Trending Reports within 24 hours! Please uncheck an existing trending report first.');
+        setIsTrending(false);
+        return;
+      }
+    }
+    setIsTrending(checked);
+  };
+
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
+
+    if (isTrending) {
+      const currentTrendingCount = getActiveTrendingCount();
+      if (currentTrendingCount >= 5) {
+        alert('Only 5 articles can be added to Top 5 Trending Reports within 24 hours! Please uncheck a previous trending report first.');
+        return;
+      }
+    }
 
     setIsPublishing(true);
 
@@ -107,6 +139,7 @@ export default function AdminPage() {
       authorAvatar: '/logo.png',
       isTopStory,
       isBreaking,
+      isTrending,
       views: 1,
       likes: 0,
       commentsCount: 0,
@@ -125,6 +158,7 @@ export default function AdminPage() {
     setImagePreview(null);
     setIsTopStory(false);
     setIsBreaking(false);
+    setIsTrending(false);
 
     setTimeout(() => {
       setPublishSuccess(false);
@@ -294,7 +328,7 @@ export default function AdminPage() {
               </div>
 
               {/* Toggles / Flags */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-3 pt-2">
                 <label className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100/60 transition-colors">
                   <input
                     type="checkbox"
@@ -308,18 +342,33 @@ export default function AdminPage() {
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={isBreaking}
-                    onChange={(e) => setIsBreaking(e.target.checked)}
-                    className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
-                  />
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-red-950">
-                    <Radio className="w-4 h-4 text-red-600 animate-pulse" />
-                    <span>Push to Live Breaking Marquee</span>
-                  </div>
-                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={isBreaking}
+                      onChange={(e) => setIsBreaking(e.target.checked)}
+                      className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                    />
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-950">
+                      <Radio className="w-4 h-4 text-red-600 animate-pulse" />
+                      <span>Push to Live Breaking Marquee (Expires after 24h)</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-xl cursor-pointer hover:bg-indigo-100/60 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={isTrending}
+                      onChange={(e) => handleTrendingToggle(e.target.checked)}
+                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                    />
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-950">
+                      <TrendingUp className="w-4 h-4 text-indigo-600" />
+                      <span>Set as Top Trending Report (Max 5 in 24h)</span>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -363,13 +412,14 @@ export default function AdminPage() {
                         <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-wbn-navy text-white rounded">
                           {art.category}
                         </span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
                           {art.isTopStory && <span className="text-[10px] font-bold text-amber-600">Top Story</span>}
                           {art.isBreaking && <span className="text-[10px] font-bold text-red-600">Breaking</span>}
+                          {art.isTrending && <span className="text-[10px] font-bold text-indigo-600">Trending</span>}
                           <button
                             onClick={() => handleDelete(art.id, art.slug)}
                             disabled={deletingId === art.id}
-                            className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                            className="text-slate-400 hover:text-red-600 p-1 transition-colors ml-1"
                             title="Delete Article"
                           >
                             <Trash2 className="w-4 h-4" />
