@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
-import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article, formatTimeAgo } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon } from 'lucide-react';
+import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [isBreaking, setIsBreaking] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,16 +29,53 @@ export default function AdminPage() {
     });
   }, []);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  // HTML5 Canvas helper to compress large camera photos down to ~100KB under 1200px width
+  const compressImageFile = (file: File, maxWidth = 1200, quality = 0.75): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImageUrl(result);
-        setImagePreview(result);
+      reader.onload = (event) => {
+        const img = document.createElement('img');
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+          } else {
+            resolve(event.target?.result as string);
+          }
+        };
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsCompressingImage(true);
+      try {
+        const compressed = await compressImageFile(file, 1200, 0.75);
+        setImageUrl(compressed);
+        setImagePreview(compressed);
+      } catch (err) {
+        console.error('Image compression failed:', err);
+      } finally {
+        setIsCompressingImage(false);
+      }
     }
   };
 
@@ -119,236 +157,241 @@ export default function AdminPage() {
 
           <Link
             href="/"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-slate-700"
+            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Return to Live Site</span>
+            <span>Return to Live Website</span>
           </Link>
         </div>
 
-        {/* Publish Success Alert Banner */}
+        {/* Success Alert Banner */}
         {publishSuccess && (
-          <div className="bg-emerald-950 border border-emerald-800 text-emerald-200 p-4 rounded-2xl flex items-center gap-3 animate-fade-in shadow-md">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+          <div className="bg-emerald-600 text-white p-4 rounded-2xl flex items-center gap-3 shadow-md animate-fade-in">
+            <CheckCircle2 className="w-6 h-6 flex-shrink-0" />
             <div>
-              <h4 className="font-extrabold text-sm text-emerald-100">Article Published Successfully!</h4>
-              <p className="text-xs text-emerald-300">Your report has been saved into PostgreSQL and is live for readers.</p>
+              <h4 className="font-extrabold text-sm">Article Published Successfully!</h4>
+              <p className="text-xs text-emerald-100">Your news report is now live globally on West Bridge Network.</p>
             </div>
           </div>
         )}
 
-        {/* Main Publishing Form */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
-          <h2 className="text-lg font-black text-wbn-navy magazine-rule-dark pb-3 flex items-center gap-2">
-            <PlusCircle className="w-5 h-5 text-wbn-blue" />
-            Publish New News Article
-          </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Create Article Form (Col 7) */}
+          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
+              <PlusCircle className="w-5 h-5 text-wbn-blue" />
+              <h2 className="font-extrabold text-lg text-wbn-navy">Create & Publish News Article</h2>
+            </div>
 
-          <form onSubmit={handlePublish} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              {/* Headline Title */}
-              <div className="md:col-span-8 space-y-2">
+            <form onSubmit={handlePublish} className="space-y-5">
+              {/* Title */}
+              <div className="space-y-1.5">
                 <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                  Article Headline Title *
+                  Article Title / Headline <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., FG Releases Breakdown of Fuel Subsidy Savings Allocation"
+                  placeholder="e.g., Federal Government Approves ₦2.5 Trillion Clean Energy Initiative"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   required
                 />
               </div>
 
               {/* Category Dropdown */}
-              <div className="md:col-span-4 space-y-2">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                  Category *
+                  Select Category <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 >
-                  {CATEGORIES.filter((c) => c.name !== 'Discover').map((c) => (
-                    <option key={c.name} value={c.name}>
-                      {c.name}
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Dynamic Placement Toggles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white transition-colors">
-                <input
-                  type="checkbox"
-                  checked={isTopStory}
-                  onChange={(e) => setIsTopStory(e.target.checked)}
-                  className="w-4 h-4 text-wbn-blue rounded focus:ring-wbn-blue"
+              {/* Summary / Subdeck */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                  Executive Summary / Subdeck
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="A concise 1-2 sentence overview of the story..."
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  className="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 />
-                <div className="space-y-0.5">
-                  <span className="text-xs font-extrabold text-wbn-navy flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                    Set as Top Story of the Day
-                  </span>
-                  <p className="text-[11px] text-slate-500">Puts this report on the main Lead Hero Card on homepage</p>
-                </div>
-              </label>
+              </div>
 
-              <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white transition-colors">
-                <input
-                  type="checkbox"
-                  checked={isBreaking}
-                  onChange={(e) => setIsBreaking(e.target.checked)}
-                  className="w-4 h-4 text-wbn-blue rounded focus:ring-wbn-blue"
+              {/* Full Content Body */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
+                  Full Article Body Text <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={10}
+                  placeholder="Write or paste your news report body here (separate paragraphs with blank lines)..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue leading-relaxed"
+                  required
                 />
-                <div className="space-y-0.5">
-                  <span className="text-xs font-extrabold text-wbn-navy flex items-center gap-1.5">
-                    <Radio className="w-3.5 h-3.5 text-wbn-blue animate-pulse" />
-                    Push to Live Moving Breaking Marquee
-                  </span>
-                  <p className="text-[11px] text-slate-500">Headline will loop across the top breaking news banner</p>
-                </div>
-              </label>
-            </div>
+              </div>
 
-            {/* Direct Image File Upload & Web URL Option */}
-            <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-wbn-blue" />
-                Feature Image (Direct Upload or Web Link)
-              </label>
+              {/* Feature Image Upload / URL Input */}
+              <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-wbn-blue" />
+                  Cover Feature Image (Upload File or Enter Image URL)
+                </label>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                {/* Direct File Input */}
-                <div className="space-y-1">
-                  <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors text-xs font-bold text-wbn-navy shadow-xs">
-                    <Upload className="w-4 h-4 text-wbn-blue" />
-                    <span>Upload Image File from Device</span>
+                {/* Option 1: File Upload */}
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer bg-wbn-navy hover:bg-wbn-blue text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 shadow-sm">
+                    {isCompressingImage ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    ) : (
+                      <Upload className="w-4 h-4 text-white" />
+                    )}
+                    <span>{isCompressingImage ? 'Optimizing Photo...' : 'Upload Photo from Device'}</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleImageFileChange}
                       className="hidden"
+                      disabled={isCompressingImage}
                     />
                   </label>
-                  <p className="text-[10px] text-slate-400 text-center">Supports PNG, JPG, WEBP photos</p>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">or URL</span>
                 </div>
 
-                {/* Web Image URL Alternative */}
+                {/* Option 2: Image URL Input */}
                 <input
                   type="url"
-                  placeholder="Or paste image URL (e.g. Unsplash link)"
+                  placeholder="https://images.unsplash.com/photo-..."
                   value={imageUrl}
                   onChange={(e) => {
                     setImageUrl(e.target.value);
                     setImagePreview(e.target.value);
                   }}
-                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 />
-              </div>
 
-              {/* Image Live Thumbnail Preview */}
-              {imagePreview && (
-                <div className="relative h-32 w-48 rounded-xl overflow-hidden border border-slate-300 shadow-xs mt-2">
-                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-                </div>
-              )}
-            </div>
-
-            {/* Summary */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                Executive Summary / Deck Line
-              </label>
-              <input
-                type="text"
-                placeholder="Brief 1-2 sentence overview of the news report"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-              />
-            </div>
-
-            {/* Main Content Body */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-wbn-navy uppercase tracking-wider">
-                Full Article Content Body *
-              </label>
-              <textarea
-                rows={10}
-                placeholder="Write the complete news article text here..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full p-4 bg-slate-50 border border-slate-300 rounded-2xl text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                required
-              ></textarea>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isPublishing}
-              className="w-full bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-sm py-4 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              {isPublishing ? (
-                <span>Saving to Supabase Database...</span>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Publish Article Live</span>
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Recently Published Articles List */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
-          <h3 className="font-extrabold text-base text-wbn-navy magazine-rule-dark pb-2 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-wbn-blue" />
-            Manage Published Articles ({articles.length})
-          </h3>
-          <div className="space-y-3">
-            {articles.map((art) => (
-              <div
-                key={art.id}
-                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs"
-              >
-                <div className="space-y-1 flex-1 min-w-[240px]">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-wbn-cobalt uppercase">
-                    <span>{art.category}</span>
-                    <span>•</span>
-                    <span className="text-slate-400">{formatTimeAgo(art.createdAtRaw || art.publishedAt)}</span>
-                    {art.isTopStory && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[9px]">Top Story</span>}
-                    {art.isBreaking && <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[9px]">Breaking</span>}
+                {/* Image Preview Box */}
+                {imagePreview && (
+                  <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-300 mt-2">
+                    <Image src={imagePreview} alt="Preview" fill className="object-cover" />
                   </div>
-                  <h4 className="font-bold text-wbn-navy text-sm line-clamp-1">{art.title}</h4>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/news/${art.slug}`}
-                    className="bg-white border border-slate-300 hover:bg-slate-100 text-wbn-navy font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap"
-                  >
-                    View →
-                  </Link>
-
-                  <button
-                    onClick={() => handleDelete(art.id, art.slug)}
-                    disabled={deletingId === art.id}
-                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5"
-                    title="Delete Article"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                    <span>{deletingId === art.id ? 'Deleting...' : 'Delete'}</span>
-                  </button>
-                </div>
+                )}
               </div>
-            ))}
+
+              {/* Toggles / Flags */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <label className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100/60 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isTopStory}
+                    onChange={(e) => setIsTopStory(e.target.checked)}
+                    className="w-4 h-4 text-wbn-blue rounded focus:ring-wbn-blue"
+                  />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-wbn-navy">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span>Set as Top Story of the Day</span>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isBreaking}
+                    onChange={(e) => setIsBreaking(e.target.checked)}
+                    className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                  />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-red-950">
+                    <Radio className="w-4 h-4 text-red-600 animate-pulse" />
+                    <span>Push to Live Breaking Marquee</span>
+                  </div>
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isPublishing || isCompressingImage}
+                className="w-full bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-sm py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Publishing Live to Supabase...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span>Publish Article Live</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Published Articles List (Col 5) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="font-extrabold text-base text-wbn-navy flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-wbn-blue" />
+                  Live Published Articles ({articles.length})
+                </h3>
+              </div>
+
+              <div className="space-y-3 max-h-[650px] overflow-y-auto pr-1 no-scrollbar">
+                {articles.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic text-center py-6">No articles currently published.</p>
+                ) : (
+                  articles.map((art) => (
+                    <div key={art.id} className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 group hover:bg-blue-50/40 transition-colors">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-wbn-navy text-white rounded">
+                          {art.category}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {art.isTopStory && <span className="text-[10px] font-bold text-amber-600">Top Story</span>}
+                          {art.isBreaking && <span className="text-[10px] font-bold text-red-600">Breaking</span>}
+                          <button
+                            onClick={() => handleDelete(art.id, art.slug)}
+                            disabled={deletingId === art.id}
+                            className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                            title="Delete Article"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <Link href={`/news/${art.slug}`} target="_blank">
+                        <h4 className="font-bold text-xs text-wbn-navy group-hover:text-wbn-blue line-clamp-2 leading-snug">
+                          {art.title}
+                        </h4>
+                      </Link>
+
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60">
+                        <span>{art.publishedAt}</span>
+                        <span>{art.views} Reads</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </main>
