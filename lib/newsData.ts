@@ -157,9 +157,12 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   if (!supabase) return stored;
 
   try {
+    // Query top 100 most recent articles from Supabase PostgreSQL for 1M+ article scale
     const { data, error } = await supabase
       .from('articles')
-      .select('*');
+      .select('*')
+      .order('published_at', { ascending: false })
+      .limit(100);
 
     if (error || !data || data.length === 0) {
       return stored;
@@ -188,13 +191,6 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
         commentsCount: item.comments_count || 0,
         commentsList: item.comments_list || [],
       };
-    });
-
-    // Sort by date descending safely
-    mapped.sort((a, b) => {
-      const da = new Date(a.createdAtRaw || 0).getTime();
-      const db = new Date(b.createdAtRaw || 0).getTime();
-      return db - da;
     });
 
     // Merge with local stored articles
