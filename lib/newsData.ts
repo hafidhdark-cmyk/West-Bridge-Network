@@ -42,7 +42,7 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   if (seconds < 0 || seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
-  const hours = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
@@ -201,13 +201,20 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       };
     });
 
-    // Merge with local stored articles
+    // Merge with local stored articles without losing any local ones
     const mergedMap = new Map<string, Article>();
     
-    // Put remote articles first
+    // Remote articles first
     mapped.forEach((a) => mergedMap.set(a.slug, a));
-    // Overlay local stored articles (so local updates take immediate priority)
-    stored.forEach((sa) => mergedMap.set(sa.slug, sa));
+    // Local stored articles take overlay priority so newly added local stories are preserved
+    stored.forEach((sa) => {
+      const existing = mergedMap.get(sa.slug);
+      if (existing) {
+        mergedMap.set(sa.slug, { ...existing, ...sa });
+      } else {
+        mergedMap.set(sa.slug, sa);
+      }
+    });
 
     const merged = Array.from(mergedMap.values());
 
@@ -286,6 +293,7 @@ export async function incrementArticleViews(slug: string): Promise<number> {
 export async function saveArticleToSupabase(article: Article): Promise<boolean> {
   const existingArticles = getStoredArticles();
 
+  // If new article is marked as Top Story, uncheck isTopStory for all existing articles
   if (article.isTopStory) {
     existingArticles.forEach((a) => {
       if (a.id !== article.id && a.slug !== article.slug) {
@@ -294,6 +302,7 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     });
   }
 
+  // If new article is marked as Trending, auto-override oldest trending items if total exceeds 5
   if (article.isTrending) {
     const activeTrending = existingArticles
       .filter((a) => a.isTrending && a.id !== article.id && a.slug !== article.slug)
@@ -347,12 +356,16 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     if (existing) {
       const { error: updateErr } = await supabase.from('articles').update(payload).eq('slug', article.slug);
       if (updateErr) {
-        console.warn('Supabase update warning:', updateErr);
+        // Retry without optional columns if schema differs
+        const { is_trending, ...basicPayload } = payload;
+        await supabase.from('articles').update(basicPayload).eq('slug', article.slug);
       }
     } else {
       const { error: insertErr } = await supabase.from('articles').insert([payload]);
       if (insertErr) {
-        console.warn('Supabase insert warning:', insertErr);
+        // Retry without optional columns if schema differs
+        const { is_trending, ...basicPayload } = payload;
+        await supabase.from('articles').insert([basicPayload]);
       }
     }
 
