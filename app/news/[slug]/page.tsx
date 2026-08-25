@@ -14,38 +14,38 @@ interface ArticleDetailPageProps {
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
   const siteUrl = 'https://west-bridge-network.vercel.app';
-  const article = await getArticleBySlug(params.slug);
+  const slug = params?.slug || '';
+  const article = await getArticleBySlug(slug);
 
-  if (!article) {
-    return {
-      metadataBase: new URL(siteUrl),
-      title: 'West Bridge Network | Journalistic Integrity & Speed',
-      description: 'Premier digital news platform committed to speed, accuracy, and investigative news across West Africa.',
-    };
-  }
+  // Fallback defaults if article is not found in database during server crawl
+  const pageTitle = article ? `${article.title} | West Bridge Network` : 'West Bridge Network | Journalistic Integrity & Speed';
+  const pageDescription = article?.summary || 'Read top journalistic reports, breaking news, and investigative coverage across West Africa on West Bridge Network.';
+  const canonicalUrl = `${siteUrl}/news/${slug}`;
 
-  const fullUrl = `${siteUrl}/news/${article.slug}`;
-  // Use direct article feature photo for WhatsApp, Facebook, Twitter preview cards!
-  const previewImage = article.imageUrl || `${siteUrl}/logo.png`;
+  // WhatsApp & Social Platforms require an absolute https:// image URL (never a data:image base64 string)
+  // Our dedicated og-image.jpg proxy endpoint converts base64/external photos into a clean binary JPEG image!
+  const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${slug}`;
 
   return {
     metadataBase: new URL(siteUrl),
-    title: `${article.title} | West Bridge Network`,
-    description: article.summary,
+    title: pageTitle,
+    description: pageDescription,
     alternates: {
-      canonical: fullUrl,
+      canonical: canonicalUrl,
     },
     openGraph: {
-      title: article.title,
-      description: article.summary,
-      url: fullUrl,
+      title: pageTitle,
+      description: pageDescription,
+      url: canonicalUrl,
       siteName: 'West Bridge Network',
       images: [
         {
-          url: previewImage,
+          url: ogImageUrl,
+          secureUrl: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: article?.title || 'West Bridge Network News Report',
+          type: 'image/jpeg',
         },
       ],
       locale: 'en_US',
@@ -53,10 +53,16 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.summary,
-      images: [previewImage],
+      title: pageTitle,
+      description: pageDescription,
+      images: [ogImageUrl],
       site: '@WestBridgeNet',
+    },
+    other: {
+      'og:image:secure_url': ogImageUrl,
+      'og:image:type': 'image/jpeg',
+      'og:image:width': '1200',
+      'og:image:height': '630',
     },
   };
 }
