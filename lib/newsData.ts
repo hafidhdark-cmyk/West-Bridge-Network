@@ -201,20 +201,14 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       };
     });
 
-    // Merge with local stored articles without losing any local ones
+    // Remote database data MUST take 100% priority over local browser storage
     const mergedMap = new Map<string, Article>();
     
-    // Remote articles first
+    // 1. Load local stored articles first as offline fallback
+    stored.forEach((sa) => mergedMap.set(sa.slug, sa));
+
+    // 2. Remote articles from Supabase PostgreSQL OVERWRITE local articles with ground-truth DB state
     mapped.forEach((a) => mergedMap.set(a.slug, a));
-    // Local stored articles take overlay priority so newly added local stories are preserved
-    stored.forEach((sa) => {
-      const existing = mergedMap.get(sa.slug);
-      if (existing) {
-        mergedMap.set(sa.slug, { ...existing, ...sa });
-      } else {
-        mergedMap.set(sa.slug, sa);
-      }
-    });
 
     const merged = Array.from(mergedMap.values());
 
