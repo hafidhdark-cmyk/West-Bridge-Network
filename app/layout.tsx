@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://west-bridge-network.vercel.app'),
+  metadataBase: new URL('https://westbridgenews.com'),
   title: {
     default: 'West Bridge Network | Journalistic Integrity & Speed',
     template: '%s | West Bridge Network',
@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     'African Business',
     'Super Eagles',
     'Nollywood',
+    'Security',
+    'Lifestyle',
   ],
   authors: [{ name: 'West Bridge Network Editorial Bureau' }],
   creator: 'West Bridge Network',
@@ -45,14 +47,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://west-bridge-network.vercel.app',
+    url: 'https://westbridgenews.com',
     siteName: 'West Bridge Network',
     title: 'West Bridge Network | Journalistic Integrity & Speed',
     description:
       'Premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.',
     images: [
       {
-        url: 'https://west-bridge-network.vercel.app/logo.png',
+        url: 'https://westbridgenews.com/logo.png',
         width: 800,
         height: 800,
         alt: 'West Bridge Network Logo',
@@ -64,7 +66,7 @@ export const metadata: Metadata = {
     title: 'West Bridge Network | Journalistic Integrity & Speed',
     description:
       'Premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.',
-    images: ['https://west-bridge-network.vercel.app/logo.png'],
+    images: ['https://westbridgenews.com/logo.png'],
   },
   icons: {
     icon: '/logo.png',
@@ -77,6 +79,30 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const jsonLdOrg = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsMediaOrganization',
+    'name': 'West Bridge Network',
+    'url': 'https://westbridgenews.com',
+    'logo': 'https://westbridgenews.com/logo.png',
+    'sameAs': [
+      'https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4'
+    ],
+    'publishingPrinciples': 'https://westbridgenews.com/#editorial-policy'
+  };
+
+  const jsonLdWebSite = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    'name': 'West Bridge Network',
+    'url': 'https://westbridgenews.com',
+    'potentialAction': {
+      '@type': 'SearchAction',
+      'target': 'https://westbridgenews.com/?q={search_term_string}',
+      'query-input': 'required name=search_term_string'
+    }
+  };
+
   return (
     <html lang="en">
       <head>
@@ -85,6 +111,14 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,500;0,600;0,700;1,600&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrg) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
       <body className="antialiased bg-[#FAFAF9] text-slate-900 font-sans">

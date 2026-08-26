@@ -67,7 +67,47 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const slug = params?.slug;
+  const siteUrl = 'https://westbridgenews.com';
   const initialArticle = await getArticleBySlug(slug);
 
-  return <ArticlePageClient slug={slug} initialArticle={initialArticle} />;
+  const jsonLdArticle = initialArticle
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        headline: initialArticle.title,
+        description: initialArticle.summary,
+        image: [initialArticle.imageUrl || `${siteUrl}/logo.png`],
+        datePublished: initialArticle.createdAtRaw || new Date().toISOString(),
+        dateModified: initialArticle.createdAtRaw || new Date().toISOString(),
+        author: {
+          '@type': 'Organization',
+          name: 'West Bridge Network',
+          url: siteUrl,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'West Bridge Network',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${siteUrl}/logo.png`,
+          },
+        },
+        'mainEntityOfPage': {
+          '@type': 'WebPage',
+          '@id': `${siteUrl}/news/${initialArticle.slug}`,
+        },
+      }
+    : null;
+
+  return (
+    <>
+      {jsonLdArticle && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }}
+        />
+      )}
+      <ArticlePageClient slug={slug} initialArticle={initialArticle} />
+    </>
+  );
 }
