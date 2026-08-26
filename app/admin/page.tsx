@@ -168,13 +168,13 @@ export default function AdminPage() {
             <p className="text-slate-300 text-xs">Publish, upload photos, and manage reports live in Supabase PostgreSQL</p>
           </div>
 
-          <Link
-            href="/"
+          <a
+            href="https://westbridgenews.com"
             className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Return to Live Website</span>
-          </Link>
+          </a>
         </div>
 
         {/* Success Alert Banner */}
@@ -397,11 +397,11 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      <Link href={`/news/${art.slug}`} target="_blank">
+                      <a href={`https://westbridgenews.com/news/${art.slug}`} target="_blank" rel="noopener noreferrer">
                         <h4 className="font-bold text-xs text-wbn-navy group-hover:text-wbn-blue line-clamp-2 leading-snug">
                           {art.title}
                         </h4>
-                      </Link>
+                      </a>
 
                       <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60">
                         <span>{art.publishedAt}</span>
