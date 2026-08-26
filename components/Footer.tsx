@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { CATEGORIES } from '@/components/Header';
-import { Lock, ShieldCheck, FileText, HelpCircle, X } from 'lucide-react';
+import { ShieldCheck, FileText, HelpCircle, X } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
 const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20Network,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
@@ -136,15 +136,8 @@ export default function Footer({ onSelectCategory }: FooterProps) {
         </div>
 
         {/* Bottom Footer Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 flex flex-wrap justify-between items-center gap-4 text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 text-slate-500 text-center sm:text-left">
           <div>© 2026 West Bridge Network (WBN). All rights reserved.</div>
-          <Link
-            href="/admin"
-            className="text-slate-600 hover:text-slate-400 transition-colors flex items-center gap-1 text-[11px]"
-          >
-            <Lock className="w-3 h-3" />
-            <span>Publisher Admin Studio</span>
-          </Link>
         </div>
       </footer>
 
