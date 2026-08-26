@@ -201,13 +201,24 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       };
     });
 
+    // Merge remote database data with stored articles, preserving active isTrending / isTopStory / isBreaking flags
+    stored.forEach((sa) => {
+      const existing = mapped.find((m) => m.slug === sa.slug || m.id === sa.id);
+      if (existing) {
+        if (sa.isTrending) existing.isTrending = true;
+        if (sa.isTopStory) existing.isTopStory = true;
+        if (sa.isBreaking) existing.isBreaking = true;
+      } else {
+        mapped.push(sa);
+      }
+    });
+
     mapped.sort((a, b) => {
       const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
       const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
       return db - da;
     });
 
-    // Supabase PostgreSQL is 100% master authority: overwrite local storage so deleted items are wiped on all devices
     saveArticlesToStore(mapped);
     return mapped;
   } catch (e) {
