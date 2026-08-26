@@ -86,52 +86,58 @@ export default function AdminPage() {
 
     setIsPublishing(true);
 
-    const generatedSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
+    try {
+      const generatedSlug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
 
-    const nowIso = new Date().toISOString();
+      const nowIso = new Date().toISOString();
 
-    const newArticle: Article = {
-      id: `wbn-${Date.now()}`,
-      title: title.trim(),
-      slug: generatedSlug,
-      category,
-      summary: summary.trim() || title.trim(),
-      content: content.trim(),
-      imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
-      createdAtRaw: nowIso,
-      publishedAt: 'Just now',
-      readTime: `${Math.max(2, Math.ceil(content.split(' ').length / 200))} min read`,
-      author: 'West Bridge Network',
-      authorAvatar: '/logo.png',
-      isTopStory,
-      isBreaking,
-      isTrending,
-      views: 1,
-      likes: 0,
-      commentsCount: 0,
-    };
+      const newArticle: Article = {
+        id: `wbn-${Date.now()}`,
+        title: title.trim(),
+        slug: generatedSlug,
+        category,
+        summary: summary.trim() || title.trim(),
+        content: content.trim(),
+        imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
+        createdAtRaw: nowIso,
+        publishedAt: 'Just now',
+        readTime: `${Math.max(2, Math.ceil(content.split(' ').length / 200))} min read`,
+        author: 'West Bridge Network',
+        authorAvatar: '/logo.png',
+        isTopStory,
+        isBreaking,
+        isTrending,
+        views: 1,
+        likes: 0,
+        commentsCount: 0,
+      };
 
-    await saveArticleToSupabase(newArticle);
-    setArticles(getStoredArticles());
-    setIsPublishing(false);
-    setPublishSuccess(true);
+      await saveArticleToSupabase(newArticle);
+      const updatedList = await fetchArticlesFromSupabase();
+      setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
+      setPublishSuccess(true);
 
-    // Reset Form
-    setTitle('');
-    setSummary('');
-    setContent('');
-    setImageUrl('');
-    setImagePreview(null);
-    setIsTopStory(false);
-    setIsBreaking(false);
-    setIsTrending(false);
+      // Reset Form
+      setTitle('');
+      setSummary('');
+      setContent('');
+      setImageUrl('');
+      setImagePreview(null);
+      setIsTopStory(false);
+      setIsBreaking(false);
+      setIsTrending(false);
 
-    setTimeout(() => {
-      setPublishSuccess(false);
-    }, 4000);
+      setTimeout(() => {
+        setPublishSuccess(false);
+      }, 4000);
+    } catch (err) {
+      console.error('Publishing error:', err);
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const handleDelete = async (id: string, slug: string) => {
