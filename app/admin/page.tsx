@@ -140,6 +140,20 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleTrending = async (art: Article) => {
+    const updated = { ...art, isTrending: !art.isTrending };
+    await saveArticleToSupabase(updated);
+    const updatedList = await fetchArticlesFromSupabase();
+    setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
+  };
+
+  const handleToggleTopStory = async (art: Article) => {
+    const updated = { ...art, isTopStory: !art.isTopStory };
+    await saveArticleToSupabase(updated);
+    const updatedList = await fetchArticlesFromSupabase();
+    setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
+  };
+
   const handleDelete = async (id: string, slug: string) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
     setDeletingId(id);
@@ -388,9 +402,24 @@ export default function AdminPage() {
                           {art.category}
                         </span>
                         <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                          {art.isTopStory && <span className="text-[10px] font-bold text-amber-600">Top Story</span>}
-                          {art.isBreaking && <span className="text-[10px] font-bold text-red-600">Breaking</span>}
-                          {art.isTrending && <span className="text-[10px] font-bold text-indigo-600">Trending</span>}
+                          <button
+                            onClick={() => handleToggleTopStory(art)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors ${
+                              art.isTopStory ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-amber-50'
+                            }`}
+                          >
+                            {art.isTopStory ? '★ Top Story' : '+ Top Story'}
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleTrending(art)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors ${
+                              art.isTrending ? 'bg-indigo-100 text-indigo-800 border-indigo-300' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-indigo-50'
+                            }`}
+                          >
+                            {art.isTrending ? '🔥 Trending' : '+ Trending'}
+                          </button>
+
                           <button
                             onClick={() => handleDelete(art.id, art.slug)}
                             disabled={deletingId === art.id}
