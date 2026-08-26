@@ -227,9 +227,26 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  if (!slug) return undefined;
+  const decodedSlug = decodeURIComponent(slug).trim().toLowerCase();
+
   if (supabase) {
     try {
-      const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).maybeSingle();
+      // 1. Exact match query
+      let { data, error } = await supabase.from('articles').select('*').eq('slug', decodedSlug).maybeSingle();
+
+      // 2. Partial prefix query (if slug was truncated when shared on WhatsApp)
+      if (!data) {
+        const { data: ilikeList } = await supabase
+          .from('articles')
+          .select('*')
+          .ilike('slug', `${decodedSlug}%`)
+          .limit(1);
+        if (ilikeList && ilikeList.length > 0) {
+          data = ilikeList[0];
+        }
+      }
+
       if (data && !error) {
         const rawDate = data.published_at || data.created_at || new Date().toISOString();
         return {
@@ -255,11 +272,15 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
         };
       }
     } catch (e) {
-      // Fallback
+      // Fallback to local store
     }
   }
 
-  return getStoredArticles().find((a) => a.slug === slug);
+  const stored = getStoredArticles();
+  return (
+    stored.find((a) => a.slug.toLowerCase() === decodedSlug) ||
+    stored.find((a) => a.slug.toLowerCase().startsWith(decodedSlug))
+  );
 }
 
 export async function incrementArticleViews(slug: string): Promise<number> {
@@ -294,27 +315,6 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
         a.isTopStory = false;
       }
     });
-  }
-
-  // If new article is marked as Trending, auto-override oldest trending items if total exceeds 5
-  if (article.isTrending) {
-    const activeTrending = existingArticles
-      .filter((a) => a.isTrending && a.id !== article.id && a.slug !== article.slug)
-      .sort((a, b) => {
-        const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
-        const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
-        return da - db; // oldest first
-      });
-
-    while (activeTrending.length >= 5) {
-      const oldestToOverride = activeTrending.shift();
-      if (oldestToOverride) {
-        oldestToOverride.isTrending = false;
-        if (supabase) {
-          supabase.from('articles').update({ is_trending: false }).eq('slug', oldestToOverride.slug).then();
-        }
-      }
-    }
   }
 
   saveArticle(article);
