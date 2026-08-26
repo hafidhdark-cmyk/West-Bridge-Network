@@ -7,7 +7,7 @@ export const revalidate = 0;
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get('slug');
-  const fallbackLogo = 'https://west-bridge-network.vercel.app/logo.png';
+  const fallbackLogo = 'https://westbridgenews.com/logo.png';
 
   if (!slug) {
     return NextResponse.redirect(fallbackLogo);
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(article.imageUrl);
   }
 
-  // 2. Base64 data string (Uploaded from phone/PC)
+  // 2. Base64 data string (Uploaded from device)
   if (article.imageUrl.startsWith('data:image')) {
     try {
       const matches = article.imageUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);

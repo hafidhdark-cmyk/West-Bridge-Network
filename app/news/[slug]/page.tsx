@@ -13,17 +13,15 @@ interface ArticleDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
-  const siteUrl = 'https://west-bridge-network.vercel.app';
+  const siteUrl = 'https://westbridgenews.com';
   const slug = params?.slug || '';
   const article = await getArticleBySlug(slug);
 
-  // Fallback defaults if article is not found in database during server crawl
   const pageTitle = article ? `${article.title} | West Bridge Network` : 'West Bridge Network | Journalistic Integrity & Speed';
   const pageDescription = article?.summary || 'Read top journalistic reports, breaking news, and investigative coverage across West Africa on West Bridge Network.';
   const canonicalUrl = `${siteUrl}/news/${slug}`;
 
-  // WhatsApp & Social Platforms require an absolute https:// image URL (never a data:image base64 string)
-  // Our dedicated og-image.jpg proxy endpoint converts base64/external photos into a clean binary JPEG image!
+  // Dedicated og-image.jpg binary JPEG endpoint for WhatsApp, Facebook, and Twitter link preview cards
   const ogImageUrl = `${siteUrl}/api/og-image.jpg?slug=${slug}`;
 
   return {

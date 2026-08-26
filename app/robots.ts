@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/admin/',
     },
-    sitemap: 'https://west-bridge-network.vercel.app/sitemap.xml',
+    sitemap: 'https://westbridgenews.com/sitemap.xml',
   };
 }
