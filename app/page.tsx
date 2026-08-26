@@ -131,7 +131,7 @@ export default function HomePage() {
 
               <Link 
                 href={`/news/${mainLeadStory.slug}`}
-                className="group relative flex-1 rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-wbn-navy flex flex-col justify-end min-h-[420px] sm:min-h-[480px]"
+                className="group relative flex-1 rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-wbn-navy flex flex-col justify-end min-h-[380px] sm:min-h-[480px]"
               >
                 <Image
                   src={mainLeadStory.imageUrl}
@@ -142,7 +142,7 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
-                <div className="relative z-10 p-6 sm:p-8 space-y-3">
+                <div className="relative z-10 p-5 sm:p-8 space-y-2.5 sm:space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="bg-wbn-blue text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md tracking-wider flex items-center gap-1 shadow-sm">
                       <Zap className="w-3 h-3 fill-current" />
@@ -153,7 +153,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <h2 className="text-2xl sm:text-4xl font-black text-white font-editorial-heading leading-tight group-hover:text-blue-200 transition-colors">
+                  <h2 className="text-xl sm:text-4xl font-black text-white font-editorial-heading leading-tight group-hover:text-blue-200 transition-colors">
                     {mainLeadStory.title}
                   </h2>
 
@@ -161,23 +161,24 @@ export default function HomePage() {
                     {mainLeadStory.summary}
                   </p>
 
-                  <div className="flex items-center gap-4 text-xs text-slate-400 pt-2 border-t border-slate-800">
-                    <div className="flex items-center gap-1.5 font-semibold text-white">
+                  <div className="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800">
+                    <div className="hidden sm:flex items-center gap-1.5 font-semibold text-white">
                       <Image src="/logo.png" alt="WBN Logo" width={16} height={16} className="rounded-full" />
                       <span>West Bridge Network</span>
                     </div>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{mainLeadStory.publishedAt}</span>
-                    </div>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>{mainLeadStory.views} reads</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{mainLeadStory.publishedAt}</span>
+                      </div>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{mainLeadStory.views} reads</span>
+                      </div>
                     </div>
 
-                    <span className="ml-auto bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2 rounded-xl border border-white/20 transition-all flex items-center gap-1">
+                    <span className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/20 transition-all flex items-center gap-1">
                       Read Story
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </span>
