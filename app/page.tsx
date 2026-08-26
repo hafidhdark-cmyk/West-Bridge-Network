@@ -11,15 +11,10 @@ import { fetchArticlesFromSupabase, getStoredArticles, Article } from '@/lib/new
 import { 
   Clock, 
   Eye, 
-  TrendingUp, 
   Zap, 
-  Calendar, 
   ChevronRight, 
   ArrowUpRight,
-  RotateCcw,
-  Sparkles,
-  Radio,
-  Search
+  Sparkles
 } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
@@ -69,23 +64,6 @@ export default function HomePage() {
     : filteredArticles;
 
   const displayedNews = regularNews.slice(0, visibleCount);
-
-  // Strict Top 5 Trending Reports (Only articles checked with isTrending = true within 24h, NO view fallback)
-  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-  const now = Date.now();
-
-  const trendingReads = articles
-    .filter((a) => {
-      if (!a.isTrending) return false;
-      const pubTime = new Date(a.createdAtRaw || a.publishedAt).getTime();
-      return isNaN(pubTime) || now - pubTime <= TWENTY_FOUR_HOURS_MS;
-    })
-    .sort((a, b) => {
-      const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
-      const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
-      return db - da;
-    })
-    .slice(0, 5);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 6);
@@ -366,42 +344,6 @@ export default function HomePage() {
 
           {/* Sidebar Column (4 Cols) */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* Strict Top 5 Trending Reports Widget (NO view count fallback) */}
-            {trendingReads && trendingReads.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                  <TrendingUp className="w-4 h-4 text-wbn-blue" />
-                  <h3 className="font-extrabold text-sm uppercase tracking-wider text-wbn-navy font-editorial-heading">
-                    Top 5 Trending Reports
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  {trendingReads.map((art, index) => (
-                    <Link
-                      key={art.id}
-                      href={`/news/${art.slug}`}
-                      className="flex items-start gap-3 group border-b border-slate-100 pb-3 last:border-0 last:pb-0"
-                    >
-                      <span className="font-black text-2xl text-slate-300 group-hover:text-wbn-blue transition-colors font-editorial-heading w-6 flex-shrink-0 text-center">
-                        0{index + 1}
-                      </span>
-                      <div className="space-y-1 min-w-0">
-                        <h4 className="font-bold text-xs text-wbn-navy group-hover:text-wbn-blue transition-colors line-clamp-2 leading-snug">
-                          {art.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase">
-                          <span className="text-wbn-cobalt">{art.category}</span>
-                          <span>•</span>
-                          <span>{art.views} views</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Official WhatsApp Group Channel Widget */}
             <div className="bg-gradient-to-br from-emerald-800 to-teal-900 text-white rounded-3xl p-6 shadow-md space-y-4">
               <div className="flex items-center gap-2">

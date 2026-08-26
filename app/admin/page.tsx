@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
 import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
-import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, TrendingUp, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
+import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -17,7 +17,6 @@ export default function AdminPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isTopStory, setIsTopStory] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
-  const [isTrending, setIsTrending] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
@@ -109,7 +108,6 @@ export default function AdminPage() {
         authorAvatar: '/logo.png',
         isTopStory,
         isBreaking,
-        isTrending,
         views: 1,
         likes: 0,
         commentsCount: 0,
@@ -128,7 +126,6 @@ export default function AdminPage() {
       setImagePreview(null);
       setIsTopStory(false);
       setIsBreaking(false);
-      setIsTrending(false);
 
       setTimeout(() => {
         setPublishSuccess(false);
@@ -138,13 +135,6 @@ export default function AdminPage() {
     } finally {
       setIsPublishing(false);
     }
-  };
-
-  const handleToggleTrending = async (art: Article) => {
-    const updated = { ...art, isTrending: !art.isTrending };
-    await saveArticleToSupabase(updated);
-    const updatedList = await fetchArticlesFromSupabase();
-    setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
   };
 
   const handleToggleTopStory = async (art: Article) => {
@@ -331,33 +321,18 @@ export default function AdminPage() {
                   </div>
                 </label>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={isBreaking}
-                      onChange={(e) => setIsBreaking(e.target.checked)}
-                      className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
-                    />
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-950">
-                      <Radio className="w-4 h-4 text-red-600 animate-pulse" />
-                      <span>Push to Live Breaking Marquee (Expires after 24h)</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-xl cursor-pointer hover:bg-indigo-100/60 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={isTrending}
-                      onChange={(e) => setIsTrending(e.target.checked)}
-                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-                    />
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-950">
-                      <TrendingUp className="w-4 h-4 text-indigo-600" />
-                      <span>Set as Top Trending Report (Auto-overrides oldest if &gt;5)</span>
-                    </div>
-                  </label>
-                </div>
+                <label className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isBreaking}
+                    onChange={(e) => setIsBreaking(e.target.checked)}
+                    className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                  />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-red-950">
+                    <Radio className="w-4 h-4 text-red-600 animate-pulse" />
+                    <span>Push to Live Breaking Marquee (Expires after 24h)</span>
+                  </div>
+                </label>
               </div>
 
               {/* Submit Button */}
@@ -409,15 +384,6 @@ export default function AdminPage() {
                             }`}
                           >
                             {art.isTopStory ? '★ Top Story' : '+ Top Story'}
-                          </button>
-
-                          <button
-                            onClick={() => handleToggleTrending(art)}
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors ${
-                              art.isTrending ? 'bg-indigo-100 text-indigo-800 border-indigo-300' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-indigo-50'
-                            }`}
-                          >
-                            {art.isTrending ? '🔥 Trending' : '+ Trending'}
                           </button>
 
                           <button
