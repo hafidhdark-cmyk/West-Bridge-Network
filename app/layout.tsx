@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'West Bridge Network Editorial Bureau' }],
   creator: 'West Bridge Network',
   publisher: 'West Bridge Network',
+  verification: {
+    google: 'nVuO_Wn6aelyV49YJjDb_4cjVXvW_sAP4KUNCnrKMwQ',
+  },
   robots: {
     index: true,
     follow: true,
