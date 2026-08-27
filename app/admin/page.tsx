@@ -29,8 +29,8 @@ export default function AdminPage() {
     });
   }, []);
 
-  // HTML5 Canvas helper to compress large camera photos down to ~100KB under 1200px width
-  const compressImageFile = (file: File, maxWidth = 1200, quality = 0.75): Promise<string> => {
+  // HTML5 Canvas helper to compress large camera photos down to ~30KB under 800px width
+  const compressImageFile = (file: File, maxWidth = 800, quality = 0.6): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -68,7 +68,7 @@ export default function AdminPage() {
     if (file) {
       setIsCompressingImage(true);
       try {
-        const compressed = await compressImageFile(file, 1200, 0.75);
+        const compressed = await compressImageFile(file, 800, 0.6);
         setImageUrl(compressed);
         setImagePreview(compressed);
       } catch (err) {
@@ -113,10 +113,8 @@ export default function AdminPage() {
         commentsCount: 0,
       };
 
-      await saveArticleToSupabase(newArticle);
-      const updatedList = await fetchArticlesFromSupabase();
-      setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
-      setPublishSuccess(true);
+      // 1. Optimistic Instant UI Update (Article appears immediately!)
+      setArticles((prev) => [newArticle, ...prev.filter((a) => a.slug !== newArticle.slug)]);
 
       // Reset Form
       setTitle('');
@@ -126,6 +124,10 @@ export default function AdminPage() {
       setImagePreview(null);
       setIsTopStory(false);
       setIsBreaking(false);
+      setPublishSuccess(true);
+
+      // 2. Save live to Supabase PostgreSQL in background
+      await saveArticleToSupabase(newArticle);
 
       setTimeout(() => {
         setPublishSuccess(false);
@@ -139,16 +141,15 @@ export default function AdminPage() {
 
   const handleToggleTopStory = async (art: Article) => {
     const updated = { ...art, isTopStory: !art.isTopStory };
+    setArticles((prev) => prev.map((a) => (a.slug === art.slug ? updated : a)));
     await saveArticleToSupabase(updated);
-    const updatedList = await fetchArticlesFromSupabase();
-    setArticles(updatedList && updatedList.length > 0 ? updatedList : getStoredArticles());
   };
 
   const handleDelete = async (id: string, slug: string) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
     setDeletingId(id);
+    setArticles((prev) => prev.filter((a) => a.id !== id && a.slug !== slug));
     await deleteArticleFromSupabase(id);
-    setArticles(articles.filter((a) => a.id !== id && a.slug !== slug));
     setDeletingId(null);
   };
 

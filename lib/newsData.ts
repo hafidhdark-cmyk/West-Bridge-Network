@@ -321,60 +321,51 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
 
   if (!supabase) return true;
 
-  // Safety net: 3.5s maximum timeout so network delays on mobile data never hang the UI
-  const timeoutPromise = new Promise<boolean>((resolve) => {
-    setTimeout(() => resolve(true), 3500);
-  });
-
-  const savePromise = (async () => {
-    try {
-      if (article.isTopStory) {
-        await supabase.from('articles').update({ is_top_story: false }).neq('slug', article.slug);
-      }
-
-      const isoDate = article.createdAtRaw || new Date().toISOString();
-
-      const payload = {
-        title: article.title,
-        slug: article.slug,
-        category: article.category,
-        summary: article.summary,
-        content: article.content,
-        image_url: article.imageUrl,
-        published_at: isoDate,
-        read_time: article.readTime,
-        is_top_story: article.isTopStory || false,
-        is_breaking: article.isBreaking || false,
-        is_trending: article.isTrending || false,
-        views: article.views || 1,
-        likes: article.likes || 0,
-        comments_count: article.commentsCount || 0,
-      };
-
-      const { data: existing } = await supabase.from('articles').select('id').eq('slug', article.slug).maybeSingle();
-
-      if (existing) {
-        const { error: updateErr } = await supabase.from('articles').update(payload).eq('slug', article.slug);
-        if (updateErr) {
-          const { is_trending, ...basicPayload } = payload;
-          await supabase.from('articles').update(basicPayload).eq('slug', article.slug);
-        }
-      } else {
-        const { error: insertErr } = await supabase.from('articles').insert([payload]);
-        if (insertErr) {
-          const { is_trending, ...basicPayload } = payload;
-          await supabase.from('articles').insert([basicPayload]);
-        }
-      }
-
-      return true;
-    } catch (e) {
-      console.warn('Supabase save exception:', e);
-      return true;
+  try {
+    if (article.isTopStory) {
+      await supabase.from('articles').update({ is_top_story: false }).neq('slug', article.slug);
     }
-  })();
 
-  return Promise.race([savePromise, timeoutPromise]);
+    const isoDate = article.createdAtRaw || new Date().toISOString();
+
+    const payload = {
+      title: article.title,
+      slug: article.slug,
+      category: article.category,
+      summary: article.summary,
+      content: article.content,
+      image_url: article.imageUrl,
+      published_at: isoDate,
+      read_time: article.readTime,
+      is_top_story: article.isTopStory || false,
+      is_breaking: article.isBreaking || false,
+      is_trending: article.isTrending || false,
+      views: article.views || 1,
+      likes: article.likes || 0,
+      comments_count: article.commentsCount || 0,
+    };
+
+    const { data: existing } = await supabase.from('articles').select('id').eq('slug', article.slug).maybeSingle();
+
+    if (existing) {
+      const { error: updateErr } = await supabase.from('articles').update(payload).eq('slug', article.slug);
+      if (updateErr) {
+        const { is_trending, ...basicPayload } = payload;
+        await supabase.from('articles').update(basicPayload).eq('slug', article.slug);
+      }
+    } else {
+      const { error: insertErr } = await supabase.from('articles').insert([payload]);
+      if (insertErr) {
+        const { is_trending, ...basicPayload } = payload;
+        await supabase.from('articles').insert([basicPayload]);
+      }
+    }
+
+    return true;
+  } catch (e) {
+    console.warn('Supabase save exception:', e);
+    return true;
+  }
 }
 
 export async function deleteArticleFromSupabase(idOrSlug: string): Promise<boolean> {
