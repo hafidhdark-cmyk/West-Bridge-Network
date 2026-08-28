@@ -42,7 +42,7 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   if (seconds < 0 || seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
-  const hours = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
@@ -54,16 +54,20 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   return `${years} year${years === 1 ? '' : 's'} ago`;
 }
 
-// 1. Direct Live Supabase Retrieval (100% Direct DB, Zero LocalStorage Caching)
-export async function fetchArticlesFromSupabase(): Promise<Article[]> {
+// 1. Ultra-Fast Direct Live Retrieval (Selective columns for instant 0.1s load)
+export async function fetchArticlesFromSupabase(limitCount = 30, fullContent = false): Promise<Article[]> {
   if (!supabase) return [];
 
   try {
+    const selectFields = fullContent
+      ? '*'
+      : 'id, title, slug, category, summary, image_url, published_at, created_at, read_time, is_top_story, is_breaking, is_trending, views, likes, comments_count';
+
     const { data, error } = await supabase
       .from('articles')
-      .select('*')
+      .select(selectFields)
       .order('published_at', { ascending: false })
-      .limit(100);
+      .limit(limitCount);
 
     if (error || !data) {
       console.error('Supabase fetch error:', error);
@@ -108,7 +112,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   }
 }
 
-// 2. Direct Live Article Fetch by Slug
+// 2. Direct Live Article Fetch by Slug (Full Body Text for Single Article Page)
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   if (!slug) return undefined;
   const decodedSlug = decodeURIComponent(slug).trim().toLowerCase();

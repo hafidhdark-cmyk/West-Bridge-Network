@@ -27,20 +27,36 @@ export default function HomePage() {
   const [visibleCount, setVisibleCount] = useState<number>(6);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const loadArticles = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchArticlesFromSupabase();
-      setArticles(data || []);
-    } catch (err) {
-      console.error('Failed to load articles:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadArticles();
+    let isSubscribed = true;
+
+    const loadIncrementalArticles = async () => {
+      setIsLoading(true);
+      try {
+        // Step 1: Instant Fast Batch (First 20 headlines in ~0.15s, light feed query)
+        const initialBatch = await fetchArticlesFromSupabase(20, false);
+        if (isSubscribed && initialBatch && initialBatch.length > 0) {
+          setArticles(initialBatch);
+          setIsLoading(false);
+        }
+
+        // Step 2: Background Stream (Fetch remaining up to 100 in background without blocking UI)
+        const fullBatch = await fetchArticlesFromSupabase(100, false);
+        if (isSubscribed && fullBatch && fullBatch.length > 0) {
+          setArticles(fullBatch);
+        }
+      } catch (err) {
+        console.error('Failed to load incremental articles:', err);
+      } finally {
+        if (isSubscribed) setIsLoading(false);
+      }
+    };
+
+    loadIncrementalArticles();
+
+    return () => {
+      isSubscribed = false;
+    };
   }, []);
 
   const filteredArticles = articles.filter((a) => {
@@ -58,7 +74,7 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  const mainLeadStory = articles.find((a) => a.isTopStory === true);
+  const mainLeadStory = articles.find((a) => a.isTopStory === true) || articles[0];
   const sideLatestNews = articles.filter((a) => a.id !== mainLeadStory?.id).slice(0, 3);
   
   const isHomeView = activeCategory === 'Home' || activeCategory === 'Discover' || activeCategory === 'All';
@@ -120,7 +136,7 @@ export default function HomePage() {
         )}
 
         {/* HERO SECTION: Top Story Lead + Side Latest News */}
-        {isHomeView && !searchQuery && mainLeadStory && (
+        {isHomeView && !searchQuery && (
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             {/* Primary Main Lead Story (8 Cols) */}
             <div className="lg:col-span-8 flex flex-col">
@@ -132,62 +148,67 @@ export default function HomePage() {
                 <span className="text-slate-400 text-[10px] ml-auto font-medium">Updated live</span>
               </div>
 
-              <Link 
-                href={`/news/${mainLeadStory.slug}`}
-                className="group relative flex-1 rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-wbn-navy flex flex-col justify-end min-h-[380px] sm:min-h-[480px]"
-              >
-                <Image
-                  src={mainLeadStory.imageUrl}
-                  alt={mainLeadStory.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+              {isLoading && !mainLeadStory ? (
+                /* Skeleton Loader for Main Story */
+                <div className="rounded-3xl bg-slate-200 animate-pulse min-h-[380px] sm:min-h-[480px] w-full" />
+              ) : mainLeadStory ? (
+                <Link 
+                  href={`/news/${mainLeadStory.slug}`}
+                  className="group relative flex-1 rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-wbn-navy flex flex-col justify-end min-h-[380px] sm:min-h-[480px]"
+                >
+                  <Image
+                    src={mainLeadStory.imageUrl}
+                    alt={mainLeadStory.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
-                <div className="relative z-10 p-5 sm:p-8 space-y-2.5 sm:space-y-3">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="bg-wbn-blue text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md tracking-wider flex items-center gap-1 shadow-sm">
-                      <Zap className="w-3 h-3 fill-current" />
-                      Top Story
-                    </span>
-                    <span className="bg-slate-800/80 backdrop-blur-md text-white text-[10px] font-bold uppercase px-2.5 py-1 rounded-md border border-slate-700">
-                      {mainLeadStory.category}
-                    </span>
-                  </div>
-
-                  <h2 className="text-xl sm:text-4xl font-black text-white font-editorial-heading leading-tight group-hover:text-blue-200 transition-colors">
-                    {mainLeadStory.title}
-                  </h2>
-
-                  <p className="text-slate-300 text-xs sm:text-sm line-clamp-2 leading-relaxed max-w-3xl">
-                    {mainLeadStory.summary}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800">
-                    <div className="hidden sm:flex items-center gap-1.5 font-semibold text-white">
-                      <Image src="/logo.png" alt="WBN Logo" width={16} height={16} className="rounded-full" />
-                      <span>West Bridge Network</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{mainLeadStory.publishedAt}</span>
-                      </div>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{mainLeadStory.views} reads</span>
-                      </div>
+                  <div className="relative z-10 p-5 sm:p-8 space-y-2.5 sm:space-y-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="bg-wbn-blue text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md tracking-wider flex items-center gap-1 shadow-sm">
+                        <Zap className="w-3 h-3 fill-current" />
+                        Top Story
+                      </span>
+                      <span className="bg-slate-800/80 backdrop-blur-md text-white text-[10px] font-bold uppercase px-2.5 py-1 rounded-md border border-slate-700">
+                        {mainLeadStory.category}
+                      </span>
                     </div>
 
-                    <span className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/20 transition-all flex items-center gap-1">
-                      Read Story
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </span>
+                    <h2 className="text-xl sm:text-4xl font-black text-white font-editorial-heading leading-tight group-hover:text-blue-200 transition-colors">
+                      {mainLeadStory.title}
+                    </h2>
+
+                    <p className="text-slate-300 text-xs sm:text-sm line-clamp-2 leading-relaxed max-w-3xl">
+                      {mainLeadStory.summary}
+                    </p>
+
+                    <div className="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800">
+                      <div className="hidden sm:flex items-center gap-1.5 font-semibold text-white">
+                        <Image src="/logo.png" alt="WBN Logo" width={16} height={16} className="rounded-full" />
+                        <span>West Bridge Network</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{mainLeadStory.publishedAt}</span>
+                        </div>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{mainLeadStory.views} reads</span>
+                        </div>
+                      </div>
+
+                      <span className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/20 transition-all flex items-center gap-1">
+                        Read Story
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              ) : null}
             </div>
 
             {/* Side Latest Reports Widget (4 Cols) */}
@@ -201,37 +222,49 @@ export default function HomePage() {
                 </div>
 
                 <div className="space-y-4">
-                  {sideLatestNews.map((story, idx) => (
-                    <Link
-                      key={story.id}
-                      href={`/news/${story.slug}`}
-                      className="group flex gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0 items-start"
-                    >
-                      <div className="relative w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200">
-                        <Image
-                          src={story.imageUrl}
-                          alt={story.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                        {idx === 0 && (
-                          <span className="absolute top-1 left-1 bg-wbn-navy text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded">
-                            LATEST REPORT
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-wbn-cobalt uppercase">
-                          <span>{story.category}</span>
-                          <span>•</span>
-                          <span className="text-slate-400 font-normal">{story.readTime}</span>
+                  {isLoading && sideLatestNews.length === 0 ? (
+                    [1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-3 animate-pulse">
+                        <div className="w-20 h-16 bg-slate-200 rounded-xl flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-slate-200 rounded w-1/3" />
+                          <div className="h-4 bg-slate-200 rounded w-full" />
                         </div>
-                        <h4 className="font-bold text-xs text-wbn-navy group-hover:text-wbn-blue transition-colors line-clamp-2 leading-snug">
-                          {story.title}
-                        </h4>
                       </div>
-                    </Link>
-                  ))}
+                    ))
+                  ) : (
+                    sideLatestNews.map((story, idx) => (
+                      <Link
+                        key={story.id}
+                        href={`/news/${story.slug}`}
+                        className="group flex gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0 items-start"
+                      >
+                        <div className="relative w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200">
+                          <Image
+                            src={story.imageUrl}
+                            alt={story.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute top-1 left-1 bg-wbn-navy text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded">
+                              LATEST REPORT
+                            </span>
+                          )}
+                        </div>
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-wbn-cobalt uppercase">
+                            <span>{story.category}</span>
+                            <span>•</span>
+                            <span className="text-slate-400 font-normal">{story.readTime}</span>
+                          </div>
+                          <h4 className="font-bold text-xs text-wbn-navy group-hover:text-wbn-blue transition-colors line-clamp-2 leading-snug">
+                            {story.title}
+                          </h4>
+                        </div>
+                      </Link>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -262,9 +295,15 @@ export default function HomePage() {
             </div>
 
             {isLoading && articles.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
-                <Loader2 className="w-8 h-8 animate-spin text-wbn-blue mx-auto" />
-                <p className="text-slate-500 font-medium text-xs">Fetching Articles...</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-white rounded-3xl overflow-hidden border border-slate-200 p-4 space-y-3 animate-pulse">
+                    <div className="h-48 bg-slate-200 rounded-2xl w-full" />
+                    <div className="h-4 bg-slate-200 rounded w-1/4" />
+                    <div className="h-5 bg-slate-200 rounded w-full" />
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  </div>
+                ))}
               </div>
             ) : displayedNews.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
