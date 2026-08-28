@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header, { CATEGORIES } from '@/components/Header';
-import { getStoredArticles, fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
+import { fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
 import { PlusCircle, FileText, CheckCircle2, Lock, ArrowLeft, Radio, Star, Send, Trash2, Upload, ImageIcon, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -21,18 +21,21 @@ export default function AdminPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isLoadingArticles, setIsLoadingArticles] = useState<boolean>(true);
 
   const loadLatestArticles = async () => {
-    const data = await fetchArticlesFromSupabase();
-    if (data && data.length > 0) {
-      setArticles(data);
-    } else {
-      setArticles(getStoredArticles());
+    setIsLoadingArticles(true);
+    try {
+      const data = await fetchArticlesFromSupabase();
+      setArticles(data || []);
+    } catch (err) {
+      console.error('Error fetching admin articles:', err);
+    } finally {
+      setIsLoadingArticles(false);
     }
   };
 
   useEffect(() => {
-    setArticles(getStoredArticles());
     loadLatestArticles();
   }, []);
 
@@ -378,7 +381,12 @@ export default function AdminPage() {
               </div>
 
               <div className="space-y-3 max-h-[650px] overflow-y-auto pr-1 no-scrollbar">
-                {articles.length === 0 ? (
+                {isLoadingArticles && articles.length === 0 ? (
+                  <div className="py-8 text-center space-y-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-wbn-blue mx-auto" />
+                    <p className="text-xs text-slate-400">Loading articles directly from database...</p>
+                  </div>
+                ) : articles.length === 0 ? (
                   <p className="text-xs text-slate-400 italic text-center py-6">No articles currently published.</p>
                 ) : (
                   articles.map((art) => (

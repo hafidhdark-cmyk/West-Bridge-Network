@@ -7,14 +7,15 @@ import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
-import { fetchArticlesFromSupabase, getStoredArticles, Article } from '@/lib/newsData';
+import { fetchArticlesFromSupabase, Article } from '@/lib/newsData';
 import { 
   Clock, 
   Eye, 
   Zap, 
   ChevronRight, 
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
@@ -24,20 +25,22 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string>('Home');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(6);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const loadArticles = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchArticlesFromSupabase();
+      setArticles(data || []);
+    } catch (err) {
+      console.error('Failed to load articles:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setIsMounted(true);
-    const stored = getStoredArticles();
-    if (stored && stored.length > 0) {
-      setArticles(stored);
-    }
-
-    fetchArticlesFromSupabase().then((data) => {
-      if (data && data.length > 0) {
-        setArticles(data);
-      }
-    });
+    loadArticles();
   }, []);
 
   const filteredArticles = articles.filter((a) => {
@@ -258,7 +261,12 @@ export default function HomePage() {
               </span>
             </div>
 
-            {displayedNews.length === 0 ? (
+            {isLoading && articles.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-wbn-blue mx-auto" />
+                <p className="text-slate-500 font-medium text-xs">Loading live news feed from Supabase...</p>
+              </div>
+            ) : displayedNews.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
                 <p className="text-slate-500 font-medium text-sm">No stories found matching your criteria.</p>
                 <button
