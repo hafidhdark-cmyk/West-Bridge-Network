@@ -54,18 +54,14 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   return `${years} year${years === 1 ? '' : 's'} ago`;
 }
 
-// 1. Ultra-Fast Direct Live Retrieval (Selective columns for instant 0.1s load)
-export async function fetchArticlesFromSupabase(limitCount = 30, fullContent = false): Promise<Article[]> {
+// 1. Ultra-Fast Direct Live Retrieval (Safe SELECT * with 20-item fast limit)
+export async function fetchArticlesFromSupabase(limitCount = 20): Promise<Article[]> {
   if (!supabase) return [];
 
   try {
-    const selectFields = fullContent
-      ? '*'
-      : 'id, title, slug, category, summary, image_url, published_at, created_at, read_time, is_top_story, is_breaking, is_trending, views, likes, comments_count';
-
     const { data, error } = await supabase
       .from('articles')
-      .select(selectFields)
+      .select('*')
       .order('published_at', { ascending: false })
       .limit(limitCount);
 
@@ -112,7 +108,7 @@ export async function fetchArticlesFromSupabase(limitCount = 30, fullContent = f
   }
 }
 
-// 2. Direct Live Article Fetch by Slug (Full Body Text for Single Article Page)
+// 2. Direct Live Article Fetch by Slug
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   if (!slug) return undefined;
   const decodedSlug = decodeURIComponent(slug).trim().toLowerCase();

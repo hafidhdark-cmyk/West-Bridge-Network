@@ -28,34 +28,34 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let isSubscribed = true;
+    let isMounted = true;
 
-    const loadIncrementalArticles = async () => {
+    const loadArticles = async () => {
       setIsLoading(true);
       try {
-        // Step 1: Instant Fast Batch (First 20 headlines in ~0.15s, light feed query)
-        const initialBatch = await fetchArticlesFromSupabase(20, false);
-        if (isSubscribed && initialBatch && initialBatch.length > 0) {
-          setArticles(initialBatch);
+        // Fast Initial Render (First 20 articles in ~0.2s)
+        const initialData = await fetchArticlesFromSupabase(20);
+        if (isMounted && initialData && initialData.length > 0) {
+          setArticles(initialData);
           setIsLoading(false);
         }
 
-        // Step 2: Background Stream (Fetch remaining up to 100 in background without blocking UI)
-        const fullBatch = await fetchArticlesFromSupabase(100, false);
-        if (isSubscribed && fullBatch && fullBatch.length > 0) {
-          setArticles(fullBatch);
+        // Seamless background fetch for full archive (up to 100 articles)
+        const fullData = await fetchArticlesFromSupabase(100);
+        if (isMounted && fullData && fullData.length > 0) {
+          setArticles(fullData);
         }
       } catch (err) {
-        console.error('Failed to load incremental articles:', err);
+        console.error('Failed to load articles:', err);
       } finally {
-        if (isSubscribed) setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    loadIncrementalArticles();
+    loadArticles();
 
     return () => {
-      isSubscribed = false;
+      isMounted = false;
     };
   }, []);
 
