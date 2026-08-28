@@ -384,7 +384,7 @@ export default function AdminPage() {
                 {isLoadingArticles && articles.length === 0 ? (
                   <div className="py-8 text-center space-y-2">
                     <Loader2 className="w-6 h-6 animate-spin text-wbn-blue mx-auto" />
-                    <p className="text-xs text-slate-400">Loading articles directly from database...</p>
+                    <p className="text-xs text-slate-400">Fetching Articles...</p>
                   </div>
                 ) : articles.length === 0 ? (
                   <p className="text-xs text-slate-400 italic text-center py-6">No articles currently published.</p>

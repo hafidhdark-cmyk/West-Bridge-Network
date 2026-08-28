@@ -264,7 +264,7 @@ export default function HomePage() {
             {isLoading && articles.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-wbn-blue mx-auto" />
-                <p className="text-slate-500 font-medium text-xs">Loading live news feed from Supabase...</p>
+                <p className="text-slate-500 font-medium text-xs">Fetching Articles...</p>
               </div>
             ) : displayedNews.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3">
