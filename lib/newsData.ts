@@ -161,6 +161,7 @@ export async function saveCommentToSupabase(slug: string, comment: CommentItem):
   }
 }
 
+// Supabase PostgreSQL is 100% Master Authority for fetching articles
 export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   const stored = getStoredArticles();
   if (!supabase) return stored;
@@ -172,7 +173,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       .order('published_at', { ascending: false })
       .limit(100);
 
-    if (error || !data) {
+    if (error || !data || data.length === 0) {
       return stored;
     }
 
@@ -201,24 +202,13 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
       };
     });
 
-    // Merge remote database data with stored articles, preserving active isTrending / isTopStory / isBreaking flags
-    stored.forEach((sa) => {
-      const existing = mapped.find((m) => m.slug === sa.slug || m.id === sa.id);
-      if (existing) {
-        if (sa.isTrending) existing.isTrending = true;
-        if (sa.isTopStory) existing.isTopStory = true;
-        if (sa.isBreaking) existing.isBreaking = true;
-      } else {
-        mapped.push(sa);
-      }
-    });
-
     mapped.sort((a, b) => {
       const da = new Date(a.createdAtRaw || a.publishedAt).getTime();
       const db = new Date(b.createdAtRaw || b.publishedAt).getTime();
       return db - da;
     });
 
+    // Overwrite local storage so remote deletions and updates sync 1:1 across all devices
     saveArticlesToStore(mapped);
     return mapped;
   } catch (e) {

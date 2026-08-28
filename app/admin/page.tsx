@@ -22,11 +22,18 @@ export default function AdminPage() {
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const loadLatestArticles = async () => {
+    const data = await fetchArticlesFromSupabase();
+    if (data && data.length > 0) {
+      setArticles(data);
+    } else {
+      setArticles(getStoredArticles());
+    }
+  };
+
   useEffect(() => {
     setArticles(getStoredArticles());
-    fetchArticlesFromSupabase().then((data) => {
-      if (data && data.length > 0) setArticles(data);
-    });
+    loadLatestArticles();
   }, []);
 
   // HTML5 Canvas helper to compress large camera photos down to ~30KB under 800px width
@@ -113,7 +120,7 @@ export default function AdminPage() {
         commentsCount: 0,
       };
 
-      // 1. Optimistic Instant UI Update (Article appears immediately!)
+      // 1. Optimistic Instant UI Update (Article appears immediately in Admin list!)
       setArticles((prev) => [newArticle, ...prev.filter((a) => a.slug !== newArticle.slug)]);
 
       // Reset Form
@@ -126,8 +133,9 @@ export default function AdminPage() {
       setIsBreaking(false);
       setPublishSuccess(true);
 
-      // 2. Save live to Supabase PostgreSQL in background
+      // 2. Save live to Supabase PostgreSQL
       await saveArticleToSupabase(newArticle);
+      await loadLatestArticles();
 
       setTimeout(() => {
         setPublishSuccess(false);
@@ -143,6 +151,7 @@ export default function AdminPage() {
     const updated = { ...art, isTopStory: !art.isTopStory };
     setArticles((prev) => prev.map((a) => (a.slug === art.slug ? updated : a)));
     await saveArticleToSupabase(updated);
+    await loadLatestArticles();
   };
 
   const handleDelete = async (id: string, slug: string) => {
@@ -150,6 +159,7 @@ export default function AdminPage() {
     setDeletingId(id);
     setArticles((prev) => prev.filter((a) => a.id !== id && a.slug !== slug));
     await deleteArticleFromSupabase(id);
+    await loadLatestArticles();
     setDeletingId(null);
   };
 
