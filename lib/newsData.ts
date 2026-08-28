@@ -42,7 +42,7 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   if (seconds < 0 || seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
-  const hours = Math.floor(minutes / 60);
+  const hours = Math.floor(seconds / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
@@ -54,14 +54,14 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   return `${years} year${years === 1 ? '' : 's'} ago`;
 }
 
-// 1. Ultra-Fast Direct Supabase Retrieval (Selective columns payload: ~30KB instead of 8MB)
+// 1. Direct Live Supabase Retrieval (100% Direct DB, Zero LocalStorage Caching)
 export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   if (!supabase) return [];
 
   try {
     const { data, error } = await supabase
       .from('articles')
-      .select('id, title, slug, category, summary, image_url, published_at, created_at, read_time, is_top_story, is_breaking, is_trending, views, likes, comments_count')
+      .select('*')
       .order('published_at', { ascending: false })
       .limit(100);
 
@@ -78,7 +78,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
         slug: item.slug,
         category: item.category || 'General',
         summary: item.summary || '',
-        content: '', // Full body content loaded on demand when clicking individual article page
+        content: item.content || '',
         imageUrl: item.image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
         createdAtRaw: rawDate,
         publishedAt: formatTimeAgo(rawDate),
@@ -91,7 +91,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
         views: item.views || 1,
         likes: item.likes || 0,
         commentsCount: item.comments_count || 0,
-        commentsList: [],
+        commentsList: item.comments_list || [],
       };
     });
 
@@ -108,7 +108,7 @@ export async function fetchArticlesFromSupabase(): Promise<Article[]> {
   }
 }
 
-// 2. Direct Live Article Fetch by Slug (Includes full content body & comments)
+// 2. Direct Live Article Fetch by Slug
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   if (!slug) return undefined;
   const decodedSlug = decodeURIComponent(slug).trim().toLowerCase();
