@@ -79,6 +79,13 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         image: [initialArticle.imageUrl || `${siteUrl}/logo.png`],
         datePublished: initialArticle.createdAtRaw || new Date().toISOString(),
         dateModified: initialArticle.createdAtRaw || new Date().toISOString(),
+        copyrightYear: 2026,
+        copyrightNotice: '© 2026 West Bridge Network (WBN). All Rights Reserved.',
+        copyrightHolder: {
+          '@type': 'Organization',
+          name: 'West Bridge Network',
+          url: siteUrl,
+        },
         author: {
           '@type': 'Organization',
           name: 'West Bridge Network',

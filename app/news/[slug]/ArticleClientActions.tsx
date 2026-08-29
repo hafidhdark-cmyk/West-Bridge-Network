@@ -5,7 +5,7 @@ import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
 import { Article, CommentItem, incrementArticleViews, formatTimeAgo, fetchCommentsForArticle, saveCommentToSupabase } from '@/lib/newsData';
-import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, ShieldCheck } from 'lucide-react';
 
 interface ArticleClientActionsProps {
   article: Article;
@@ -42,7 +42,25 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
         setViewsCount(updatedViews);
       }
     });
-  }, [article.slug, article.commentsList]);
+
+    // Automatic Copyright Source Attribution when users copy article text
+    const handleCopyEvent = (e: ClipboardEvent) => {
+      const selection = window.getSelection()?.toString();
+      if (selection && selection.length > 40) {
+        e.preventDefault();
+        const sourceUrl = window.location.href;
+        const attribution = `\n\nRead full report on West Bridge Network: ${sourceUrl}\n© 2026 West Bridge Network (WBN). All Rights Reserved.`;
+        if (e.clipboardData) {
+          e.clipboardData.setData('text/plain', selection + attribution);
+        }
+      }
+    };
+
+    document.addEventListener('copy', handleCopyEvent);
+    return () => {
+      document.removeEventListener('copy', handleCopyEvent);
+    };
+  }, [article.slug, article.commentsList, viewsCount]);
 
   const handleLike = () => {
     if (!hasLiked) {
@@ -197,6 +215,17 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
               )}
             </React.Fragment>
           ))}
+        </div>
+
+        {/* Official Article Copyright Protection Banner */}
+        <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600 space-y-1.5 my-6">
+          <div className="font-extrabold text-wbn-navy flex items-center gap-1.5 text-xs">
+            <ShieldCheck className="w-4 h-4 text-wbn-blue" />
+            <span>© 2026 West Bridge Network (WBN). All Rights Reserved.</span>
+          </div>
+          <p className="text-[11px] text-slate-500 leading-relaxed">
+            This news report and all digital content on westbridgenews.com may not be reproduced, republished, broadcast, rewritten, or redistributed in whole or in part without express prior written permission from West Bridge Network Editorial Bureau.
+          </p>
         </div>
 
         {/* Share Footer */}
