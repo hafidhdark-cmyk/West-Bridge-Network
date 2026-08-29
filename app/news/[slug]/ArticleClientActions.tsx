@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
@@ -22,6 +22,8 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
+  const hasIncrementedRef = useRef<boolean>(false);
+
   useEffect(() => {
     setIsMounted(true);
 
@@ -37,11 +39,15 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       }
     });
 
-    incrementArticleViews(article.slug).then((updatedViews) => {
-      if (updatedViews > viewsCount) {
-        setViewsCount(updatedViews);
-      }
-    });
+    // Increment view count EXACTLY ONCE per visit (No infinite loop)
+    if (!hasIncrementedRef.current) {
+      hasIncrementedRef.current = true;
+      incrementArticleViews(article.slug).then((updatedViews) => {
+        if (updatedViews && updatedViews > 0) {
+          setViewsCount(updatedViews);
+        }
+      });
+    }
 
     // Automatic Copyright Source Attribution when users copy article text
     const handleCopyEvent = (e: ClipboardEvent) => {
@@ -60,7 +66,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
     return () => {
       document.removeEventListener('copy', handleCopyEvent);
     };
-  }, [article.slug, article.commentsList, viewsCount]);
+  }, [article.slug, article.commentsList]);
 
   const handleLike = () => {
     if (!hasLiked) {
