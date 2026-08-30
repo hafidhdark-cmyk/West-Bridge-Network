@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     'google-adsense-account': 'ca-pub-2586916860240984',
   },
   verification: {
-    google: 'nVuO_Wn6aelyV49YJjDb_4cjVXvW_sAP4KUNCnrKMwQ',
+    google: '8H9PnX15pMnyrklgt50-6imvO_AzOTI2A_q56z7hnMU',
   },
   robots: {
     index: true,
@@ -116,7 +116,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="nVuO_Wn6aelyV49YJjDb_4cjVXvW_sAP4KUNCnrKMwQ" />
+        <meta name="google-site-verification" content="8H9PnX15pMnyrklgt50-6imvO_AzOTI2A_q56z7hnMU" />
         <meta name="google-adsense-account" content="ca-pub-2586916860240984" />
         <script
           async
