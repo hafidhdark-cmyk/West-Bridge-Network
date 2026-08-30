@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 
-const ADSENSE_CLIENT_ID = 'ca-pub-2566916860240984';
+const ADSENSE_CLIENT_ID = 'ca-pub-2586916860240984';
 
 interface AdBannerProps {
   slotType?: 'inline' | 'sidebar' | 'header' | 'article-inline';
