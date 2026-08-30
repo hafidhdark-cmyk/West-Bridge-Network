@@ -11,13 +11,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://westbridgenews.com'),
   title: {
-    default: 'West Bridge Network | Journalistic Integrity & Speed',
-    template: '%s | West Bridge Network',
+    default: 'West Bridge News | Journalistic Integrity & Speed',
+    template: '%s | West Bridge News',
   },
   description:
-    'West Bridge Network (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa and global news.',
+    'West Bridge News (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa and global news.',
   keywords: [
-    'West Bridge Network',
+    'West Bridge News',
     'WBN News',
     'Nigeria News',
     'West Africa Headlines',
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
     'Security',
     'Lifestyle',
   ],
-  authors: [{ name: 'West Bridge Network Editorial Bureau' }],
-  creator: 'West Bridge Network',
-  publisher: 'West Bridge Network',
+  authors: [{ name: 'West Bridge News Editorial Bureau' }],
+  creator: 'West Bridge News',
+  publisher: 'West Bridge News',
   other: {
     'google-adsense-account': 'ca-pub-2586916860240984',
   },
@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://westbridgenews.com',
-    siteName: 'West Bridge Network',
-    title: 'West Bridge Network | Journalistic Integrity & Speed',
+    siteName: 'West Bridge News',
+    title: 'West Bridge News | Journalistic Integrity & Speed',
     description:
       'Premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.',
     images: [
@@ -63,13 +63,13 @@ export const metadata: Metadata = {
         url: 'https://westbridgenews.com/logo.png',
         width: 800,
         height: 800,
-        alt: 'West Bridge Network Logo',
+        alt: 'West Bridge News Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'West Bridge Network | Journalistic Integrity & Speed',
+    title: 'West Bridge News | Journalistic Integrity & Speed',
     description:
       'Premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.',
     images: ['https://westbridgenews.com/logo.png'],
@@ -92,7 +92,7 @@ export default function RootLayout({
   const jsonLdOrg = {
     '@context': 'https://schema.org',
     '@type': 'NewsMediaOrganization',
-    'name': 'West Bridge Network',
+    'name': 'West Bridge News',
     'url': 'https://westbridgenews.com',
     'logo': 'https://westbridgenews.com/logo.png',
     'sameAs': [
@@ -104,7 +104,7 @@ export default function RootLayout({
   const jsonLdWebSite = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    'name': 'West Bridge Network',
+    'name': 'West Bridge News',
     'url': 'https://westbridgenews.com',
     'potentialAction': {
       '@type': 'SearchAction',

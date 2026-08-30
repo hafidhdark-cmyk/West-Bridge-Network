@@ -5,10 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { CATEGORIES } from '@/components/Header';
-import { ShieldCheck, FileText, HelpCircle, Info, Scale } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Info, Scale } from 'lucide-react';
 
 const OFFICIAL_WHATSAPP_LINK = "https://chat.whatsapp.com/FSqZA2tOXbv0luyOPa7iKD?s=cl&p=a&ilr=4";
-const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20Network,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
+const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20News,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
 
 interface FooterProps {
   onSelectCategory?: (category: string) => void;
@@ -24,10 +24,10 @@ export default function Footer({ onSelectCategory }: FooterProps) {
             <div className="relative w-8 h-8 flex-shrink-0">
               <Image src="/logo.png" alt="WBN Logo" fill className="object-contain" />
             </div>
-            <span className="font-black text-white text-lg font-editorial-heading">west bridge network</span>
+            <span className="font-black text-white text-lg font-editorial-heading">west bridge news</span>
           </Link>
           <p className="text-slate-400 text-xs leading-relaxed">
-            West Bridge Network (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa and global markets.
+            West Bridge News (WBN) is a premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa and global markets.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function Footer({ onSelectCategory }: FooterProps) {
 
       {/* Bottom Footer Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 text-slate-500 text-center sm:text-left flex flex-wrap justify-between items-center gap-4">
-        <div>© 2026 West Bridge Network (WBN). All rights reserved.</div>
+        <div>© 2026 West Bridge News (WBN). All rights reserved.</div>
         <div className="flex items-center gap-4 text-xs">
           <Link href="/about" className="hover:text-slate-300">About</Link>
           <span>•</span>

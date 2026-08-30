@@ -55,7 +55,7 @@ export default function ArticlePageClient({ slug, initialArticle }: ArticlePageC
               Article Has Been Removed
             </h1>
             <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
-              The news report you are looking for has been deleted by the editorial team or is no longer available on West Bridge Network.
+              The news report you are looking for has been deleted by the editorial team or is no longer available on West Bridge News.
             </p>
           </div>
           <Link

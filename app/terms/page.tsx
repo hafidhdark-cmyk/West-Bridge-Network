@@ -5,9 +5,9 @@ import Footer from '@/components/Footer';
 import { FileText, AlertCircle, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service & Disclaimer | West Bridge Network',
+  title: 'Terms of Service & Disclaimer | West Bridge News',
   description:
-    'West Bridge Network (WBN) Terms of Service, copyright notices, content licensing, and publishing disclaimers.',
+    'West Bridge News (WBN) Terms of Service, copyright notices, content licensing, and publishing disclaimers.',
 };
 
 export default function TermsPage() {
@@ -26,7 +26,7 @@ export default function TermsPage() {
             Terms of Service &amp; Disclaimer
           </h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            By accessing or using West Bridge Network (westbridgenews.com), you agree to be bound by the following terms, conditions, and publishing disclaimers.
+            By accessing or using West Bridge News (westbridgenews.com), you agree to be bound by the following terms, conditions, and publishing disclaimers.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function TermsPage() {
               1. Intellectual Property &amp; Copyright
             </h2>
             <p>
-              All original investigative reporting, text, articles, headlines, graphics, photos, and branding published on <strong>West Bridge Network (WBN)</strong> are protected by international copyright laws and trade governance.
+              All original investigative reporting, text, articles, headlines, graphics, photos, and branding published on <strong>West Bridge News (WBN)</strong> are protected by international copyright laws and trade governance.
             </p>
             <p>
               No portion of WBN content may be reproduced, redistributed, scraped, or republished on third-party portals without explicit written authorization or clear hyperlinked attribution to <strong>https://westbridgenews.com</strong>.
@@ -88,7 +88,7 @@ export default function TermsPage() {
               These Terms of Service are governed by and construed in accordance with international digital publishing laws and sub-regional media regulatory frameworks.
             </p>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-wbn-navy text-xs">
-              West Bridge Network Legal Desk<br />
+              West Bridge News Legal Desk<br />
               Email: <a href="mailto:contact@westbridgenews.com" className="text-wbn-blue underline">contact@westbridgenews.com</a>
             </div>
           </section>

@@ -1,14 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
-import { Mail, Phone, MapPin, Send, HelpCircle } from 'lucide-react';
+import { Mail, MapPin, Send, HelpCircle, CheckCircle2 } from 'lucide-react';
 
-const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20Network,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
+const ADVERTISE_WHATSAPP_LINK = "https://wa.me/2348140097546?text=Hello%20West%20Bridge%20News,%20I%20would%20like%20to%20inquire%20about%20advertising%20on%20WBN.";
 
 export default function ContactPage() {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName || !email || !message) return;
+
+    setIsSubmitted(true);
+
+    // Open default mail client prepopulated with user message
+    const mailtoUrl = `mailto:contact@westbridgenews.com?subject=${encodeURIComponent(
+      subject || 'News Bureau Inquiry'
+    )}&body=${encodeURIComponent(
+      `Name: ${fullName}\nEmail: ${email}\n\nMessage:\n${message}`
+    )}`;
+
+    setTimeout(() => {
+      window.location.href = mailtoUrl;
+    }, 800);
+
+    setTimeout(() => {
+      setFullName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+      setIsSubmitted(false);
+    }, 5000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF9]">
       <Header />
@@ -66,7 +98,7 @@ export default function ContactPage() {
             </div>
             <h3 className="font-bold text-wbn-navy text-base">Regional Headquarters</h3>
             <p className="text-xs text-slate-500">
-              West Bridge Network News Bureau,<br />
+              West Bridge News Bureau,<br />
               Abuja &amp; Lagos Editorial Desks,<br />
               Nigeria.
             </p>
@@ -79,13 +111,25 @@ export default function ContactPage() {
             Send a Direct Message
           </h2>
 
-          <form className="space-y-4 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
+          {isSubmitted && (
+            <div className="bg-emerald-600 text-white p-4 rounded-2xl flex items-center gap-3 shadow-md animate-fade-in">
+              <CheckCircle2 className="w-6 h-6 flex-shrink-0" />
+              <div>
+                <h4 className="font-extrabold text-sm">Message Sent Successfully!</h4>
+                <p className="text-xs text-emerald-100">Opening your email app to send directly to contact@westbridgenews.com.</p>
+              </div>
+            </div>
+          )}
+
+          <form className="space-y-4 max-w-2xl" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-wbn-navy uppercase">Your Full Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Samuel Okonkwo"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   required
                 />
@@ -96,6 +140,8 @@ export default function ContactPage() {
                 <input
                   type="email"
                   placeholder="e.g. samuel@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                   required
                 />
@@ -107,6 +153,8 @@ export default function ContactPage() {
               <input
                 type="text"
                 placeholder="News Tip / Editorial Correction / Advertising Inquiry"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 required
               />
@@ -117,6 +165,8 @@ export default function ContactPage() {
               <textarea
                 rows={5}
                 placeholder="Write your inquiry or news tip details here..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 className="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 required
               />

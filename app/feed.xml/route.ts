@@ -29,7 +29,7 @@ export async function GET() {
   const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>West Bridge Network | Live News Feed</title>
+    <title>West Bridge News | Live News Feed</title>
     <link>${siteUrl}</link>
     <description>Premier digital news platform committed to speed, accuracy, and investigative integrity across West Africa.</description>
     <language>en-us</language>

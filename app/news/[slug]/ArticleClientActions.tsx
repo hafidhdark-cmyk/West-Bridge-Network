@@ -55,7 +55,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       if (selection && selection.length > 40) {
         e.preventDefault();
         const sourceUrl = window.location.href;
-        const attribution = `\n\nRead full report on West Bridge Network: ${sourceUrl}\n© 2026 West Bridge Network (WBN). All Rights Reserved.`;
+        const attribution = `\n\nRead full report on West Bridge News: ${sourceUrl}\n© 2026 West Bridge News (WBN). All Rights Reserved.`;
         if (e.clipboardData) {
           e.clipboardData.setData('text/plain', selection + attribution);
         }
@@ -177,15 +177,15 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             {article.title}
           </h1>
 
-          {/* Reported By West Bridge Network Tag */}
+          {/* Reported By West Bridge News Tag */}
           <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-slate-100 text-xs">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 flex-shrink-0">
-                <Image src="/logo.png" alt="West Bridge Network" fill className="object-contain" />
+                <Image src="/logo.png" alt="West Bridge News" fill className="object-contain" />
               </div>
               <div>
                 <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Reported by:</span>
-                <h4 className="font-extrabold text-wbn-navy text-sm">West Bridge Network</h4>
+                <h4 className="font-extrabold text-wbn-navy text-sm">West Bridge News</h4>
                 <p className="text-[11px] text-wbn-slate font-medium" suppressHydrationWarning>
                   {isMounted ? formatTimeAgo(article.createdAtRaw || article.publishedAt) : article.publishedAt}
                 </p>
@@ -227,10 +227,10 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
         <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600 space-y-1.5 my-6">
           <div className="font-extrabold text-wbn-navy flex items-center gap-1.5 text-xs">
             <ShieldCheck className="w-4 h-4 text-wbn-blue" />
-            <span>© 2026 West Bridge Network (WBN). All Rights Reserved.</span>
+            <span>© 2026 West Bridge News (WBN). All Rights Reserved.</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">
-            This news report and all digital content on westbridgenews.com may not be reproduced, republished, broadcast, rewritten, or redistributed in whole or in part without express prior written permission from West Bridge Network Editorial Bureau.
+            This news report and all digital content on westbridgenews.com may not be reproduced, republished, broadcast, rewritten, or redistributed in whole or in part without express prior written permission from West Bridge News Editorial Bureau.
           </p>
         </div>
 

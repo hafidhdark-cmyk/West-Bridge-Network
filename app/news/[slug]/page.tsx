@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   const slug = params?.slug || '';
   const article = await getArticleBySlug(slug);
 
-  const pageTitle = article ? `${article.title} | West Bridge Network` : 'West Bridge Network | Journalistic Integrity & Speed';
-  const pageDescription = article?.summary || 'Read top journalistic reports, breaking news, and investigative coverage across West Africa on West Bridge Network.';
+  const pageTitle = article ? `${article.title} | West Bridge News` : 'West Bridge News | Journalistic Integrity & Speed';
+  const pageDescription = article?.summary || 'Read top journalistic reports, breaking news, and investigative coverage across West Africa on West Bridge News.';
   const canonicalUrl = `${siteUrl}/news/${slug}`;
 
   // Dedicated og-image.jpg binary JPEG endpoint for WhatsApp, Facebook, and Twitter link preview cards
@@ -35,14 +35,14 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
       title: pageTitle,
       description: pageDescription,
       url: canonicalUrl,
-      siteName: 'West Bridge Network',
+      siteName: 'West Bridge News',
       images: [
         {
           url: ogImageUrl,
           secureUrl: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: article?.title || 'West Bridge Network News Report',
+          alt: article?.title || 'West Bridge News Report',
           type: 'image/jpeg',
         },
       ],
@@ -80,20 +80,20 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         datePublished: initialArticle.createdAtRaw || new Date().toISOString(),
         dateModified: initialArticle.createdAtRaw || new Date().toISOString(),
         copyrightYear: 2026,
-        copyrightNotice: '© 2026 West Bridge Network (WBN). All Rights Reserved.',
+        copyrightNotice: '© 2026 West Bridge News (WBN). All Rights Reserved.',
         copyrightHolder: {
           '@type': 'Organization',
-          name: 'West Bridge Network',
+          name: 'West Bridge News',
           url: siteUrl,
         },
         author: {
           '@type': 'Organization',
-          name: 'West Bridge Network',
+          name: 'West Bridge News',
           url: siteUrl,
         },
         publisher: {
           '@type': 'Organization',
-          name: 'West Bridge Network',
+          name: 'West Bridge News',
           logo: {
             '@type': 'ImageObject',
             url: `${siteUrl}/logo.png`,

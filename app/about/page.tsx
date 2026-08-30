@@ -5,9 +5,9 @@ import Footer from '@/components/Footer';
 import { ShieldCheck, Award, Globe, Users, Target } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About Us | West Bridge Network',
+  title: 'About Us | West Bridge News',
   description:
-    'Learn about West Bridge Network (WBN), our mission, editorial principles, investigative integrity, and news bureau operations across West Africa and global markets.',
+    'Learn about West Bridge News (WBN), our mission, editorial principles, investigative integrity, and news bureau operations across West Africa and global markets.',
 };
 
 export default function AboutPage() {
@@ -23,10 +23,10 @@ export default function AboutPage() {
             <span>Digital News Organization</span>
           </span>
           <h1 className="text-3xl sm:text-5xl font-black font-editorial-heading leading-tight">
-            About West Bridge Network
+            About West Bridge News
           </h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            West Bridge Network (WBN) is an independent premier digital news platform committed to speed, investigative accuracy, and non-partisan journalism across West Africa and international markets.
+            West Bridge News (WBN) is an independent premier digital news platform committed to speed, investigative accuracy, and non-partisan journalism across West Africa and international markets.
           </p>
         </div>
 

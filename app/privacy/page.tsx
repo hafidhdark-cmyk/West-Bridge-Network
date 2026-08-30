@@ -5,9 +5,9 @@ import Footer from '@/components/Footer';
 import { Shield, Lock, Eye, CheckCircle2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | West Bridge Network',
+  title: 'Privacy Policy | West Bridge News',
   description:
-    'West Bridge Network (WBN) Privacy Policy explaining reader data protection, cookies usage, Google AdSense compliance, and reader rights.',
+    'West Bridge News (WBN) Privacy Policy explaining reader data protection, cookies usage, Google AdSense compliance, and reader rights.',
 };
 
 export default function PrivacyPage() {
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
-            Last Updated: August 2026. West Bridge Network (WBN) is dedicated to protecting reader privacy, transparency, and data security.
+            Last Updated: August 2026. West Bridge News (WBN) is dedicated to protecting reader privacy, transparency, and data security.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
               1. Information We Collect
             </h2>
             <p>
-              West Bridge Network (&quot;WBN&quot;, &quot;we&quot;, &quot;our&quot;) operates <strong>https://westbridgenews.com</strong>. We collect zero personal data from casual readers unless voluntarily provided through newsroom inquiries, comment submissions, or email subscriptions.
+              West Bridge News (&quot;WBN&quot;, &quot;we&quot;, &quot;our&quot;) operates <strong>https://westbridgenews.com</strong>. We collect zero personal data from casual readers unless voluntarily provided through newsroom inquiries, comment submissions, or email subscriptions.
             </p>
             <p>
               Automated analytical log data collected when accessing our site includes your device Internet Protocol (IP) address, browser type, operating system version, referring pages, time spent per article, and standard web request telemetry.
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
               <li>
-                Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to West Bridge Network or other websites across the Internet.
+                Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to West Bridge News or other websites across the Internet.
               </li>
               <li>
                 Google&apos;s use of advertising cookies enables it and its partners to serve ads to users based on their visit to our site and/or other sites on the Internet.
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
               If you have any questions regarding this Privacy Policy or your data rights, please contact our Editorial Bureau at:
             </p>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-wbn-navy text-xs">
-              West Bridge Network Privacy Desk<br />
+              West Bridge News Privacy Desk<br />
               Email: <a href="mailto:contact@westbridgenews.com" className="text-wbn-blue underline">contact@westbridgenews.com</a><br />
               Website: <a href="https://westbridgenews.com" className="text-wbn-blue underline">https://westbridgenews.com</a>
             </div>

@@ -85,7 +85,7 @@ export default function Header({
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform group-hover:scale-105">
             <Image
               src="/logo.png"
-              alt="West Bridge Network Logo"
+              alt="West Bridge News Logo"
               fill
               className="object-contain"
               priority
@@ -93,7 +93,7 @@ export default function Header({
           </div>
           <div className="flex flex-col">
             <span className="font-extrabold text-base sm:text-xl text-white font-editorial-heading leading-tight tracking-tight">
-              west bridge network
+              west bridge news
             </span>
             <span className="text-[10px] text-wbn-cobalt font-bold tracking-widest uppercase">
               West Africa Bureau
