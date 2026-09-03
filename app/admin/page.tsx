@@ -236,7 +236,7 @@ export default function AdminPage() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
                 >
-                  {CATEGORIES.map((cat) => (
+                  {CATEGORIES.filter((cat) => cat.name.toLowerCase() !== 'discover').map((cat) => (
                     <option key={cat.name} value={cat.name}>
                       {cat.name}
                     </option>
