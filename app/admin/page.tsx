@@ -378,6 +378,12 @@ export default function AdminPage() {
                   <FileText className="w-4 h-4 text-wbn-blue" />
                   Live Published Articles ({articles.length})
                 </h3>
+                <Link
+                  href="/admin/articles"
+                  className="text-xs font-bold text-wbn-blue hover:underline flex items-center gap-1"
+                >
+                  <span>View All Archive →</span>
+                </Link>
               </div>
 
               <div className="space-y-3 max-h-[650px] overflow-y-auto pr-1 no-scrollbar">
