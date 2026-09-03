@@ -95,7 +95,7 @@ export default function PrivacyPage() {
             </p>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-wbn-navy text-xs">
               West Bridge News Privacy Desk<br />
-              Email: <a href="mailto:contact@westbridgenews.com" className="text-wbn-blue underline">contact@westbridgenews.com</a><br />
+              Email: <a href="mailto:westbridgenetwork@gmail.com" className="text-wbn-blue underline">westbridgenetwork@gmail.com</a><br />
               Website: <a href="https://westbridgenews.com" className="text-wbn-blue underline">https://westbridgenews.com</a>
             </div>
           </section>

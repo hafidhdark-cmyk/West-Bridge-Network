@@ -89,7 +89,7 @@ export default function TermsPage() {
             </p>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-wbn-navy text-xs">
               West Bridge News Legal Desk<br />
-              Email: <a href="mailto:contact@westbridgenews.com" className="text-wbn-blue underline">contact@westbridgenews.com</a>
+              Email: <a href="mailto:westbridgenetwork@gmail.com" className="text-wbn-blue underline">westbridgenetwork@gmail.com</a>
             </div>
           </section>
         </div>

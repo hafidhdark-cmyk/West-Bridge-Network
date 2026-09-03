@@ -22,7 +22,7 @@ export default function ContactPage() {
     setIsSubmitted(true);
 
     // Open default mail client prepopulated with user message
-    const mailtoUrl = `mailto:contact@westbridgenews.com?subject=${encodeURIComponent(
+    const mailtoUrl = `mailto:westbridgenetwork@gmail.com?subject=${encodeURIComponent(
       subject || 'News Bureau Inquiry'
     )}&body=${encodeURIComponent(
       `Name: ${fullName}\nEmail: ${email}\n\nMessage:\n${message}`
@@ -69,10 +69,10 @@ export default function ContactPage() {
             <h3 className="font-bold text-wbn-navy text-base">News Bureau Email</h3>
             <p className="text-xs text-slate-500">For news tips, press releases, and editorial feedback:</p>
             <a
-              href="mailto:contact@westbridgenews.com"
+              href="mailto:westbridgenetwork@gmail.com"
               className="text-xs font-extrabold text-wbn-blue hover:underline block pt-1"
             >
-              contact@westbridgenews.com
+              westbridgenetwork@gmail.com
             </a>
           </div>
 
@@ -116,7 +116,7 @@ export default function ContactPage() {
               <CheckCircle2 className="w-6 h-6 flex-shrink-0" />
               <div>
                 <h4 className="font-extrabold text-sm">Message Sent Successfully!</h4>
-                <p className="text-xs text-emerald-100">Opening your email app to send directly to contact@westbridgenews.com.</p>
+                <p className="text-xs text-emerald-100">Opening your email app to send directly to westbridgenetwork@gmail.com.</p>
               </div>
             </div>
           )}
