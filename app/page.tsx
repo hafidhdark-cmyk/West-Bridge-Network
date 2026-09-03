@@ -28,6 +28,15 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // Read category from URL query (e.g. ?category=Politics)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const catParam = params.get('category');
+      if (catParam) {
+        setActiveCategory(catParam);
+      }
+    }
+
     let isMounted = true;
 
     const loadArticles = async () => {
