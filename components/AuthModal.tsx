@@ -44,7 +44,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       if (error) {
         setErrorMsg(error);
       } else if (user) {
-        setSuccessMsg('Account created successfully! Welcome to West Bridge Network.');
+        setSuccessMsg('Account created successfully! Welcome to West Bridge News.');
         setTimeout(() => {
           onAuthSuccess(user);
           onClose();
@@ -79,7 +79,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         {/* Modal Header */}
         <div className="space-y-1 text-center pt-2">
           <h3 className="font-extrabold text-2xl text-wbn-navy font-editorial-heading">
-            {isSignUp ? 'Join West Bridge Network' : 'Welcome Back Reader'}
+            {isSignUp ? 'Join West Bridge News' : 'Welcome Back Reader'}
           </h3>
           <p className="text-xs text-slate-500">
             {isSignUp

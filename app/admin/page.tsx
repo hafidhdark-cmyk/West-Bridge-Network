@@ -114,7 +114,7 @@ export default function AdminPage() {
         createdAtRaw: nowIso,
         publishedAt: 'Just now',
         readTime: `${Math.max(2, Math.ceil(content.split(' ').length / 200))} min read`,
-        author: 'West Bridge Network',
+        author: 'West Bridge News',
         authorAvatar: '/logo.png',
         isTopStory,
         isBreaking,
@@ -176,7 +176,7 @@ export default function AdminPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs text-wbn-cobalt uppercase font-extrabold tracking-wider">
               <Lock className="w-4 h-4 text-blue-400" />
-              <span>West Bridge Network Editorial Suite</span>
+              <span>West Bridge News Editorial Suite</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-editorial-heading">Publisher Admin Studio</h1>
             <p className="text-slate-300 text-xs">Publish, upload photos, and manage reports live in Supabase PostgreSQL</p>
@@ -197,7 +197,7 @@ export default function AdminPage() {
             <CheckCircle2 className="w-6 h-6 flex-shrink-0" />
             <div>
               <h4 className="font-extrabold text-sm">Article Published Successfully!</h4>
-              <p className="text-xs text-emerald-100">Your news report is now live globally on West Bridge Network.</p>
+              <p className="text-xs text-emerald-100">Your news report is now live globally on West Bridge News.</p>
             </div>
           </div>
         )}

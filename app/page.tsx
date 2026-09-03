@@ -196,7 +196,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800">
                       <div className="hidden sm:flex items-center gap-1.5 font-semibold text-white">
                         <Image src="/logo.png" alt="WBN Logo" width={16} height={16} className="rounded-full" />
-                        <span>West Bridge Network</span>
+                        <span>West Bridge News</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1">
