@@ -35,7 +35,7 @@ export default function Footer({ onSelectCategory }: FooterProps) {
         <div>
           <h4 className="font-bold text-white mb-3 uppercase tracking-wider">Editorial Hubs</h4>
           <ul className="space-y-2">
-            {CATEGORIES.slice(1, 7).map((c) => (
+            {CATEGORIES.filter((c) => !c.hidden).slice(1, 7).map((c) => (
               <li key={c.name}>
                 {onSelectCategory ? (
                   <button

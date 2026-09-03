@@ -29,6 +29,7 @@ import {
 export interface CategoryItem {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
+  hidden?: boolean;
 }
 
 export const CATEGORIES: CategoryItem[] = [
@@ -37,15 +38,15 @@ export const CATEGORIES: CategoryItem[] = [
   { name: 'Politics', icon: Landmark },
   { name: 'Security', icon: Shield },
   { name: 'Business', icon: Briefcase },
-  { name: 'Tech', icon: Cpu },
+  { name: 'Tech', icon: Cpu, hidden: true },
   { name: 'Sports', icon: Trophy },
   { name: 'Entertainment', icon: Film },
-  { name: 'Lifestyle', icon: Sparkles },
-  { name: 'Health', icon: HeartPulse },
-  { name: 'Education', icon: GraduationCap },
-  { name: 'Career', icon: CareerIcon },
+  { name: 'Lifestyle', icon: Sparkles, hidden: true },
+  { name: 'Health', icon: HeartPulse, hidden: true },
+  { name: 'Education', icon: GraduationCap, hidden: true },
+  { name: 'Career', icon: CareerIcon, hidden: true },
   { name: 'World', icon: Globe },
-  { name: 'Opinion', icon: MessageSquareQuote },
+  { name: 'Opinion', icon: MessageSquareQuote, hidden: true },
 ];
 
 interface HeaderProps {
@@ -197,7 +198,7 @@ export default function Header({
       <nav className="hidden lg:block bg-slate-900 border-t border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
-            {CATEGORIES.map((cat) => {
+            {CATEGORIES.filter((cat) => !cat.hidden).map((cat) => {
               const IconComp = cat.icon;
               const isActive = activeCategory.toLowerCase() === cat.name.toLowerCase();
               return (
@@ -241,7 +242,7 @@ export default function Header({
           )}
 
           <div className="grid grid-cols-2 gap-2 pt-2">
-            {CATEGORIES.map((cat) => {
+            {CATEGORIES.filter((cat) => !cat.hidden).map((cat) => {
               const IconComp = cat.icon;
               const isActive = activeCategory.toLowerCase() === cat.name.toLowerCase();
               return (
