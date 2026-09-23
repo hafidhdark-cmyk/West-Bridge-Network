@@ -8,6 +8,11 @@ export interface CommentItem {
   createdAt: string;
 }
 
+export interface GalleryImage {
+  url: string;
+  caption?: string;
+}
+
 export interface Article {
   id: string;
   title: string;
@@ -16,6 +21,10 @@ export interface Article {
   summary: string;
   content: string;
   imageUrl: string;
+  secondImageUrl?: string;
+  additionalImages?: GalleryImage[];
+  videoUrl?: string;
+  xPostUrl?: string;
   publishedAt: string;
   createdAtRaw?: string;
   readTime: string;
@@ -54,6 +63,59 @@ export function formatTimeAgo(dateInput: string | Date | undefined): string {
   return `${years} year${years === 1 ? '' : 's'} ago`;
 }
 
+export function parseArticleMedia(rawContent: string): {
+  content: string;
+  secondImageUrl?: string;
+  additionalImages: GalleryImage[];
+  videoUrl?: string;
+  xPostUrl?: string;
+} {
+  if (!rawContent) return { content: '', additionalImages: [] };
+  const match = rawContent.match(/<!--WBN_MEDIA:([\s\S]*?)-->/);
+  if (match) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      const cleanContent = rawContent.replace(/<!--WBN_MEDIA:[\s\S]*?-->/, '').trim();
+      return {
+        content: cleanContent,
+        secondImageUrl: parsed.secondImageUrl || undefined,
+        additionalImages: Array.isArray(parsed.additionalImages) ? parsed.additionalImages : [],
+        videoUrl: parsed.videoUrl || undefined,
+        xPostUrl: parsed.xPostUrl || undefined,
+      };
+    } catch (e) {
+      console.error('Error parsing WBN_MEDIA metadata:', e);
+    }
+  }
+  return {
+    content: rawContent,
+    additionalImages: [],
+  };
+}
+
+export function serializeArticleMedia(article: Partial<Article>): string {
+  const baseContent = (article.content || '').replace(/<!--WBN_MEDIA:[\s\S]*?-->/, '').trim();
+  const hasMediaMeta = Boolean(
+    article.secondImageUrl ||
+    (article.additionalImages && article.additionalImages.length > 0) ||
+    article.videoUrl ||
+    article.xPostUrl
+  );
+
+  if (!hasMediaMeta) {
+    return baseContent;
+  }
+
+  const meta = {
+    secondImageUrl: article.secondImageUrl || undefined,
+    additionalImages: article.additionalImages && article.additionalImages.length > 0 ? article.additionalImages : undefined,
+    videoUrl: article.videoUrl || undefined,
+    xPostUrl: article.xPostUrl || undefined,
+  };
+
+  return `${baseContent}\n\n<!--WBN_MEDIA:${JSON.stringify(meta)}-->`;
+}
+
 // 1. Ultra-Fast Direct Live Retrieval (Safe SELECT * with 20-item fast limit)
 export async function fetchArticlesFromSupabase(limitCount = 20): Promise<Article[]> {
   if (!supabase) return [];
@@ -72,14 +134,20 @@ export async function fetchArticlesFromSupabase(limitCount = 20): Promise<Articl
 
     const mapped: Article[] = data.map((item: any) => {
       const rawDate = item.published_at || item.created_at || new Date().toISOString();
+      const { content: cleanContent, secondImageUrl, additionalImages, videoUrl, xPostUrl } = parseArticleMedia(item.content || '');
+
       return {
         id: item.id || item.slug,
         title: item.title,
         slug: item.slug,
         category: item.category || 'General',
         summary: item.summary || '',
-        content: item.content || '',
+        content: cleanContent,
         imageUrl: item.image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+        secondImageUrl,
+        additionalImages,
+        videoUrl,
+        xPostUrl,
         createdAtRaw: rawDate,
         publishedAt: formatTimeAgo(rawDate),
         readTime: item.read_time || '3 min read',
@@ -133,14 +201,20 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
 
     if (data && !error) {
       const rawDate = data.published_at || data.created_at || new Date().toISOString();
+      const { content: cleanContent, secondImageUrl, additionalImages, videoUrl, xPostUrl } = parseArticleMedia(data.content || '');
+
       return {
         id: data.id || data.slug,
         title: data.title,
         slug: data.slug,
         category: data.category || 'General',
         summary: data.summary || '',
-        content: data.content || '',
+        content: cleanContent,
         imageUrl: data.image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+        secondImageUrl,
+        additionalImages,
+        videoUrl,
+        xPostUrl,
         createdAtRaw: rawDate,
         publishedAt: formatTimeAgo(rawDate),
         readTime: data.read_time || '3 min read',
@@ -172,13 +246,14 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     }
 
     const isoDate = article.createdAtRaw || new Date().toISOString();
+    const finalContent = serializeArticleMedia(article);
 
     const payload = {
       title: article.title,
       slug: article.slug,
       category: article.category,
       summary: article.summary,
-      content: article.content,
+      content: finalContent,
       image_url: article.imageUrl,
       published_at: isoDate,
       read_time: article.readTime,

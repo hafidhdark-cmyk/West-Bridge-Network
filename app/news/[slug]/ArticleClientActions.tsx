@@ -5,7 +5,24 @@ import Image from 'next/image';
 import WhatsAppIcon from '@/components/WhatsAppIcon';
 import AdBanner from '@/components/AdBanner';
 import { Article, CommentItem, incrementArticleViews, formatTimeAgo, fetchCommentsForArticle, saveCommentToSupabase } from '@/lib/newsData';
-import { Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, ShieldCheck } from 'lucide-react';
+import { 
+  Heart, MessageSquare, Share2, Eye, Clock, Send, Check, UserCheck, ShieldCheck, 
+  Camera, RotateCcw, ExternalLink, X, ChevronLeft, ChevronRight 
+} from 'lucide-react';
+
+function WBNBadge({ className = '' }: { className?: string }) {
+  return (
+    <div className={`absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/85 backdrop-blur-md border border-white/20 shadow-lg pointer-events-none select-none ${className}`}>
+      <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+      <span className="text-[10px] font-black tracking-wider text-white uppercase font-editorial-heading">
+        WBN
+      </span>
+      <span className="text-[9px] font-semibold text-slate-300 border-l border-white/25 pl-1.5 hidden sm:inline">
+        West Bridge News
+      </span>
+    </div>
+  );
+}
 
 interface ArticleClientActionsProps {
   article: Article;
@@ -22,7 +39,16 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
+  // Gallery Lightbox modal state
+  const [selectedGalleryIndex, setSelectedGalleryIndex] = useState<number | null>(null);
+
+  // Video play-once state
+  const [videoEnded, setVideoEnded] = useState<boolean>(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const hasIncrementedRef = useRef<boolean>(false);
+
+  const officialXUrl = article.xPostUrl || 'https://x.com/WestBridgeNet';
 
   useEffect(() => {
     setIsMounted(true);
@@ -62,9 +88,18 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedGalleryIndex(null);
+      }
+    };
+
     document.addEventListener('copy', handleCopyEvent);
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.removeEventListener('copy', handleCopyEvent);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [article.slug, article.commentsList]);
 
@@ -105,6 +140,24 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
       navigator.clipboard.writeText(window.location.href);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 3000);
+    }
+  };
+
+  // Video play-once & replay constraint handlers
+  const handleVideoEnded = () => {
+    setVideoEnded(true);
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+
+  const handleVideoPlayAttempt = (e: React.SyntheticEvent) => {
+    if (videoEnded) {
+      e.preventDefault();
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+      window.open(officialXUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -203,10 +256,24 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           </div>
         </div>
 
-        {/* Featured Image */}
-        <div className="relative h-64 sm:h-96 rounded-2xl overflow-hidden shadow-md">
-          <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
-        </div>
+        {/* Featured Main Image(s) - Without Captions */}
+        {article.secondImageUrl ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md">
+              <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
+              <WBNBadge />
+            </div>
+            <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md">
+              <Image src={article.secondImageUrl} alt={`${article.title} - secondary`} fill className="object-cover" priority />
+              <WBNBadge />
+            </div>
+          </div>
+        ) : (
+          <div className="relative h-64 sm:h-96 rounded-2xl overflow-hidden shadow-md">
+            <Image src={article.imageUrl} alt={article.title} fill className="object-cover" priority />
+            <WBNBadge />
+          </div>
+        )}
 
         {/* Main Article Text Body */}
         <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base space-y-4">
@@ -222,6 +289,108 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             </React.Fragment>
           ))}
         </div>
+
+        {/* ================================================================ */}
+        {/* OPTIONAL IN PICTURES / STORY GALLERY (WITH CAPTIONS & LIGHTBOX)  */}
+        {/* ================================================================ */}
+        {article.additionalImages && article.additionalImages.length > 0 && (
+          <div className="my-8 pt-6 border-t border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base sm:text-lg font-black text-wbn-navy font-editorial-heading flex items-center gap-2">
+                <Camera className="w-5 h-5 text-wbn-blue" />
+                <span>In Pictures / Story Gallery ({article.additionalImages.length})</span>
+              </h3>
+              <span className="text-[11px] font-semibold text-slate-400">Click photo to enlarge</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {article.additionalImages.map((imgItem, idx) => (
+                <figure
+                  key={idx}
+                  className="group cursor-pointer space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-2.5 transition-all hover:shadow-md hover:border-slate-300"
+                  onClick={() => setSelectedGalleryIndex(idx)}
+                >
+                  <div className="relative h-48 sm:h-56 w-full rounded-xl overflow-hidden bg-slate-200">
+                    <Image
+                      src={imgItem.url}
+                      alt={imgItem.caption || `Story photo ${idx + 1}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <WBNBadge />
+                  </div>
+
+                  {imgItem.caption && (
+                    <figcaption className="text-xs text-slate-600 font-medium leading-relaxed px-1 flex items-start gap-1.5">
+                      <span className="text-wbn-blue font-bold flex-shrink-0">📸</span>
+                      <span>{imgItem.caption}</span>
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================ */}
+        {/* OPTIONAL END-OF-ARTICLE VIDEO (STRICTLY OPTIONAL: ONLY IF ADDED)  */}
+        {/* CONSTRAINT: PLAYS ONCE, REPLAY ATTEMPT REDIRECTS TO OFFICIAL X   */}
+        {/* ================================================================ */}
+        {article.videoUrl && (
+          <div className="my-8 p-4 sm:p-6 bg-slate-950 text-white rounded-3xl border border-slate-800 shadow-xl space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-red-500">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
+                <span>Exclusive Video Report</span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-medium">West Bridge News Bureau</span>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+              <video
+                ref={videoRef}
+                src={article.videoUrl}
+                controls
+                playsInline
+                controlsList="nodownload"
+                onEnded={handleVideoEnded}
+                onPlay={handleVideoPlayAttempt}
+                className="w-full h-full object-contain"
+              />
+
+              {/* Play-Once End Screen Overlay */}
+              {videoEnded && (
+                <div 
+                  onClick={() => window.open(officialXUrl, '_blank', 'noopener,noreferrer')}
+                  className="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 cursor-pointer animate-fade-in"
+                >
+                  <div className="w-14 h-14 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                    <RotateCcw className="w-6 h-6" />
+                  </div>
+
+                  <div className="space-y-1.5 max-w-md">
+                    <h4 className="text-base sm:text-lg font-black text-white">Video Finished Playing</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      To watch the replay and join the viral discussion, continue on our official X (Twitter) channel.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="bg-white hover:bg-slate-100 text-slate-950 font-black text-xs px-6 py-3 rounded-xl transition-all shadow-lg flex items-center gap-2"
+                  >
+                    <span>Watch Replay on X (@WestBridgeNet)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[11px] text-slate-400 text-center">
+              West Bridge News Video Coverage • © 2026 West Bridge News
+            </p>
+          </div>
+        )}
 
         {/* Official Article Copyright Protection Banner */}
         <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600 space-y-1.5 my-6">
@@ -306,7 +475,7 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
             </button>
           </form>
 
-          {/* Comments List Visible to EVERYONE with Dynamic Time Ago */}
+          {/* Comments List */}
           <div className="space-y-4 pt-2">
             {comments.length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-4">
@@ -336,6 +505,84 @@ export default function ArticleClientActions({ article, officialWhatsAppLink }: 
           </div>
         </section>
       </div>
+
+      {/* ================================================================ */}
+      {/* FULLSCREEN LIGHTBOX MODAL FOR GALLERY IMAGES                      */}
+      {/* ================================================================ */}
+      {selectedGalleryIndex !== null && article.additionalImages && article.additionalImages[selectedGalleryIndex] && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8 animate-fade-in"
+          onClick={() => setSelectedGalleryIndex(null)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedGalleryIndex(null)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20"
+            title="Close Gallery (Esc)"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Prev Button */}
+          {article.additionalImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedGalleryIndex((prev) => (prev! > 0 ? prev! - 1 : article.additionalImages!.length - 1));
+              }}
+              className="absolute left-2 sm:left-6 p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors z-20"
+              title="Previous Photo"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Main Image in Lightbox */}
+          <div
+            className="relative max-w-4xl max-h-[72vh] w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full h-[65vh] rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src={article.additionalImages[selectedGalleryIndex].url}
+                alt={article.additionalImages[selectedGalleryIndex].caption || 'Enlarged photo'}
+                fill
+                className="object-contain"
+              />
+              <WBNBadge />
+            </div>
+          </div>
+
+          {/* Caption & Counter */}
+          <div
+            className="max-w-2xl text-center space-y-1.5 mt-4 z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-400">
+              Photo {selectedGalleryIndex + 1} of {article.additionalImages.length}
+            </span>
+            {article.additionalImages[selectedGalleryIndex].caption && (
+              <p className="text-sm text-slate-200 leading-relaxed font-medium">
+                {article.additionalImages[selectedGalleryIndex].caption}
+              </p>
+            )}
+          </div>
+
+          {/* Next Button */}
+          {article.additionalImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedGalleryIndex((prev) => (prev! < article.additionalImages!.length - 1 ? prev! + 1 : 0));
+              }}
+              className="absolute right-2 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors z-20"
+              title="Next Photo"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 }

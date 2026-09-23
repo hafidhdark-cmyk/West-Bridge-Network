@@ -1,20 +1,46 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { ADMIN_COOKIE_NAME, isValidAdminSessionToken } from './lib/adminAuth';
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
 
-  // Rewrite admin.westbridgenews.com directly to /admin Publisher Admin Studio
+  // 1. Rewrite admin.westbridgenews.com directly to /admin Publisher Admin Studio
   if (hostname.startsWith('admin.')) {
     if (url.pathname === '/') {
       url.pathname = '/admin';
-      return NextResponse.rewrite(url);
-    }
-    if (!url.pathname.startsWith('/admin')) {
+    } else if (!url.pathname.startsWith('/admin')) {
       url.pathname = `/admin${url.pathname}`;
-      return NextResponse.rewrite(url);
     }
+  }
+
+  // 2. Admin Authentication Gate for /admin routes
+  // (All public news pages, articles, sitemaps, RSS feeds remain 100% open for Google AdSense bots)
+  if (url.pathname.startsWith('/admin')) {
+    // Whitelist the login portal itself
+    if (url.pathname === '/admin/login') {
+      // If already logged in, redirect to /admin studio
+      const sessionToken = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+      if (isValidAdminSessionToken(sessionToken)) {
+        url.pathname = '/admin';
+        return NextResponse.redirect(url);
+      }
+      return hostname.startsWith('admin.') ? NextResponse.rewrite(url) : NextResponse.next();
+    }
+
+    // Check for valid session token
+    const sessionToken = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    if (!isValidAdminSessionToken(sessionToken)) {
+      const loginUrl = new URL('/admin/login', request.url);
+      loginUrl.searchParams.set('returnUrl', url.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // If rewritten for admin subdomain
+  if (hostname.startsWith('admin.')) {
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();

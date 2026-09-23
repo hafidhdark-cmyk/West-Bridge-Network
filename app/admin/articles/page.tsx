@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { fetchArticlesFromSupabase, saveArticleToSupabase, deleteArticleFromSupabase, Article } from '@/lib/newsData';
 import { 
@@ -16,7 +17,8 @@ import {
   Loader2, 
   Star,
   Layers,
-  Filter
+  Filter,
+  LogOut
 } from 'lucide-react';
 
 export default function AdminAllArticlesPage() {
@@ -57,6 +59,18 @@ export default function AdminAllArticlesPage() {
     await deleteArticleFromSupabase(id);
     await loadArticles();
     setDeletingId(null);
+  };
+
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (e) {
+      // Ignore network errors on logout
+    }
+    router.push('/admin/login');
+    router.refresh();
   };
 
   const categories = ['All', ...Array.from(new Set(articles.map((a) => a.category).filter(Boolean)))];
@@ -105,6 +119,14 @@ export default function AdminAllArticlesPage() {
               <ArrowLeft className="w-4 h-4" />
               <span>Live Site</span>
             </a>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
+              title="Log Out of Admin Studio"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Log Out</span>
+            </button>
           </div>
         </div>
 
