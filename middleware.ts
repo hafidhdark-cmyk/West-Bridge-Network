@@ -6,21 +6,28 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
 
-  // 1. Rewrite admin.westbridgenews.com directly to /admin Publisher Admin Studio
+  // 1. NEVER intercept, block, or rewrite API routes (login, logout, og-image, etc.)
+  if (url.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // 2. Rewrite admin.westbridgenews.com directly to /admin Publisher Admin Studio
   if (hostname.startsWith('admin.')) {
-    if (url.pathname === '/') {
+    if (url.pathname === '/' || url.pathname === '') {
       url.pathname = '/admin';
+    } else if (url.pathname === '/login') {
+      url.pathname = '/admin/login';
     } else if (!url.pathname.startsWith('/admin')) {
       url.pathname = `/admin${url.pathname}`;
     }
   }
 
-  // 2. Admin Authentication Gate for /admin routes
+  // 3. Admin Authentication Gate for /admin routes
   // (All public news pages, articles, sitemaps, RSS feeds remain 100% open for Google AdSense bots)
   if (url.pathname.startsWith('/admin')) {
     // Whitelist the login portal itself
     if (url.pathname === '/admin/login') {
-      // If already logged in, redirect to /admin studio
+      // If already logged in with a valid session, redirect to /admin studio
       const sessionToken = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
       if (isValidAdminSessionToken(sessionToken)) {
         url.pathname = '/admin';
