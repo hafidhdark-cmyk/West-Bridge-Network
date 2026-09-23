@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 import { fetchArticlesFromSupabase } from '@/lib/newsData';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://westbridgenews.com';
 
@@ -41,12 +44,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/messi-moves-into-spanish-club-ownership-as-eldense-takeover-nears-completion`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
