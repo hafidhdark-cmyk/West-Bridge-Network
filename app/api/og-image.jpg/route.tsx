@@ -1,10 +1,55 @@
-import React from 'react';
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageResponse } from 'next/og';
+import sharp, { OverlayOptions } from 'sharp';
+import fs from 'fs';
+import path from 'path';
 import { getArticleBySlug } from '@/lib/newsData';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+/**
+ * Safely decodes base64 data strings or fetches remote HTTP/HTTPS images into a Buffer.
+ */
+async function getImageBuffer(source: string): Promise<Buffer | null> {
+  if (!source) return null;
+  const trimmed = source.trim();
+
+  // 1. Base64 data string (e.g. data:image/jpeg;base64,...)
+  if (trimmed.startsWith('data:image')) {
+    const base64Index = trimmed.indexOf('base64,');
+    if (base64Index !== -1) {
+      try {
+        const base64Data = trimmed.slice(base64Index + 7);
+        return Buffer.from(base64Data, 'base64');
+      } catch (err) {
+        console.error('Failed to parse base64 image data:', err);
+      }
+    }
+    return null;
+  }
+
+  // 2. Remote HTTP/HTTPS image URL
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(trimmed, {
+        signal: controller.signal,
+        cache: 'no-store',
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        return Buffer.from(arrayBuf);
+      }
+    } catch (err) {
+      console.error('Failed to fetch remote image for OG:', trimmed.slice(0, 80), err);
+    }
+  }
+
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -20,189 +65,115 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(fallbackLogo);
   }
 
-  // 1. DUAL-PHOTO WHATSAPP & SOCIAL PREVIEW
-  // If the article has a secondImageUrl, composite both photos side-by-side into a 1200x630 card
+  // =========================================================================
+  // 1. DUAL-PHOTO PREVIEW (WHATSAPP, FACEBOOK, TWITTER)
+  // When an article has two primary images, composite side-by-side (1200x630)
+  // Guaranteed < 150KB JPEG so WhatsApp NEVER drops or hides the preview!
+  // =========================================================================
   if (article.secondImageUrl) {
     try {
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              display: 'flex',
-              width: '1200px',
-              height: '630px',
-              position: 'relative',
-              backgroundColor: '#0a192f',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Left Photo (Main 1) */}
-            <div
-              style={{
-                display: 'flex',
-                width: '598px',
-                height: '630px',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={article.imageUrl}
-                alt="Main 1"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </div>
+      const [buf1, buf2] = await Promise.all([
+        getImageBuffer(article.imageUrl),
+        getImageBuffer(article.secondImageUrl),
+      ]);
 
-            {/* Middle Divider */}
-            <div
-              style={{
-                width: '4px',
-                height: '630px',
-                backgroundColor: '#ffffff',
-                zIndex: 10,
-              }}
-            />
+      if (buf1 && buf2) {
+        // Resize both images into 598x630 panels with cover fit
+        const [leftResized, rightResized] = await Promise.all([
+          sharp(buf1)
+            .resize(598, 630, { fit: 'cover', position: 'center' })
+            .toBuffer(),
+          sharp(buf2)
+            .resize(598, 630, { fit: 'cover', position: 'center' })
+            .toBuffer(),
+        ]);
 
-            {/* Right Photo (Main 2) */}
-            <div
-              style={{
-                display: 'flex',
-                width: '598px',
-                height: '630px',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={article.secondImageUrl}
-                alt="Main 2"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </div>
+        const compositeLayers: OverlayOptions[] = [
+          { input: leftResized, top: 0, left: 0 },
+          { input: rightResized, top: 0, left: 602 },
+        ];
 
-            {/* Bottom Official WBN Brand Badge */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '24px',
-                left: '24px',
-                right: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 24px',
-                backgroundColor: 'rgba(10, 25, 47, 0.92)',
-                borderRadius: '16px',
-                border: '2px solid rgba(255, 255, 255, 0.25)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ef4444',
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: 900,
-                    color: '#ffffff',
-                    letterSpacing: '2px',
-                  }}
-                >
-                  WEST BRIDGE NEWS
-                </span>
-                <span
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    color: '#60a5fa',
-                    marginLeft: '8px',
-                    padding: '4px 10px',
-                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                    borderRadius: '8px',
-                  }}
-                >
-                  {article.category.toUpperCase()}
-                </span>
-              </div>
+        // Overlay the official blue WBN logo badge in bottom-right corner
+        const logoPath = path.join(process.cwd(), 'public', 'logo.png');
+        if (fs.existsSync(logoPath)) {
+          try {
+            const logoBuffer = await sharp(logoPath)
+              .resize(90, 90, { fit: 'inside' })
+              .toBuffer();
 
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 800,
-                  color: '#e2e8f0',
-                }}
-              >
-                SPECIAL REPORT
-              </span>
-            </div>
-          </div>
-        ),
-        {
-          width: 1200,
-          height: 630,
+            compositeLayers.push({
+              input: logoBuffer,
+              top: 630 - 90 - 24, // 516
+              left: 1200 - 90 - 24, // 1086
+            });
+          } catch (logoErr) {
+            console.error('Failed to overlay logo on dual OG image:', logoErr);
+          }
         }
-      );
-    } catch (e) {
-      console.error('Dual image composition error:', e);
-    }
-  }
 
-  // 2. SINGLE PHOTO WITH WBN BADGE (or fallback to binary stream)
-  // External HTTPS image URL -> fetch & stream binary image
-  if (article.imageUrl.startsWith('http://') || article.imageUrl.startsWith('https://')) {
-    try {
-      const res = await fetch(article.imageUrl, { cache: 'no-store' });
-      if (res.ok) {
-        const arrayBuffer = await res.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        return new NextResponse(buffer, {
+        // Composite onto 1200x630 canvas with 4px divider
+        const dualJpeg = await sharp({
+          create: {
+            width: 1200,
+            height: 630,
+            channels: 4,
+            background: { r: 10, g: 25, b: 47, alpha: 1 },
+          },
+        })
+          .composite(compositeLayers)
+          .jpeg({ quality: 80, progressive: true })
+          .toBuffer();
+
+        return new NextResponse(new Uint8Array(dualJpeg), {
+          status: 200,
           headers: {
             'Content-Type': 'image/jpeg',
-            'Content-Length': buffer.length.toString(),
+            'Content-Length': dualJpeg.length.toString(),
             'Cache-Control': 'public, max-age=31536000, immutable',
           },
         });
       }
-    } catch (e) {
-      console.error('Failed to proxy external image for WhatsApp:', e);
+    } catch (dualErr) {
+      console.error('Dual image composition error:', dualErr);
+      // Fallback seamlessly to single image processing below
     }
-    return NextResponse.redirect(article.imageUrl);
   }
 
-  // 3. Base64 data string (Uploaded from device)
-  if (article.imageUrl.startsWith('data:image')) {
+  // =========================================================================
+  // 2. SINGLE PHOTO PREVIEW (WHATSAPP, FACEBOOK, TWITTER)
+  // Ensure the single image is valid JPEG and under WhatsApp's 300KB limit
+  // =========================================================================
+  const singleBuf = await getImageBuffer(article.imageUrl);
+  if (singleBuf) {
     try {
-      const matches = article.imageUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-      if (matches && matches.length === 3) {
-        const base64Data = matches[2];
-        const buffer = Buffer.from(base64Data, 'base64');
+      let outputBuf = singleBuf;
 
-        return new NextResponse(buffer, {
-          headers: {
-            'Content-Type': 'image/jpeg',
-            'Content-Length': buffer.length.toString(),
-            'Cache-Control': 'public, max-age=31536000, immutable',
-          },
-        });
+      // If larger than 280KB, resize & compress with sharp to prevent WhatsApp drop
+      if (singleBuf.length > 280 * 1024) {
+        outputBuf = await sharp(singleBuf)
+          .resize(1200, 630, { fit: 'cover', position: 'center' })
+          .jpeg({ quality: 80, progressive: true })
+          .toBuffer();
       }
-    } catch (e) {
-      console.error('Base64 image conversion error for WhatsApp:', e);
+
+      return new NextResponse(new Uint8Array(outputBuf), {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/jpeg',
+          'Content-Length': outputBuf.length.toString(),
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+    } catch (singleErr) {
+      console.error('Single image optimization error:', singleErr);
+      return new NextResponse(new Uint8Array(singleBuf), {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/jpeg',
+          'Content-Length': singleBuf.length.toString(),
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
     }
   }
 

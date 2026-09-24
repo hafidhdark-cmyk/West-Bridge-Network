@@ -12,14 +12,13 @@ import {
 
 function WBNBadge({ className = '' }: { className?: string }) {
   return (
-    <div className={`absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/85 backdrop-blur-md border border-white/20 shadow-lg pointer-events-none select-none ${className}`}>
-      <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-      <span className="text-[10px] font-black tracking-wider text-white uppercase font-editorial-heading">
-        WBN
-      </span>
-      <span className="text-[9px] font-semibold text-slate-300 border-l border-white/25 pl-1.5 hidden sm:inline">
-        West Bridge News
-      </span>
+    <div className={`absolute bottom-3 right-3 z-10 w-9 h-9 sm:w-11 sm:h-11 pointer-events-none select-none drop-shadow-md ${className}`}>
+      <Image
+        src="/logo.png"
+        alt="WBN Logo"
+        fill
+        className="object-contain"
+      />
     </div>
   );
 }
