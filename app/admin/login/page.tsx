@@ -2,7 +2,6 @@
 
 import React, { useState, Suspense } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Lock, Mail, KeyRound, ArrowLeft, Loader2, AlertCircle, 
@@ -58,14 +57,14 @@ function LoginForm() {
       <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-16 bg-slate-950 relative z-10 border-r border-slate-900/80">
         {/* Top Header / Branding */}
         <div>
-          <Link href="/" className="inline-flex items-center gap-2 group">
+          <a href="https://westbridgenews.com" className="inline-flex items-center gap-2 group">
             <div className="relative w-9 h-9">
               <Image src="/logo.png" alt="West Bridge News" fill className="object-contain" priority />
             </div>
             <span className="font-extrabold text-sm tracking-wider text-white group-hover:text-blue-400 transition-colors uppercase font-editorial-heading">
               West Bridge News
             </span>
-          </Link>
+          </a>
         </div>
 
         {/* Main Sign-In Card Content */}
@@ -159,13 +158,13 @@ function LoginForm() {
 
         {/* Footer Navigation */}
         <div className="pt-4 border-t border-slate-900 text-center sm:text-left">
-          <Link
-            href="/"
+          <a
+            href="https://westbridgenews.com"
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Website</span>
-          </Link>
+          </a>
         </div>
       </div>
 
