@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [isTopStory, setIsTopStory] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isLoadingArticles, setIsLoadingArticles] = useState<boolean>(true);
@@ -179,8 +180,9 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (file) {
       const sizeMB = file.size / (1024 * 1024);
-      if (sizeMB > 30) {
-        alert('Video file is larger than 30MB. Please select a video under 30MB for smooth playback.');
+      if (sizeMB > 12) {
+        alert(`This video file is ${sizeMB.toFixed(1)}MB.\n\nFor instant publishing and fast loading for mobile readers, direct device uploads are capped at 12MB.\n\nFor longer videos, please paste a video URL below instead.`);
+        e.target.value = '';
         return;
       }
 
@@ -207,13 +209,18 @@ export default function AdminPage() {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
 
+    setPublishError(null);
     setIsPublishing(true);
 
     try {
-      const generatedSlug = title
+      let generatedSlug = title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
+
+      if (!generatedSlug) {
+        generatedSlug = `story-${Date.now()}`;
+      }
 
       const nowIso = new Date().toISOString();
 
@@ -244,10 +251,21 @@ export default function AdminPage() {
         commentsCount: 0,
       };
 
-      // 1. Optimistic Instant UI Update (Article appears immediately in Admin list!)
+      // 1. Save live to Supabase PostgreSQL FIRST (Guarantees persistence before touching form)
+      const result = await saveArticleToSupabase(newArticle);
+
+      if (!result.success) {
+        setPublishError(result.error || 'Failed to save to database. Please check your connection and try again.');
+        setIsPublishing(false);
+        return; // KEEP FORM INTACT! Do not erase editor inputs!
+      }
+
+      // 2. Verified Saved! Now update live state
+      setPublishError(null);
+      setPublishSuccess(true);
       setArticles((prev) => [newArticle, ...prev.filter((a) => a.slug !== newArticle.slug)]);
 
-      // Reset Form
+      // 3. Reset form only AFTER confirmed database save
       setTitle('');
       setSummary('');
       setContent('');
@@ -262,17 +280,15 @@ export default function AdminPage() {
       setXPostUrl('');
       setIsTopStory(false);
       setIsBreaking(false);
-      setPublishSuccess(true);
 
-      // 2. Save live to Supabase PostgreSQL
-      await saveArticleToSupabase(newArticle);
       await loadLatestArticles();
 
       setTimeout(() => {
         setPublishSuccess(false);
-      }, 4000);
-    } catch (err) {
+      }, 5000);
+    } catch (err: any) {
       console.error('Publishing error:', err);
+      setPublishError(err.message || 'Error occurred while publishing.');
     } finally {
       setIsPublishing(false);
     }
@@ -336,6 +352,17 @@ export default function AdminPage() {
             <div>
               <h4 className="font-extrabold text-sm">Article Published Successfully!</h4>
               <p className="text-xs text-emerald-100">Your news report is now live globally on West Bridge News.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Alert Banner */}
+        {publishError && (
+          <div className="bg-red-600 text-white p-4 rounded-2xl flex items-center gap-3 shadow-md animate-fade-in">
+            <AlertCircle className="w-6 h-6 flex-shrink-0" />
+            <div>
+              <h4 className="font-extrabold text-sm">Publishing Notice</h4>
+              <p className="text-xs text-red-100">{publishError}</p>
             </div>
           </div>
         )}

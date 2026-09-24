@@ -237,8 +237,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
 }
 
 // 3. Direct Live Supabase Insert & Save
-export async function saveArticleToSupabase(article: Article): Promise<boolean> {
-  if (!supabase) return false;
+export async function saveArticleToSupabase(article: Article): Promise<{ success: boolean; error?: string }> {
+  if (!supabase) return { success: false, error: 'Database connection unavailable' };
 
   try {
     if (article.isTopStory) {
@@ -259,7 +259,6 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
       read_time: article.readTime,
       is_top_story: article.isTopStory || false,
       is_breaking: article.isBreaking || false,
-      is_trending: article.isTrending || false,
       views: article.views || 1,
       likes: article.likes || 0,
       comments_count: article.commentsCount || 0,
@@ -270,21 +269,21 @@ export async function saveArticleToSupabase(article: Article): Promise<boolean> 
     if (existing) {
       const { error: updateErr } = await supabase.from('articles').update(payload).eq('slug', article.slug);
       if (updateErr) {
-        const { is_trending, ...basicPayload } = payload;
-        await supabase.from('articles').update(basicPayload).eq('slug', article.slug);
+        console.error('Supabase update error:', updateErr);
+        return { success: false, error: updateErr.message };
       }
     } else {
       const { error: insertErr } = await supabase.from('articles').insert([payload]);
       if (insertErr) {
-        const { is_trending, ...basicPayload } = payload;
-        await supabase.from('articles').insert([basicPayload]);
+        console.error('Supabase insert error:', insertErr);
+        return { success: false, error: insertErr.message };
       }
     }
 
-    return true;
-  } catch (e) {
+    return { success: true };
+  } catch (e: any) {
     console.error('Supabase save exception:', e);
-    return false;
+    return { success: false, error: e?.message || 'Database error occurred while saving article' };
   }
 }
 
