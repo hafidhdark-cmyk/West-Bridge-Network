@@ -38,6 +38,8 @@ export default function AdminPage() {
   // Optional Video at End of Article
   const [videoUrl, setVideoUrl] = useState('');
   const [xPostUrl, setXPostUrl] = useState('');
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoFileMeta, setVideoFileMeta] = useState<{ name: string; size: string } | null>(null);
 
   // Toggles & Flags
   const [isTopStory, setIsTopStory] = useState(false);
@@ -173,6 +175,34 @@ export default function AdminPage() {
     }
   };
 
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const sizeMB = file.size / (1024 * 1024);
+      if (sizeMB > 30) {
+        alert('Video file is larger than 30MB. Please select a video under 30MB for smooth playback.');
+        return;
+      }
+
+      setIsUploadingVideo(true);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Data = event.target?.result as string;
+        setVideoUrl(base64Data);
+        setVideoFileMeta({
+          name: file.name,
+          size: `${sizeMB.toFixed(1)} MB`,
+        });
+        setIsUploadingVideo(false);
+      };
+      reader.onerror = () => {
+        alert('Failed to read video file.');
+        setIsUploadingVideo(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
@@ -228,6 +258,7 @@ export default function AdminPage() {
       setEnableSecondImage(false);
       setAdditionalImages([]);
       setVideoUrl('');
+      setVideoFileMeta(null);
       setXPostUrl('');
       setIsTopStory(false);
       setIsBreaking(false);
@@ -609,24 +640,77 @@ export default function AdminPage() {
                 </div>
 
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Strictly optional: If you leave this blank, no video box or placeholder will be rendered at all. When added, the video plays once; any attempt to replay redirects the user to your official X (Twitter) post/profile.
+                  Strictly optional: If you leave this blank, no video box will appear at all. Upload a video clip from your device or paste a URL. The video plays once; any replay attempt redirects the reader to your official X (Twitter) post/profile.
                 </p>
 
                 <div className="space-y-3 pt-1">
-                  <div className="space-y-1">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                      Video Direct URL (MP4 / WebM / Cloud Hosted)
+                  {/* Option 1: File Upload from Device */}
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 shadow-sm">
+                      {isUploadingVideo ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-white" />
+                      )}
+                      <span>{isUploadingVideo ? 'Attaching Video...' : 'Upload Video from Device'}</span>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*"
+                        onChange={handleVideoFileChange}
+                        className="hidden"
+                        disabled={isUploadingVideo}
+                      />
                     </label>
-                    <input
-                      type="url"
-                      placeholder="https://example.com/videos/exclusive-report.mp4"
-                      value={videoUrl}
-                      onChange={(e) => setVideoUrl(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
-                    />
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">or URL</span>
                   </div>
 
-                  <div className="space-y-1">
+                  {/* Option 2: Video URL Input */}
+                  <input
+                    type="url"
+                    placeholder="Or paste video URL (https://...)"
+                    value={videoUrl.startsWith('data:') ? '' : videoUrl}
+                    onChange={(e) => {
+                      setVideoUrl(e.target.value);
+                      setVideoFileMeta(null);
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-wbn-navy focus:outline-none focus:ring-2 focus:ring-wbn-blue"
+                  />
+
+                  {/* Attached Video Preview & File Info */}
+                  {videoUrl && (
+                    <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl space-y-2.5 animate-fade-in">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 font-bold text-purple-950">
+                          <Video className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                          <span className="truncate max-w-[200px] sm:max-w-xs">{videoFileMeta?.name || 'Attached Video Report'}</span>
+                          {videoFileMeta && (
+                            <span className="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded-md font-mono font-bold">
+                              {videoFileMeta.size}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVideoUrl('');
+                            setVideoFileMeta(null);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+
+                      {/* Live Video Preview Box */}
+                      <div className="relative rounded-xl overflow-hidden bg-black max-h-56 aspect-video flex items-center justify-center border border-purple-200 shadow-inner">
+                        <video src={videoUrl} controls playsInline className="w-full h-full object-contain" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Specific X Post Redirect URL */}
+                  <div className="space-y-1 pt-1">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                       Specific X (Twitter) Post URL for Replay (Optional)
                     </label>
@@ -676,7 +760,7 @@ export default function AdminPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isPublishing || isCompressingImage || isCompressingSecondImage || compressingGalleryIdx !== null}
+                disabled={isPublishing || isCompressingImage || isCompressingSecondImage || compressingGalleryIdx !== null || isUploadingVideo}
                 className="w-full bg-wbn-navy hover:bg-wbn-blue text-white font-extrabold text-sm py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isPublishing ? (
