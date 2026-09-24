@@ -663,7 +663,6 @@ export default function AdminPage() {
                     <Video className="w-4 h-4 text-purple-600" />
                     <span>Video at End of Article (Strictly Optional)</span>
                   </label>
-                  <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">Plays Once • Replay → X</span>
                 </div>
 
                 <p className="text-[11px] text-slate-500 leading-relaxed">
